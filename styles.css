@@ -860,3 +860,84 @@ body {
   border-color: var(--blanc);
   color: var(--blanc);
 }
+
+/* Bouton de suppression définitive */
+.btn--danger {
+  background-color: var(--rouge-statut);
+  color: var(--blanc);
+  border-color: var(--rouge-statut);
+}
+
+.btn--danger:hover,
+.btn--danger:focus-visible {
+  background-color: #991b1b;
+  border-color: #991b1b;
+}
+
+/* Champ en lecture seule (ID adhérent en mode modification) */
+.champ-input[disabled] {
+  background-color: var(--gris-clair);
+  color: var(--gris-moyen);
+  cursor: not-allowed;
+  border-color: var(--gris-bord);
+  opacity: 1; /* Évite l'assombrissement natif du navigateur */
+}
+
+/* Petite modale de confirmation (largeur réduite) */
+.modale--petite {
+  max-width: 440px;
+}
+
+/* En-tête rouge pour la modale de suppression */
+.modale__entete--danger {
+  background-color: var(--rouge-statut);
+}
+
+/* Corps de la fenêtre de confirmation */
+.confirmation__corps {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.confirmation__question {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--encre);
+}
+
+/* Bloc nom + ID de l'adhérent concerné */
+.confirmation__adherent {
+  background-color: var(--rouge-fond);
+  border: 1px solid var(--rouge-statut);
+  border-radius: var(--rayon);
+  padding: 0.65rem 0.9rem;
+  font-size: 0.92rem;
+  color: var(--rouge-statut);
+  font-weight: 600;
+}
+
+.confirmation__avertissement {
+  font-size: 0.85rem;
+  color: var(--gris-moyen);
+  font-style: italic;
+}
+
+/* Zone d'actions de la confirmation (override padding de modale__actions) */
+.confirmation__actions {
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+  padding-bottom: 1.25rem;
+}
+
+/* Bandeau d'erreur global au-dessus du tableau */
+.message-erreur {
+  background-color: var(--rouge-fond);
+  color: var(--rouge-statut);
+  border: 1px solid var(--rouge-statut);
+  border-radius: var(--rayon);
+  padding: 0.7rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+}

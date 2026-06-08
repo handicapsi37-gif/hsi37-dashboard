@@ -1,13 +1,9 @@
 /* =====================================================
    APP.JS — HSI37 Dashboard
-   Phase 0 : Fausses données + affichage du tableau
-   Aucun stockage réel, aucune interaction de données.
+   Phase 2.5 : Modification et suppression d'adhérents
    ===================================================== */
 
-/* Les données sont chargées depuis Supabase (voir chargerAdherents ci-dessous) */
-
 /* ---------- CONFIGURATION DES TYPES DE MEMBRES ---------- */
-/* Libellés et définitions pour les infobulles (bulles d'aide au survol) */
 
 const typesMembres = {
   actif: {
@@ -48,7 +44,7 @@ const statutsConfig = {
   ajour: {
     libelle: "À jour",
     classe: "badge--ajour",
-    indicateur: "●" /* Pastille colorée */
+    indicateur: "●"
   },
   expire: {
     libelle: "Expiré",
@@ -57,12 +53,20 @@ const statutsConfig = {
   }
 };
 
+/* ---------- CACHE DES DONNÉES SUPABASE ---------- */
+/* Conserve les objets complets pour pré-remplir la modale sans requête supplémentaire */
+let donneesAdherents = [];
+
+/* ---------- ÉTAT DE LA MODALE ---------- */
+/* null = mode ajout ; objet adherent = mode modification */
+let adherentEnCours = null;
+
 /* ---------- FONCTIONS D'AFFICHAGE ---------- */
 
 /**
  * Formate une date ISO (AAAA-MM-JJ) en format français (JJ/MM/AAAA).
- * @param {string} dateIso - Date au format ISO
- * @returns {string} Date au format français
+ * @param {string} dateIso
+ * @returns {string}
  */
 function formaterDate(dateIso) {
   if (!dateIso) return "—";
@@ -72,13 +76,11 @@ function formaterDate(dateIso) {
 
 /**
  * Génère le HTML d'une cellule "Type de membre" avec son infobulle.
- * Accepte la clé courte ("actif") pour les anciennes données
- * ou le libellé complet ("Membre actif") pour les nouvelles données.
- * @param {string} valeur - Clé courte ou libellé complet
- * @returns {string} HTML de la cellule
+ * Accepte la clé courte ("actif") ou le libellé complet ("Membre actif").
+ * @param {string} valeur
+ * @returns {string}
  */
 function genererCelluleType(valeur) {
-  /* Chercher d'abord par clé courte, puis par libellé complet */
   let type = typesMembres[valeur];
   if (!type) {
     const entree = Object.entries(typesMembres).find(function([, t]) {
@@ -88,7 +90,6 @@ function genererCelluleType(valeur) {
   }
   if (!type) return valeur || "—";
 
-  /* Classe optionnelle pour décaler l'infobulle si elle risque de sortir à droite */
   const classeAlign = type.alignInfBulle ? ` type-membre--${type.alignInfBulle}` : "";
 
   return `
@@ -102,8 +103,8 @@ function genererCelluleType(valeur) {
 
 /**
  * Génère le HTML d'un badge de statut.
- * @param {string} cle - Clé du statut (ex : "ajour")
- * @returns {string} HTML du badge
+ * @param {string} cle
+ * @returns {string}
  */
 function genererBadge(cle) {
   const statut = statutsConfig[cle];
@@ -118,17 +119,19 @@ function genererBadge(cle) {
 }
 
 /**
- * Génère le HTML des boutons d'action (modifier, supprimer) pour une ligne.
- * En Phase 0 : visuels uniquement, aucune action réelle.
- * @param {string} id - Identifiant de l'adhérent (pour aria-label)
- * @returns {string} HTML des boutons
+ * Génère les boutons d'action (modifier, supprimer).
+ * data-id-technique porte l'UUID Supabase pour la délégation d'événements.
+ * @param {string} idAdherent  - Identifiant affiché (HSI-AAAA-NNNN)
+ * @param {string} idTechnique - UUID Supabase (clé primaire)
+ * @returns {string}
  */
-function genererBoutonsActions(id) {
+function genererBoutonsActions(idAdherent, idTechnique) {
   return `
     <button class="btn-icone btn-icone--modifier"
-            aria-label="Modifier l'adhérent ${id}"
+            aria-label="Modifier l'adhérent ${idAdherent}"
             title="Modifier"
-            type="button">
+            type="button"
+            data-id-technique="${idTechnique}">
       <svg aria-hidden="true" focusable="false"
            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
            width="17" height="17">
@@ -139,9 +142,10 @@ function genererBoutonsActions(id) {
       </svg>
     </button>
     <button class="btn-icone btn-icone--supprimer"
-            aria-label="Supprimer l'adhérent ${id}"
+            aria-label="Supprimer l'adhérent ${idAdherent}"
             title="Supprimer"
-            type="button">
+            type="button"
+            data-id-technique="${idTechnique}">
       <svg aria-hidden="true" focusable="false"
            xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
            width="17" height="17">
@@ -159,16 +163,18 @@ function genererBoutonsActions(id) {
 }
 
 /**
- * Injecte les lignes du tableau à partir des données Supabase.
- * @param {Array} adherents - Tableau d'objets retournés par Supabase
+ * Injecte les lignes du tableau et met à jour le cache donneesAdherents.
+ * @param {Array} adherents
  */
 function remplirTableau(adherents) {
   const corps = document.getElementById("corps-tableau");
   if (!corps) return;
 
+  /* Mettre à jour le cache local utilisé par les boutons d'action */
+  donneesAdherents = adherents || [];
+
   corps.innerHTML = "";
 
-  /* Cas table vide : message accessible dans le tableau */
   if (!adherents || adherents.length === 0) {
     corps.innerHTML = `
       <tr>
@@ -183,7 +189,6 @@ function remplirTableau(adherents) {
   adherents.forEach(function(adherent) {
     const ligne = document.createElement("tr");
 
-    /* Formatage du montant : nombre Supabase → "xx,xx €" à la française */
     const montant = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? Number(adherent.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
@@ -204,7 +209,7 @@ function remplirTableau(adherents) {
       <td>${formaterDate(adherent.date_adhesion)}</td>
       <td>${montant}</td>
       <td>—</td>
-      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id)}</td>
+      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id)}</td>
     `;
 
     corps.appendChild(ligne);
@@ -212,13 +217,11 @@ function remplirTableau(adherents) {
 }
 
 /**
- * Lit tous les adhérents depuis la table Supabase et met à jour le tableau.
- * Gère les cas : chargement, table vide, erreur réseau.
+ * Lit tous les adhérents depuis Supabase et met à jour le tableau.
  */
 async function chargerAdherents() {
   const corps = document.getElementById("corps-tableau");
 
-  /* Message de chargement pendant la requête */
   if (corps) {
     corps.innerHTML = `
       <tr>
@@ -232,7 +235,6 @@ async function chargerAdherents() {
     .select("*");
 
   if (error) {
-    /* Erreur réseau ou RLS : message simple sans jargon technique */
     if (corps) {
       corps.innerHTML = `
         <tr>
@@ -248,29 +250,23 @@ async function chargerAdherents() {
   remplirTableau(data);
 }
 
-/* ---------- GESTION DE LA MODALE ---------- */
-/* La modale (fenêtre superposée) s'ouvre et se ferme visuellement.
-   En Phase 0, le formulaire n'enregistre rien. */
+/* =====================================================
+   GESTION DE LA MODALE (MODE AJOUT ET MODIFICATION)
+   ===================================================== */
 
-const fond = document.getElementById("modale-fond");
-const modale = document.getElementById("modale-adherent");
-const btnOuvrir = document.getElementById("btn-ajouter");
-const btnFermer = document.getElementById("btn-fermer-modale");
+const fond     = document.getElementById("modale-fond");
+const modale   = document.getElementById("modale-adherent");
+const btnOuvrir  = document.getElementById("btn-ajouter");
+const btnFermer  = document.getElementById("btn-fermer-modale");
 const btnAnnuler = document.getElementById("btn-annuler-modale");
 const formulaire = document.getElementById("formulaire-adherent");
 
-/* Mémorise l'élément qui avait le focus avant l'ouverture de la modale,
-   pour y revenir à la fermeture (bonne pratique d'accessibilité RGAA) */
 let elementAvantModale = null;
 
 /**
- * Ouvre la modale, réinitialise le formulaire et déplace le focus.
+ * Efface les erreurs de validation du formulaire.
  */
-function ouvrirModale() {
-  elementAvantModale = document.activeElement;
-
-  /* Réinitialiser le formulaire et effacer tous les messages d'erreur */
-  formulaire.reset();
+function reinitialiserErreursFormulaire() {
   const zoneErreurModale = document.getElementById("modale-erreur");
   if (zoneErreurModale) {
     zoneErreurModale.hidden = true;
@@ -280,42 +276,87 @@ function ouvrirModale() {
   document.querySelectorAll(".champ-input--erreur").forEach(function(el) {
     el.classList.remove("champ-input--erreur");
   });
+}
+
+/**
+ * Ouvre la modale en mode AJOUT : formulaire vide, champ ID masqué.
+ */
+function ouvrirModaleAjout() {
+  adherentEnCours = null;
+  elementAvantModale = document.activeElement;
+
+  formulaire.reset();
+  reinitialiserErreursFormulaire();
+
+  document.getElementById("groupe-id-adherent").hidden = true;
+  document.getElementById("modale-titre").textContent = "Ajouter un adhérent";
+  document.querySelector("#formulaire-adherent [type='submit']").textContent = "Enregistrer";
+  document.getElementById("btn-fermer-modale").setAttribute("aria-label", "Fermer la fenêtre d'ajout d'adhérent");
 
   fond.hidden = false;
-  /* Délai minimal pour que l'animation CSS s'enclenche correctement */
-  requestAnimationFrame(function() {
-    modale.focus();
-  });
+  requestAnimationFrame(function() { modale.focus(); });
   document.addEventListener("keydown", gererToucheClavier);
 }
 
 /**
- * Ferme la modale et rend le focus à l'élément d'origine.
+ * Ouvre la modale en mode MODIFICATION : champs pré-remplis, ID affiché en lecture seule.
+ * @param {Object} adherent - Objet complet de l'adhérent à modifier
  */
-function fermerModale() {
-  fond.hidden = true;
-  document.removeEventListener("keydown", gererToucheClavier);
-  /* Retour du focus à l'élément qui a ouvert la modale */
-  if (elementAvantModale) {
-    elementAvantModale.focus();
-  }
+function ouvrirModaleModification(adherent) {
+  adherentEnCours = adherent;
+  elementAvantModale = document.activeElement;
+
+  formulaire.reset();
+  reinitialiserErreursFormulaire();
+
+  /* Afficher et remplir le champ ID en lecture seule */
+  document.getElementById("groupe-id-adherent").hidden = false;
+  document.getElementById("champ-id-adherent").value = adherent.id_adherent || "";
+
+  /* Pré-remplir les champs modifiables */
+  document.getElementById("champ-nom").value       = adherent.nom || "";
+  document.getElementById("champ-prenom").value    = adherent.prenom || "";
+  document.getElementById("champ-email").value     = adherent.email || "";
+  document.getElementById("champ-telephone").value = adherent.telephone || "";
+  document.getElementById("champ-adresse").value   = adherent.adresse || "";
+  document.getElementById("champ-date").value      = adherent.date_adhesion || "";
+  document.getElementById("champ-type").value      = adherent.type_membre || "";
+  document.getElementById("champ-montant").value   =
+    (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
+      ? adherent.montant_cotisation
+      : "";
+
+  document.getElementById("modale-titre").textContent = "Modifier un adhérent";
+  document.querySelector("#formulaire-adherent [type='submit']").textContent = "Enregistrer les modifications";
+  document.getElementById("btn-fermer-modale").setAttribute("aria-label", "Fermer la fenêtre de modification d'adhérent");
+
+  fond.hidden = false;
+  requestAnimationFrame(function() { modale.focus(); });
+  document.addEventListener("keydown", gererToucheClavier);
 }
 
 /**
- * Focus trap (focus enfermé dans la modale) : empêche de sortir de la modale au clavier.
- * Fermeture par touche Échap (RGAA exigence).
+ * Ferme la modale et remet l'état à "ajout" pour la prochaine ouverture.
+ */
+function fermerModale() {
+  fond.hidden = true;
+  adherentEnCours = null;
+  document.getElementById("groupe-id-adherent").hidden = true;
+  document.removeEventListener("keydown", gererToucheClavier);
+  if (elementAvantModale) elementAvantModale.focus();
+}
+
+/**
+ * Focus trap dans la modale, fermeture par Échap.
  * @param {KeyboardEvent} evenement
  */
 function gererToucheClavier(evenement) {
-  /* Fermeture par Échap */
   if (evenement.key === "Escape") {
     fermerModale();
     return;
   }
 
-  /* Focus trap : boucle dans les éléments focusables de la modale */
   if (evenement.key === "Tab") {
-    /* Récupère tous les éléments interactifs à l'intérieur de la modale */
     const elementsFocusables = modale.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
@@ -323,13 +364,11 @@ function gererToucheClavier(evenement) {
     const dernier = elementsFocusables[elementsFocusables.length - 1];
 
     if (evenement.shiftKey) {
-      /* Shift+Tab : si on est sur le premier élément, on saute au dernier */
       if (document.activeElement === premier) {
         evenement.preventDefault();
         dernier.focus();
       }
     } else {
-      /* Tab : si on est sur le dernier élément, on saute au premier */
       if (document.activeElement === dernier) {
         evenement.preventDefault();
         premier.focus();
@@ -339,31 +378,25 @@ function gererToucheClavier(evenement) {
 }
 
 /**
- * Ferme la modale si l'utilisateur clique sur le fond semi-transparent
- * (en dehors de la boîte de dialogue).
- * @param {MouseEvent} evenement
+ * Ferme la modale si le clic est sur le fond semi-transparent.
  */
 function gererClicFond(evenement) {
-  /* On vérifie que le clic est bien sur le fond, pas sur la modale elle-même */
-  if (evenement.target === fond) {
-    fermerModale();
-  }
+  if (evenement.target === fond) fermerModale();
 }
 
-/* Branchement des écouteurs d'événements (event listeners) */
-btnOuvrir.addEventListener("click", ouvrirModale);
+btnOuvrir.addEventListener("click", ouvrirModaleAjout);
 btnFermer.addEventListener("click", fermerModale);
 btnAnnuler.addEventListener("click", fermerModale);
 fond.addEventListener("click", gererClicFond);
 
 /* =====================================================
-   AJOUT D'UN ADHÉRENT — VALIDATION ET ENREGISTREMENT
+   VALIDATION ET ENREGISTREMENT (AJOUT ET MODIFICATION)
    ===================================================== */
 
 /**
- * Affiche un message d'erreur sous un champ et le marque visuellement.
- * @param {string} idChamp - ID du champ concerné
- * @param {string} message - Message en français
+ * Marque un champ en erreur et affiche le message sous le champ.
+ * @param {string} idChamp
+ * @param {string} message
  */
 function marquerChampErreur(idChamp, message) {
   const champ = document.getElementById(idChamp);
@@ -376,12 +409,10 @@ function marquerChampErreur(idChamp, message) {
 }
 
 /**
- * Valide le formulaire d'ajout.
- * Affiche les erreurs individuelles sous chaque champ invalide.
- * @returns {boolean} true si tout est valide, false sinon
+ * Valide le formulaire (modes ajout et modification).
+ * @returns {boolean}
  */
 function validerFormulaire() {
-  /* Effacer les erreurs du passage précédent */
   document.querySelectorAll(".champ-erreur").forEach(function(el) { el.remove(); });
   document.querySelectorAll(".champ-input--erreur").forEach(function(el) {
     el.classList.remove("champ-input--erreur");
@@ -412,12 +443,10 @@ function validerFormulaire() {
     marquerChampErreur("champ-type", "Le type de membre est obligatoire.");
     valide = false;
   }
-  /* Email facultatif mais vérifié si renseigné */
   if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     marquerChampErreur("champ-email", "L'adresse e-mail n'est pas valide.");
     valide = false;
   }
-  /* Montant facultatif mais doit être numérique si renseigné */
   if (montant && isNaN(parseFloat(montant.replace(",", ".")))) {
     marquerChampErreur("champ-montant", "Le montant doit être un nombre (ex : 20 ou 20,50).");
     valide = false;
@@ -427,10 +456,9 @@ function validerFormulaire() {
 }
 
 /**
- * Lit les adhérents de la même saison dans Supabase et génère le prochain id_adherent.
- * Format : HSI-AAAA-NNNN, NNNN repart à 0001 chaque année.
- * @param {string} annee - Année sur 4 chiffres (ex : "2026")
- * @returns {Promise<string>} Identifiant unique (ex : "HSI-2026-0001")
+ * Génère le prochain id_adherent pour une saison donnée.
+ * @param {string} annee
+ * @returns {Promise<string>}
  */
 async function genererIdAdherent(annee) {
   const { data, error } = await clientSupabase
@@ -445,25 +473,21 @@ async function genererIdAdherent(annee) {
   if (data && data.length > 0) {
     data.forEach(function(adherent) {
       if (adherent.id_adherent) {
-        /* Extraire le numéro NNNN depuis "HSI-AAAA-NNNN" */
         const parties = adherent.id_adherent.split("-");
         if (parties.length === 3) {
           const numero = parseInt(parties[2], 10);
-          if (!isNaN(numero) && numero > maxNumero) {
-            maxNumero = numero;
-          }
+          if (!isNaN(numero) && numero > maxNumero) maxNumero = numero;
         }
       }
     });
   }
 
-  const nnnn = String(maxNumero + 1).padStart(4, "0");
-  return `HSI-${annee}-${nnnn}`;
+  return `HSI-${annee}-${String(maxNumero + 1).padStart(4, "0")}`;
 }
 
 /**
- * Affiche un bandeau de succès au-dessus du tableau, qui disparaît après 5 secondes.
- * @param {string} texte - Message à afficher
+ * Affiche un bandeau de succès au-dessus du tableau (5 secondes).
+ * @param {string} texte
  */
 function afficherMessageSucces(texte) {
   const zone = document.getElementById("message-succes");
@@ -475,7 +499,21 @@ function afficherMessageSucces(texte) {
   }, 5000);
 }
 
-/* Soumission du formulaire d'ajout : validation → génération ID → insert Supabase */
+/**
+ * Affiche un bandeau d'erreur au-dessus du tableau (7 secondes).
+ * @param {string} texte
+ */
+function afficherMessageErreur(texte) {
+  const zone = document.getElementById("message-erreur");
+  zone.textContent = texte;
+  zone.hidden = false;
+  setTimeout(function() {
+    zone.hidden = true;
+    zone.textContent = "";
+  }, 7000);
+}
+
+/* Soumission du formulaire : bifurque entre INSERT (ajout) et UPDATE (modification) */
 formulaire.addEventListener("submit", async function(evenement) {
   evenement.preventDefault();
 
@@ -485,79 +523,208 @@ formulaire.addEventListener("submit", async function(evenement) {
 
   if (!validerFormulaire()) return;
 
-  /* Lecture des valeurs saisies */
-  const nom          = document.getElementById("champ-nom").value.trim();
-  const prenom       = document.getElementById("champ-prenom").value.trim();
-  const email        = document.getElementById("champ-email").value.trim() || null;
-  const telephone    = document.getElementById("champ-telephone").value.trim() || null;
-  const adresse      = document.getElementById("champ-adresse").value.trim() || null;
-  const dateAdhesion = document.getElementById("champ-date").value;
-  const typeMembre   = document.getElementById("champ-type").value;
-  const montantBrut  = document.getElementById("champ-montant").value.trim();
+  const nom               = document.getElementById("champ-nom").value.trim();
+  const prenom            = document.getElementById("champ-prenom").value.trim();
+  const email             = document.getElementById("champ-email").value.trim() || null;
+  const telephone         = document.getElementById("champ-telephone").value.trim() || null;
+  const adresse           = document.getElementById("champ-adresse").value.trim() || null;
+  const dateAdhesion      = document.getElementById("champ-date").value;
+  const typeMembre        = document.getElementById("champ-type").value;
+  const montantBrut       = document.getElementById("champ-montant").value.trim();
+  const montantCotisation = montantBrut ? parseFloat(montantBrut.replace(",", ".")) : null;
 
-  /* Champs générés automatiquement */
-  const saison = dateAdhesion.split("-")[0]; /* Année de la date d'adhésion */
-  const montantCotisation = montantBrut
-    ? parseFloat(montantBrut.replace(",", "."))
-    : null;
+  if (adherentEnCours) {
+    /* ---- MODE MODIFICATION : UPDATE Supabase ---- */
+    const { error } = await clientSupabase
+      .from("adherents")
+      .update({
+        nom,
+        prenom,
+        email,
+        telephone,
+        adresse,
+        date_adhesion:      dateAdhesion,
+        montant_cotisation: montantCotisation,
+        type_membre:        typeMembre
+      })
+      .eq("id", adherentEnCours.id);
 
-  /* Génération de l'identifiant HSI-AAAA-NNNN */
-  let idAdherent;
-  try {
-    idAdherent = await genererIdAdherent(saison);
-  } catch (_) {
-    zoneErreurModale.textContent = "Impossible de générer l'identifiant. Vérifiez votre connexion et réessayez.";
-    zoneErreurModale.hidden = false;
-    return;
+    if (error) {
+      zoneErreurModale.textContent = "La modification a échoué. Vérifiez votre connexion et réessayez.";
+      zoneErreurModale.hidden = false;
+      return;
+    }
+
+    fermerModale();
+    await chargerAdherents();
+    afficherMessageSucces(`Adhérent modifié : ${prenom} ${nom}.`);
+
+  } else {
+    /* ---- MODE AJOUT : INSERT Supabase ---- */
+    const saison = dateAdhesion.split("-")[0];
+
+    let idAdherent;
+    try {
+      idAdherent = await genererIdAdherent(saison);
+    } catch (_) {
+      zoneErreurModale.textContent = "Impossible de générer l'identifiant. Vérifiez votre connexion et réessayez.";
+      zoneErreurModale.hidden = false;
+      return;
+    }
+
+    const nouvelAdherent = {
+      id_adherent:        idAdherent,
+      nom,
+      prenom,
+      email,
+      telephone,
+      adresse,
+      date_adhesion:      dateAdhesion,
+      montant_cotisation: montantCotisation,
+      type_membre:        typeMembre,
+      saison
+    };
+
+    const { error } = await clientSupabase
+      .from("adherents")
+      .insert([nouvelAdherent]);
+
+    if (error) {
+      zoneErreurModale.textContent = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
+      zoneErreurModale.hidden = false;
+      return;
+    }
+
+    fermerModale();
+    await chargerAdherents();
+    afficherMessageSucces(`Adhérent ajouté : ${prenom} ${nom} (${idAdherent}).`);
+  }
+});
+
+/* =====================================================
+   DÉLÉGATION DES CLICS SUR LE TABLEAU
+   Branché une seule fois ; retrouve l'adhérent via data-id-technique et donneesAdherents.
+   ===================================================== */
+
+document.getElementById("corps-tableau").addEventListener("click", function(evenement) {
+  /* closest() remonte l'arbre DOM même si le clic a touché le SVG interne */
+  const btnModifier  = evenement.target.closest(".btn-icone--modifier");
+  const btnSupprimer = evenement.target.closest(".btn-icone--supprimer");
+
+  if (btnModifier) {
+    const idTechnique = btnModifier.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirModaleModification(adherent);
   }
 
-  const nouvelAdherent = {
-    id_adherent:        idAdherent,
-    nom,
-    prenom,
-    email,
-    telephone,
-    adresse,
-    date_adhesion:      dateAdhesion,
-    montant_cotisation: montantCotisation,
-    type_membre:        typeMembre,
-    saison
-  };
+  if (btnSupprimer) {
+    const idTechnique = btnSupprimer.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirConfirmationSuppression(adherent);
+  }
+});
+
+/* =====================================================
+   CONFIRMATION DE SUPPRESSION
+   ===================================================== */
+
+const confirmationFond   = document.getElementById("confirmation-fond");
+const modaleConfirmation = document.getElementById("modale-confirmation");
+let adherentASupprimer      = null;
+let elementAvantConfirmation = null;
+
+/**
+ * Ouvre la fenêtre de confirmation avec le nom et l'ID de l'adhérent concerné.
+ * @param {Object} adherent
+ */
+function ouvrirConfirmationSuppression(adherent) {
+  adherentASupprimer = adherent;
+  elementAvantConfirmation = document.activeElement;
+
+  document.getElementById("confirmation-adherent-info").textContent =
+    `${adherent.prenom || ""} ${adherent.nom || ""} — ${adherent.id_adherent || adherent.id}`.trim();
+
+  confirmationFond.hidden = false;
+  requestAnimationFrame(function() { modaleConfirmation.focus(); });
+  document.addEventListener("keydown", gererToucheConfirmation);
+}
+
+/**
+ * Ferme la fenêtre de confirmation sans rien faire.
+ */
+function fermerConfirmation() {
+  confirmationFond.hidden = true;
+  adherentASupprimer = null;
+  document.removeEventListener("keydown", gererToucheConfirmation);
+  if (elementAvantConfirmation) elementAvantConfirmation.focus();
+}
+
+/**
+ * Focus trap dans la fenêtre de confirmation, Échap = Annuler.
+ * @param {KeyboardEvent} evenement
+ */
+function gererToucheConfirmation(evenement) {
+  if (evenement.key === "Escape") {
+    fermerConfirmation();
+    return;
+  }
+  if (evenement.key === "Tab") {
+    const focusables = modaleConfirmation.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault();
+      dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault();
+      premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-annuler-confirmation").addEventListener("click", fermerConfirmation);
+confirmationFond.addEventListener("click", function(evenement) {
+  if (evenement.target === confirmationFond) fermerConfirmation();
+});
+
+/* Suppression confirmée : DELETE Supabase → rechargement → message succès */
+document.getElementById("btn-confirmer-suppression").addEventListener("click", async function() {
+  if (!adherentASupprimer) return;
+
+  const nomComplet = `${adherentASupprimer.prenom || ""} ${adherentASupprimer.nom || ""}`.trim();
 
   const { error } = await clientSupabase
     .from("adherents")
-    .insert([nouvelAdherent]);
+    .delete()
+    .eq("id", adherentASupprimer.id);
 
   if (error) {
-    zoneErreurModale.textContent = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
-    zoneErreurModale.hidden = false;
+    fermerConfirmation();
+    afficherMessageErreur("La suppression a échoué. Vérifiez votre connexion et réessayez.");
     return;
   }
 
-  /* Succès : fermer la modale, recharger le tableau, afficher la confirmation */
-  fermerModale();
+  fermerConfirmation();
   await chargerAdherents();
-  afficherMessageSucces(`Adhérent ajouté : ${prenom} ${nom} (${idAdherent}).`);
+  afficherMessageSucces(`Adhérent supprimé : ${nomComplet}.`);
 });
 
 /* =====================================================
    AUTHENTIFICATION SUPABASE
    ===================================================== */
 
-/* Client Supabase : objet JavaScript qui dialogue avec la base de données.
-   Utilise les variables SUPABASE_URL et SUPABASE_KEY définies dans config.js. */
 const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-/* Références aux blocs à afficher ou masquer selon l'état de connexion */
-const ecranConnexion    = document.getElementById("ecran-connexion");
-const entetePrincipal   = document.querySelector("header");
-const contenuPrincipal  = document.querySelector("main");
-const piedDePage        = document.querySelector("footer");
+const ecranConnexion      = document.getElementById("ecran-connexion");
+const entetePrincipal     = document.querySelector("header");
+const contenuPrincipal    = document.querySelector("main");
+const piedDePage          = document.querySelector("footer");
 const formulaireConnexion = document.getElementById("formulaire-connexion");
-const zoneErreur        = document.getElementById("connexion-erreur");
-const btnDeconnexion    = document.getElementById("btn-deconnexion");
+const zoneErreur          = document.getElementById("connexion-erreur");
+const btnDeconnexion      = document.getElementById("btn-deconnexion");
 
-/* Affiche le tableau de bord, masque l'écran de connexion, puis charge les adhérents */
 function afficherTableauDeBord() {
   ecranConnexion.hidden   = true;
   entetePrincipal.hidden  = false;
@@ -566,19 +733,16 @@ function afficherTableauDeBord() {
   chargerAdherents();
 }
 
-/* Affiche l'écran de connexion et masque le tableau de bord */
 function afficherEcranConnexion() {
   ecranConnexion.hidden   = false;
   entetePrincipal.hidden  = true;
   contenuPrincipal.hidden = true;
   piedDePage.hidden       = true;
-  /* Vider le mot de passe et effacer l'éventuel message d'erreur */
   document.getElementById("connexion-mdp").value = "";
   zoneErreur.hidden      = true;
   zoneErreur.textContent = "";
 }
 
-/* Vérifie si une session Supabase est active au chargement de la page */
 async function verifierSession() {
   const { data } = await clientSupabase.auth.getSession();
   if (data.session) {
@@ -588,20 +752,17 @@ async function verifierSession() {
   }
 }
 
-/* Soumission du formulaire de connexion */
 formulaireConnexion.addEventListener("submit", async function(evenement) {
   evenement.preventDefault();
   const email = document.getElementById("connexion-email").value.trim();
   const mdp   = document.getElementById("connexion-mdp").value;
 
-  /* Masquer le message d'erreur précédent avant une nouvelle tentative */
   zoneErreur.hidden      = true;
   zoneErreur.textContent = "";
 
   const { error } = await clientSupabase.auth.signInWithPassword({ email, password: mdp });
 
   if (error) {
-    /* Message d'erreur en français, sans détail technique */
     zoneErreur.textContent = "E-mail ou mot de passe incorrect.";
     zoneErreur.hidden      = false;
   } else {
@@ -609,7 +770,6 @@ formulaireConnexion.addEventListener("submit", async function(evenement) {
   }
 });
 
-/* Déconnexion */
 btnDeconnexion.addEventListener("click", async function() {
   await clientSupabase.auth.signOut();
   afficherEcranConnexion();
@@ -617,5 +777,5 @@ btnDeconnexion.addEventListener("click", async function() {
 
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
-  verifierSession(); /* Détermine quel écran afficher et charge les données si connecté */
+  verifierSession();
 });

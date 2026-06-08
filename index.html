@@ -110,9 +110,13 @@
       </button>
     </section>
 
-    <!-- Message de confirmation après ajout réussi — masqué par défaut -->
+    <!-- Message de confirmation après ajout/modification/suppression réussie -->
     <div id="message-succes" class="message-succes"
          role="status" aria-live="polite" hidden></div>
+
+    <!-- Message d'erreur global (suppression ou modification échouée) -->
+    <div id="message-erreur" class="message-erreur"
+         role="alert" aria-live="assertive" hidden></div>
 
     <!-- ---- Tableau des adhérents ---- -->
     <section class="section-tableau" aria-label="Liste des adhérents">
@@ -175,6 +179,13 @@
              role="alert" aria-live="polite" hidden></div>
 
         <div class="formulaire__grille">
+
+          <!-- ID adhérent : affiché en lecture seule uniquement en mode modification -->
+          <div class="champ-groupe champ-groupe--large" id="groupe-id-adherent" hidden>
+            <label for="champ-id-adherent" class="champ-label">ID adhérent</label>
+            <input type="text" id="champ-id-adherent" class="champ-input"
+                   disabled aria-label="Identifiant adhérent, non modifiable" />
+          </div>
 
           <!-- Chaque <input> est lié à son <label> via l'attribut "for" (RGAA obligatoire) -->
           <div class="champ-groupe">
@@ -251,6 +262,38 @@
         </div>
 
       </form>
+    </div>
+  </div>
+
+  <!-- ========== MODALE DE CONFIRMATION DE SUPPRESSION ========== -->
+  <div class="modale-fond" id="confirmation-fond" role="presentation" hidden>
+    <div class="modale modale--petite"
+         id="modale-confirmation"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="confirmation-titre"
+         tabindex="-1">
+
+      <div class="modale__entete modale__entete--danger">
+        <h2 class="modale__titre" id="confirmation-titre">Supprimer un adhérent</h2>
+      </div>
+
+      <div class="confirmation__corps">
+        <p class="confirmation__question">Voulez-vous vraiment supprimer cet adhérent ?</p>
+        <!-- Nom, prénom et ID — rempli dynamiquement par app.js -->
+        <p class="confirmation__adherent" id="confirmation-adherent-info" aria-live="polite"></p>
+        <p class="confirmation__avertissement">Cette action est irréversible.</p>
+      </div>
+
+      <div class="modale__actions confirmation__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-annuler-confirmation">
+          Annuler
+        </button>
+        <button type="button" class="btn btn--danger" id="btn-confirmer-suppression">
+          Supprimer
+        </button>
+      </div>
+
     </div>
   </div>
 
