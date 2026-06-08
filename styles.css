@@ -22,6 +22,8 @@
   /* Statuts */
   --vert-statut: #1e7d45;
   --vert-fond: #e6f5ec;
+  --orange-statut: #a84800;   /* Contraste ≥ 4.5:1 sur --orange-fond (WCAG AA) */
+  --orange-fond: #fff0e0;
   --rouge-statut: #b91c1c;
   --rouge-fond: #fee2e2;
 
@@ -390,10 +392,60 @@ body {
   color: var(--vert-statut); /* Contraste ≥ 4.5:1 sur fond vert clair */
 }
 
-/* Badge "Expiré" : rouge */
-.badge--expire {
+/* Badge "À renouveler" : orange accessible (contraste ≥ 4.5:1 WCAG AA) */
+.badge--arenouveler {
+  background-color: var(--orange-fond);
+  color: var(--orange-statut);
+}
+
+/* Badge "En retard" : rouge */
+.badge--enretard {
   background-color: var(--rouge-fond);
   color: var(--rouge-statut); /* Contraste ≥ 4.5:1 sur fond rouge clair */
+}
+
+/* ---------- CHAMP DATE (groupe de trois menus déroulants) ---------- */
+
+/* Réinitialisation des styles natifs du fieldset */
+.champ-groupe--date {
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+/* La légende se comporte comme un label de champ */
+.champ-groupe--date > legend {
+  display: block;
+  float: left;
+  width: 100%;
+  padding: 0;
+  margin-bottom: 0.35rem;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--encre);
+}
+
+/* Nettoyage du float après la légende */
+.champ-groupe--date > legend + * {
+  clear: left;
+}
+
+/* Trois menus côte à côte */
+.date-adhesion__conteneur {
+  display: flex;
+  gap: 0.6rem;
+  width: 100%;
+}
+
+.date-adhesion__champ {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Le menu Année est légèrement plus large (4 chiffres) */
+.date-adhesion__champ--annee {
+  flex: 1.4;
 }
 
 /* ---------- INFOBULLES (tooltips = bulles d'aide au survol) ---------- */
@@ -716,6 +768,15 @@ body {
   .entete__logo-bloc {
     flex-direction: column;
     gap: 0.25rem;
+  }
+
+  /* Date d'adhésion : menus empilés sur très petits écrans */
+  .date-adhesion__conteneur {
+    flex-direction: column;
+  }
+
+  .date-adhesion__champ--annee {
+    flex: 1;
   }
 }
 

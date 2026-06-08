@@ -219,10 +219,23 @@
                    autocomplete="street-address" />
           </div>
 
-          <div class="champ-groupe">
-            <label for="champ-date" class="champ-label">Date d'adhésion <span aria-hidden="true">*</span></label>
-            <input type="date" id="champ-date" class="champ-input" />
-          </div>
+          <fieldset class="champ-groupe champ-groupe--large champ-groupe--date" id="groupe-date-adhesion">
+            <legend class="champ-label">Date d'adhésion <span aria-hidden="true">*</span></legend>
+            <div class="date-adhesion__conteneur">
+              <div class="date-adhesion__champ">
+                <label for="champ-date-jour" class="sr-only">Jour</label>
+                <select id="champ-date-jour" class="champ-input champ-select"></select>
+              </div>
+              <div class="date-adhesion__champ">
+                <label for="champ-date-mois" class="sr-only">Mois</label>
+                <select id="champ-date-mois" class="champ-input champ-select"></select>
+              </div>
+              <div class="date-adhesion__champ date-adhesion__champ--annee">
+                <label for="champ-date-annee" class="sr-only">Année</label>
+                <select id="champ-date-annee" class="champ-input champ-select"></select>
+              </div>
+            </div>
+          </fieldset>
 
           <div class="champ-groupe">
             <label for="champ-montant" class="champ-label">Montant cotisation (€)</label>

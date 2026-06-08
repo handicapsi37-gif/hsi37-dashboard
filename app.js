@@ -46,9 +46,14 @@ const statutsConfig = {
     classe: "badge--ajour",
     indicateur: "●"
   },
-  expire: {
-    libelle: "Expiré",
-    classe: "badge--expire",
+  arenouveler: {
+    libelle: "À renouveler",
+    classe: "badge--arenouveler",
+    indicateur: "●"
+  },
+  enretard: {
+    libelle: "En retard",
+    classe: "badge--enretard",
     indicateur: "●"
   }
 };
@@ -62,6 +67,21 @@ let donneesAdherents = [];
 let adherentEnCours = null;
 
 /* ---------- FONCTIONS D'AFFICHAGE ---------- */
+
+/**
+ * Calcule le statut de cotisation à partir de la saison de l'adhérent.
+ * Retourne la clé correspondante dans statutsConfig.
+ * Jamais stocké : calculé à l'affichage uniquement.
+ * @param {string|number} saison - Année de la saison (ex. "2026" ou 2026)
+ * @returns {string} Clé de statutsConfig : "ajour" | "arenouveler" | "enretard"
+ */
+function calculerStatut(saison) {
+  const annee = new Date().getFullYear();
+  const s = parseInt(saison, 10);
+  if (isNaN(s) || s >= annee) return "ajour";
+  if (s === annee - 1) return "arenouveler";
+  return "enretard";
+}
 
 /**
  * Formate une date ISO (AAAA-MM-JJ) en format français (JJ/MM/AAAA).
@@ -208,7 +228,7 @@ function remplirTableau(adherents) {
       <td>${genererCelluleType(adherent.type_membre)}</td>
       <td>${formaterDate(adherent.date_adhesion)}</td>
       <td>${montant}</td>
-      <td>—</td>
+      <td>${genererBadge(calculerStatut(adherent.saison))}</td>
       <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id)}</td>
     `;
 
@@ -319,7 +339,16 @@ function ouvrirModaleModification(adherent) {
   document.getElementById("champ-email").value     = adherent.email || "";
   document.getElementById("champ-telephone").value = adherent.telephone || "";
   document.getElementById("champ-adresse").value   = adherent.adresse || "";
-  document.getElementById("champ-date").value      = adherent.date_adhesion || "";
+  if (adherent.date_adhesion) {
+    const [a, m, j] = adherent.date_adhesion.split("-");
+    document.getElementById("champ-date-annee").value = a || "";
+    document.getElementById("champ-date-mois").value  = m || "";
+    document.getElementById("champ-date-jour").value  = j || "";
+  } else {
+    document.getElementById("champ-date-annee").value = "";
+    document.getElementById("champ-date-mois").value  = "";
+    document.getElementById("champ-date-jour").value  = "";
+  }
   document.getElementById("champ-type").value      = adherent.type_membre || "";
   document.getElementById("champ-montant").value   =
     (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
@@ -420,11 +449,13 @@ function validerFormulaire() {
 
   let valide = true;
 
-  const nom    = document.getElementById("champ-nom").value.trim();
-  const prenom = document.getElementById("champ-prenom").value.trim();
-  const email  = document.getElementById("champ-email").value.trim();
-  const date   = document.getElementById("champ-date").value;
-  const type   = document.getElementById("champ-type").value;
+  const nom     = document.getElementById("champ-nom").value.trim();
+  const prenom  = document.getElementById("champ-prenom").value.trim();
+  const email   = document.getElementById("champ-email").value.trim();
+  const jour    = document.getElementById("champ-date-jour").value;
+  const mois    = document.getElementById("champ-date-mois").value;
+  const annee   = document.getElementById("champ-date-annee").value;
+  const type    = document.getElementById("champ-type").value;
   const montant = document.getElementById("champ-montant").value.trim();
 
   if (!nom) {
@@ -435,10 +466,40 @@ function validerFormulaire() {
     marquerChampErreur("champ-prenom", "Le prénom est obligatoire.");
     valide = false;
   }
-  if (!date) {
-    marquerChampErreur("champ-date", "La date d'adhésion est obligatoire.");
+
+  /* Validation date : les trois menus doivent être renseignés et former une date réelle */
+  if (!jour || !mois || !annee) {
+    if (!jour)  document.getElementById("champ-date-jour").classList.add("champ-input--erreur");
+    if (!mois)  document.getElementById("champ-date-mois").classList.add("champ-input--erreur");
+    if (!annee) document.getElementById("champ-date-annee").classList.add("champ-input--erreur");
+    const errDate = document.createElement("span");
+    errDate.className = "champ-erreur";
+    errDate.setAttribute("role", "alert");
+    errDate.textContent = "La date d'adhésion est obligatoire (jour, mois et année requis).";
+    const conteneur = document.querySelector(".date-adhesion__conteneur");
+    conteneur.parentNode.insertBefore(errDate, conteneur.nextSibling);
     valide = false;
+  } else {
+    /* Vérifier que la combinaison jour/mois/année correspond à une date réelle */
+    const dateTest = new Date(`${annee}-${mois}-${jour}`);
+    const dateValide = !isNaN(dateTest.getTime()) &&
+      dateTest.getFullYear() === parseInt(annee, 10) &&
+      (dateTest.getMonth() + 1) === parseInt(mois, 10) &&
+      dateTest.getDate() === parseInt(jour, 10);
+    if (!dateValide) {
+      ["champ-date-jour", "champ-date-mois", "champ-date-annee"].forEach(function(id) {
+        document.getElementById(id).classList.add("champ-input--erreur");
+      });
+      const errDate = document.createElement("span");
+      errDate.className = "champ-erreur";
+      errDate.setAttribute("role", "alert");
+      errDate.textContent = "Cette date n'existe pas (ex. le 31 février est invalide).";
+      const conteneur = document.querySelector(".date-adhesion__conteneur");
+      conteneur.parentNode.insertBefore(errDate, conteneur.nextSibling);
+      valide = false;
+    }
   }
+
   if (!type) {
     marquerChampErreur("champ-type", "Le type de membre est obligatoire.");
     valide = false;
@@ -528,7 +589,10 @@ formulaire.addEventListener("submit", async function(evenement) {
   const email             = document.getElementById("champ-email").value.trim() || null;
   const telephone         = document.getElementById("champ-telephone").value.trim() || null;
   const adresse           = document.getElementById("champ-adresse").value.trim() || null;
-  const dateAdhesion      = document.getElementById("champ-date").value;
+  const jourSaisi         = document.getElementById("champ-date-jour").value;
+  const moisSaisi         = document.getElementById("champ-date-mois").value;
+  const anneeSaisie       = document.getElementById("champ-date-annee").value;
+  const dateAdhesion      = `${anneeSaisie}-${moisSaisi}-${jourSaisi}`;
   const typeMembre        = document.getElementById("champ-type").value;
   const montantBrut       = document.getElementById("champ-montant").value.trim();
   const montantCotisation = montantBrut ? parseFloat(montantBrut.replace(",", ".")) : null;
@@ -561,7 +625,7 @@ formulaire.addEventListener("submit", async function(evenement) {
 
   } else {
     /* ---- MODE AJOUT : INSERT Supabase ---- */
-    const saison = dateAdhesion.split("-")[0];
+    const saison = anneeSaisie;
 
     let idAdherent;
     try {
@@ -775,7 +839,54 @@ btnDeconnexion.addEventListener("click", async function() {
   afficherEcranConnexion();
 });
 
+/* =====================================================
+   INITIALISATION DES MENUS DÉROULANTS DE DATE
+   ===================================================== */
+
+/**
+ * Peuple les trois selects Jour / Mois / Année du formulaire.
+ * À appeler une seule fois au chargement de la page.
+ */
+function initialiserSelectsDate() {
+  const selectJour  = document.getElementById("champ-date-jour");
+  const selectMois  = document.getElementById("champ-date-mois");
+  const selectAnnee = document.getElementById("champ-date-annee");
+
+  /* --- Jours : 01 à 31 --- */
+  selectJour.innerHTML = '<option value="">Jour</option>';
+  for (let j = 1; j <= 31; j++) {
+    const opt = document.createElement("option");
+    opt.value       = String(j).padStart(2, "0");
+    opt.textContent = String(j);
+    selectJour.appendChild(opt);
+  }
+
+  /* --- Mois : noms français, valeurs 01 à 12 --- */
+  const moisFr = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+  selectMois.innerHTML = '<option value="">Mois</option>';
+  moisFr.forEach(function(libelle, index) {
+    const opt = document.createElement("option");
+    opt.value       = String(index + 1).padStart(2, "0");
+    opt.textContent = libelle;
+    selectMois.appendChild(opt);
+  });
+
+  /* --- Années : 2020 jusqu'à l'année en cours (dynamique) --- */
+  const anneeActuelle = new Date().getFullYear();
+  selectAnnee.innerHTML = '<option value="">Année</option>';
+  for (let a = 2020; a <= anneeActuelle; a++) {
+    const opt = document.createElement("option");
+    opt.value       = String(a);
+    opt.textContent = String(a);
+    selectAnnee.appendChild(opt);
+  }
+}
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
+  initialiserSelectsDate();
   verifierSession();
 });
