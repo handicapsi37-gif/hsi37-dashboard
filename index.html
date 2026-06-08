@@ -110,6 +110,10 @@
       </button>
     </section>
 
+    <!-- Message de confirmation après ajout réussi — masqué par défaut -->
+    <div id="message-succes" class="message-succes"
+         role="status" aria-live="polite" hidden></div>
+
     <!-- ---- Tableau des adhérents ---- -->
     <section class="section-tableau" aria-label="Liste des adhérents">
       <div class="tableau-conteneur" role="region" aria-label="Tableau des adhérents" tabindex="0">
@@ -162,9 +166,13 @@
         </button>
       </div>
 
-      <!-- Corps du formulaire — Phase 0 : visuel uniquement, aucun enregistrement -->
+      <!-- Corps du formulaire -->
       <form class="modale__formulaire" id="formulaire-adherent" novalidate
             aria-label="Formulaire d'ajout ou de modification d'un adhérent">
+
+        <!-- Zone d'erreur globale : visible en cas d'échec de validation ou d'insertion -->
+        <div id="modale-erreur" class="modale-erreur"
+             role="alert" aria-live="polite" hidden></div>
 
         <div class="formulaire__grille">
 
@@ -182,7 +190,7 @@
           </div>
 
           <div class="champ-groupe champ-groupe--large">
-            <label for="champ-email" class="champ-label">E-mail <span aria-hidden="true">*</span></label>
+            <label for="champ-email" class="champ-label">E-mail</label>
             <input type="email" id="champ-email" class="champ-input"
                    placeholder="Ex : marie.dupont@exemple.fr" autocomplete="email" />
           </div>
@@ -213,15 +221,15 @@
 
           <div class="champ-groupe champ-groupe--large">
             <label for="champ-type" class="champ-label">Type de membre <span aria-hidden="true">*</span></label>
-            <!-- Menu déroulant avec les 6 types définis par la charte HSI -->
+            <!-- Les valeurs correspondent exactement aux libellés stockés dans Supabase -->
             <select id="champ-type" class="champ-input champ-select">
               <option value="">— Sélectionner un type —</option>
-              <option value="actif">Membre actif</option>
-              <option value="bienfaiteur">Membre bienfaiteur</option>
-              <option value="honneur">Membre d'honneur</option>
-              <option value="benevole">Membre bénévole</option>
-              <option value="fondateur">Membre fondateur</option>
-              <option value="droit">Membre de droit</option>
+              <option value="Membre actif">Membre actif</option>
+              <option value="Membre bienfaiteur">Membre bienfaiteur</option>
+              <option value="Membre d'honneur">Membre d'honneur</option>
+              <option value="Membre bénévole">Membre bénévole</option>
+              <option value="Membre fondateur">Membre fondateur</option>
+              <option value="Membre de droit">Membre de droit</option>
             </select>
           </div>
 

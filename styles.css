@@ -807,6 +807,43 @@ body {
   margin-top: 0.25rem;
 }
 
+/* ---------- MESSAGES DE VALIDATION ET DE SUCCÈS ---------- */
+
+/* Message d'erreur affiché sous un champ invalide */
+.champ-erreur {
+  font-size: 0.82rem;
+  color: var(--rouge-statut);
+  margin-top: 0.15rem;
+}
+
+/* Bordure rouge sur un champ en erreur */
+.champ-input--erreur {
+  border-color: var(--rouge-statut) !important;
+  background-color: var(--rouge-fond) !important;
+}
+
+/* Bloc d'erreur global en haut du formulaire de la modale */
+.modale-erreur {
+  background-color: var(--rouge-fond);
+  color: var(--rouge-statut);
+  border: 1px solid var(--rouge-statut);
+  border-radius: var(--rayon);
+  padding: 0.65rem 0.9rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+/* Bandeau de confirmation au-dessus du tableau */
+.message-succes {
+  background-color: var(--vert-fond);
+  color: var(--vert-statut);
+  border: 1px solid var(--vert-statut);
+  border-radius: var(--rayon);
+  padding: 0.7rem 1rem;
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
 /* Bouton "Se déconnecter" dans l'en-tête */
 .btn--deconnexion {
   background-color: rgba(255, 255, 255, 0.15);

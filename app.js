@@ -72,12 +72,21 @@ function formaterDate(dateIso) {
 
 /**
  * Génère le HTML d'une cellule "Type de membre" avec son infobulle.
- * @param {string} cle - Clé du type (ex : "actif")
+ * Accepte la clé courte ("actif") pour les anciennes données
+ * ou le libellé complet ("Membre actif") pour les nouvelles données.
+ * @param {string} valeur - Clé courte ou libellé complet
  * @returns {string} HTML de la cellule
  */
-function genererCelluleType(cle) {
-  const type = typesMembres[cle];
-  if (!type) return "—";
+function genererCelluleType(valeur) {
+  /* Chercher d'abord par clé courte, puis par libellé complet */
+  let type = typesMembres[valeur];
+  if (!type) {
+    const entree = Object.entries(typesMembres).find(function([, t]) {
+      return t.libelle === valeur;
+    });
+    if (entree) type = entree[1];
+  }
+  if (!type) return valeur || "—";
 
   /* Classe optionnelle pour décaler l'infobulle si elle risque de sortir à droite */
   const classeAlign = type.alignInfBulle ? ` type-membre--${type.alignInfBulle}` : "";
@@ -255,10 +264,23 @@ const formulaire = document.getElementById("formulaire-adherent");
 let elementAvantModale = null;
 
 /**
- * Ouvre la modale et déplace le focus sur la boîte de dialogue.
+ * Ouvre la modale, réinitialise le formulaire et déplace le focus.
  */
 function ouvrirModale() {
   elementAvantModale = document.activeElement;
+
+  /* Réinitialiser le formulaire et effacer tous les messages d'erreur */
+  formulaire.reset();
+  const zoneErreurModale = document.getElementById("modale-erreur");
+  if (zoneErreurModale) {
+    zoneErreurModale.hidden = true;
+    zoneErreurModale.textContent = "";
+  }
+  document.querySelectorAll(".champ-erreur").forEach(function(el) { el.remove(); });
+  document.querySelectorAll(".champ-input--erreur").forEach(function(el) {
+    el.classList.remove("champ-input--erreur");
+  });
+
   fond.hidden = false;
   /* Délai minimal pour que l'animation CSS s'enclenche correctement */
   requestAnimationFrame(function() {
@@ -334,11 +356,188 @@ btnFermer.addEventListener("click", fermerModale);
 btnAnnuler.addEventListener("click", fermerModale);
 fond.addEventListener("click", gererClicFond);
 
-/* En Phase 0 : empêche la soumission réelle du formulaire */
-formulaire.addEventListener("submit", function(evenement) {
+/* =====================================================
+   AJOUT D'UN ADHÉRENT — VALIDATION ET ENREGISTREMENT
+   ===================================================== */
+
+/**
+ * Affiche un message d'erreur sous un champ et le marque visuellement.
+ * @param {string} idChamp - ID du champ concerné
+ * @param {string} message - Message en français
+ */
+function marquerChampErreur(idChamp, message) {
+  const champ = document.getElementById(idChamp);
+  champ.classList.add("champ-input--erreur");
+  const msgErreur = document.createElement("span");
+  msgErreur.className = "champ-erreur";
+  msgErreur.setAttribute("role", "alert");
+  msgErreur.textContent = message;
+  champ.parentNode.appendChild(msgErreur);
+}
+
+/**
+ * Valide le formulaire d'ajout.
+ * Affiche les erreurs individuelles sous chaque champ invalide.
+ * @returns {boolean} true si tout est valide, false sinon
+ */
+function validerFormulaire() {
+  /* Effacer les erreurs du passage précédent */
+  document.querySelectorAll(".champ-erreur").forEach(function(el) { el.remove(); });
+  document.querySelectorAll(".champ-input--erreur").forEach(function(el) {
+    el.classList.remove("champ-input--erreur");
+  });
+
+  let valide = true;
+
+  const nom    = document.getElementById("champ-nom").value.trim();
+  const prenom = document.getElementById("champ-prenom").value.trim();
+  const email  = document.getElementById("champ-email").value.trim();
+  const date   = document.getElementById("champ-date").value;
+  const type   = document.getElementById("champ-type").value;
+  const montant = document.getElementById("champ-montant").value.trim();
+
+  if (!nom) {
+    marquerChampErreur("champ-nom", "Le nom est obligatoire.");
+    valide = false;
+  }
+  if (!prenom) {
+    marquerChampErreur("champ-prenom", "Le prénom est obligatoire.");
+    valide = false;
+  }
+  if (!date) {
+    marquerChampErreur("champ-date", "La date d'adhésion est obligatoire.");
+    valide = false;
+  }
+  if (!type) {
+    marquerChampErreur("champ-type", "Le type de membre est obligatoire.");
+    valide = false;
+  }
+  /* Email facultatif mais vérifié si renseigné */
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    marquerChampErreur("champ-email", "L'adresse e-mail n'est pas valide.");
+    valide = false;
+  }
+  /* Montant facultatif mais doit être numérique si renseigné */
+  if (montant && isNaN(parseFloat(montant.replace(",", ".")))) {
+    marquerChampErreur("champ-montant", "Le montant doit être un nombre (ex : 20 ou 20,50).");
+    valide = false;
+  }
+
+  return valide;
+}
+
+/**
+ * Lit les adhérents de la même saison dans Supabase et génère le prochain id_adherent.
+ * Format : HSI-AAAA-NNNN, NNNN repart à 0001 chaque année.
+ * @param {string} annee - Année sur 4 chiffres (ex : "2026")
+ * @returns {Promise<string>} Identifiant unique (ex : "HSI-2026-0001")
+ */
+async function genererIdAdherent(annee) {
+  const { data, error } = await clientSupabase
+    .from("adherents")
+    .select("id_adherent")
+    .eq("saison", annee);
+
+  if (error) throw new Error("Lecture Supabase échouée");
+
+  let maxNumero = 0;
+
+  if (data && data.length > 0) {
+    data.forEach(function(adherent) {
+      if (adherent.id_adherent) {
+        /* Extraire le numéro NNNN depuis "HSI-AAAA-NNNN" */
+        const parties = adherent.id_adherent.split("-");
+        if (parties.length === 3) {
+          const numero = parseInt(parties[2], 10);
+          if (!isNaN(numero) && numero > maxNumero) {
+            maxNumero = numero;
+          }
+        }
+      }
+    });
+  }
+
+  const nnnn = String(maxNumero + 1).padStart(4, "0");
+  return `HSI-${annee}-${nnnn}`;
+}
+
+/**
+ * Affiche un bandeau de succès au-dessus du tableau, qui disparaît après 5 secondes.
+ * @param {string} texte - Message à afficher
+ */
+function afficherMessageSucces(texte) {
+  const zone = document.getElementById("message-succes");
+  zone.textContent = texte;
+  zone.hidden = false;
+  setTimeout(function() {
+    zone.hidden = true;
+    zone.textContent = "";
+  }, 5000);
+}
+
+/* Soumission du formulaire d'ajout : validation → génération ID → insert Supabase */
+formulaire.addEventListener("submit", async function(evenement) {
   evenement.preventDefault();
-  /* On ferme simplement la modale sans rien enregistrer */
+
+  const zoneErreurModale = document.getElementById("modale-erreur");
+  zoneErreurModale.hidden = true;
+  zoneErreurModale.textContent = "";
+
+  if (!validerFormulaire()) return;
+
+  /* Lecture des valeurs saisies */
+  const nom          = document.getElementById("champ-nom").value.trim();
+  const prenom       = document.getElementById("champ-prenom").value.trim();
+  const email        = document.getElementById("champ-email").value.trim() || null;
+  const telephone    = document.getElementById("champ-telephone").value.trim() || null;
+  const adresse      = document.getElementById("champ-adresse").value.trim() || null;
+  const dateAdhesion = document.getElementById("champ-date").value;
+  const typeMembre   = document.getElementById("champ-type").value;
+  const montantBrut  = document.getElementById("champ-montant").value.trim();
+
+  /* Champs générés automatiquement */
+  const saison = dateAdhesion.split("-")[0]; /* Année de la date d'adhésion */
+  const montantCotisation = montantBrut
+    ? parseFloat(montantBrut.replace(",", "."))
+    : null;
+
+  /* Génération de l'identifiant HSI-AAAA-NNNN */
+  let idAdherent;
+  try {
+    idAdherent = await genererIdAdherent(saison);
+  } catch (_) {
+    zoneErreurModale.textContent = "Impossible de générer l'identifiant. Vérifiez votre connexion et réessayez.";
+    zoneErreurModale.hidden = false;
+    return;
+  }
+
+  const nouvelAdherent = {
+    id_adherent:        idAdherent,
+    nom,
+    prenom,
+    email,
+    telephone,
+    adresse,
+    date_adhesion:      dateAdhesion,
+    montant_cotisation: montantCotisation,
+    type_membre:        typeMembre,
+    saison
+  };
+
+  const { error } = await clientSupabase
+    .from("adherents")
+    .insert([nouvelAdherent]);
+
+  if (error) {
+    zoneErreurModale.textContent = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
+    zoneErreurModale.hidden = false;
+    return;
+  }
+
+  /* Succès : fermer la modale, recharger le tableau, afficher la confirmation */
   fermerModale();
+  await chargerAdherents();
+  afficherMessageSucces(`Adhérent ajouté : ${prenom} ${nom} (${idAdherent}).`);
 });
 
 /* =====================================================
