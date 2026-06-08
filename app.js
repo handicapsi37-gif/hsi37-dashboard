@@ -4,100 +4,7 @@
    Aucun stockage réel, aucune interaction de données.
    ===================================================== */
 
-/* ---------- FAUSSES DONNÉES (tableau d'objets) ---------- */
-/* Chaque objet représente un adhérent fictif.
-   Format ID : HSI-AAAA-NNNN (préfixe + année + numéro 4 chiffres) */
-
-const adherentsFictifs = [
-  {
-    id: "HSI-2026-0001",
-    nom: "Moreau",
-    prenom: "Claire",
-    email: "claire.moreau@exemple.fr",
-    telephone: "06 12 34 56 78",
-    typeMembre: "actif",
-    dateAdhesion: "2026-01-15",
-    montant: "20,00 €",
-    statut: "ajour"
-  },
-  {
-    id: "HSI-2026-0002",
-    nom: "Benali",
-    prenom: "Karim",
-    email: "k.benali@exemple.fr",
-    telephone: "07 45 67 89 01",
-    typeMembre: "bienfaiteur",
-    dateAdhesion: "2026-02-03",
-    montant: "100,00 €",
-    statut: "ajour"
-  },
-  {
-    id: "HSI-2026-0003",
-    nom: "Leclerc",
-    prenom: "Madeleine",
-    email: "madeleine.leclerc@exemple.fr",
-    telephone: "02 47 88 12 34",
-    typeMembre: "honneur",
-    dateAdhesion: "2020-06-10",
-    montant: "0,00 €",
-    statut: "ajour"
-  },
-  {
-    id: "HSI-2026-0004",
-    nom: "Traoré",
-    prenom: "Ibrahima",
-    email: "i.traore@exemple.fr",
-    telephone: "06 78 90 12 34",
-    typeMembre: "benevole",
-    dateAdhesion: "2025-09-01",
-    montant: "10,00 €",
-    statut: "expire"
-  },
-  {
-    id: "HSI-2026-0005",
-    nom: "Dupuis",
-    prenom: "Élodie",
-    email: "elodie.dupuis@exemple.fr",
-    telephone: "07 23 45 67 89",
-    typeMembre: "fondateur",
-    dateAdhesion: "2018-03-22",
-    montant: "20,00 €",
-    statut: "ajour"
-  },
-  {
-    id: "HSI-2026-0006",
-    nom: "Mairie de Saint-Pierre-des-Corps",
-    prenom: "—",
-    email: "contact@mairie-spc.fr",
-    telephone: "02 47 44 80 00",
-    typeMembre: "droit",
-    dateAdhesion: "2018-03-22",
-    montant: "0,00 €",
-    statut: "ajour"
-  },
-  {
-    id: "HSI-2026-0007",
-    nom: "Petit",
-    prenom: "François",
-    email: "f.petit@exemple.fr",
-    telephone: "06 56 78 90 12",
-    typeMembre: "actif",
-    dateAdhesion: "2025-04-18",
-    montant: "20,00 €",
-    statut: "expire"
-  },
-  {
-    id: "HSI-2026-0008",
-    nom: "Garnier",
-    prenom: "Nathalie",
-    email: "n.garnier@exemple.fr",
-    telephone: "07 89 01 23 45",
-    typeMembre: "bienfaiteur",
-    dateAdhesion: "2026-03-05",
-    montant: "150,00 €",
-    statut: "ajour"
-  }
-];
+/* Les données sont chargées depuis Supabase (voir chargerAdherents ci-dessous) */
 
 /* ---------- CONFIGURATION DES TYPES DE MEMBRES ---------- */
 /* Libellés et définitions pour les infobulles (bulles d'aide au survol) */
@@ -243,40 +150,93 @@ function genererBoutonsActions(id) {
 }
 
 /**
- * Construit et injecte toutes les lignes du tableau à partir des fausses données.
+ * Injecte les lignes du tableau à partir des données Supabase.
+ * @param {Array} adherents - Tableau d'objets retournés par Supabase
  */
-function remplirTableau() {
+function remplirTableau(adherents) {
   const corps = document.getElementById("corps-tableau");
   if (!corps) return;
 
-  /* On vide d'abord le corps au cas où la fonction serait appelée plusieurs fois */
   corps.innerHTML = "";
 
-  adherentsFictifs.forEach(function(adherent) {
+  /* Cas table vide : message accessible dans le tableau */
+  if (!adherents || adherents.length === 0) {
+    corps.innerHTML = `
+      <tr>
+        <td colspan="10" class="tableau-message">
+          Aucun adhérent enregistré pour l'instant.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  adherents.forEach(function(adherent) {
     const ligne = document.createElement("tr");
 
-    /* Construction des cellules */
+    /* Formatage du montant : nombre Supabase → "xx,xx €" à la française */
+    const montant = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
+      ? Number(adherent.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+      : "—";
+
     ligne.innerHTML = `
-      <td class="col-id">${adherent.id}</td>
-      <td class="col-nom">${adherent.nom}</td>
-      <td>${adherent.prenom}</td>
+      <td class="col-id">${adherent.id_adherent || "—"}</td>
+      <td class="col-nom">${adherent.nom || "—"}</td>
+      <td>${adherent.prenom || "—"}</td>
       <td class="col-email">
-        <a href="mailto:${adherent.email}"
+        <a href="mailto:${adherent.email || ""}"
            style="color: var(--bleu-fonce); text-decoration: none;"
-           aria-label="Envoyer un e-mail à ${adherent.prenom} ${adherent.nom}">
-          ${adherent.email}
+           aria-label="Envoyer un e-mail à ${adherent.prenom || ""} ${adherent.nom || ""}">
+          ${adherent.email || "—"}
         </a>
       </td>
-      <td class="col-telephone">${adherent.telephone}</td>
-      <td>${genererCelluleType(adherent.typeMembre)}</td>
-      <td>${formaterDate(adherent.dateAdhesion)}</td>
-      <td>${adherent.montant}</td>
-      <td>${genererBadge(adherent.statut)}</td>
-      <td class="col-actions">${genererBoutonsActions(adherent.id)}</td>
+      <td class="col-telephone">${adherent.telephone || "—"}</td>
+      <td>${genererCelluleType(adherent.type_membre)}</td>
+      <td>${formaterDate(adherent.date_adhesion)}</td>
+      <td>${montant}</td>
+      <td>—</td>
+      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id)}</td>
     `;
 
     corps.appendChild(ligne);
   });
+}
+
+/**
+ * Lit tous les adhérents depuis la table Supabase et met à jour le tableau.
+ * Gère les cas : chargement, table vide, erreur réseau.
+ */
+async function chargerAdherents() {
+  const corps = document.getElementById("corps-tableau");
+
+  /* Message de chargement pendant la requête */
+  if (corps) {
+    corps.innerHTML = `
+      <tr>
+        <td colspan="10" class="tableau-message">Chargement en cours…</td>
+      </tr>
+    `;
+  }
+
+  const { data, error } = await clientSupabase
+    .from("adherents")
+    .select("*");
+
+  if (error) {
+    /* Erreur réseau ou RLS : message simple sans jargon technique */
+    if (corps) {
+      corps.innerHTML = `
+        <tr>
+          <td colspan="10" class="tableau-message tableau-message--erreur" role="alert">
+            Impossible de charger les adhérents. Vérifiez votre connexion et réessayez.
+          </td>
+        </tr>
+      `;
+    }
+    return;
+  }
+
+  remplirTableau(data);
 }
 
 /* ---------- GESTION DE LA MODALE ---------- */
@@ -381,8 +341,82 @@ formulaire.addEventListener("submit", function(evenement) {
   fermerModale();
 });
 
+/* =====================================================
+   AUTHENTIFICATION SUPABASE
+   ===================================================== */
+
+/* Client Supabase : objet JavaScript qui dialogue avec la base de données.
+   Utilise les variables SUPABASE_URL et SUPABASE_KEY définies dans config.js. */
+const clientSupabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* Références aux blocs à afficher ou masquer selon l'état de connexion */
+const ecranConnexion    = document.getElementById("ecran-connexion");
+const entetePrincipal   = document.querySelector("header");
+const contenuPrincipal  = document.querySelector("main");
+const piedDePage        = document.querySelector("footer");
+const formulaireConnexion = document.getElementById("formulaire-connexion");
+const zoneErreur        = document.getElementById("connexion-erreur");
+const btnDeconnexion    = document.getElementById("btn-deconnexion");
+
+/* Affiche le tableau de bord, masque l'écran de connexion, puis charge les adhérents */
+function afficherTableauDeBord() {
+  ecranConnexion.hidden   = true;
+  entetePrincipal.hidden  = false;
+  contenuPrincipal.hidden = false;
+  piedDePage.hidden       = false;
+  chargerAdherents();
+}
+
+/* Affiche l'écran de connexion et masque le tableau de bord */
+function afficherEcranConnexion() {
+  ecranConnexion.hidden   = false;
+  entetePrincipal.hidden  = true;
+  contenuPrincipal.hidden = true;
+  piedDePage.hidden       = true;
+  /* Vider le mot de passe et effacer l'éventuel message d'erreur */
+  document.getElementById("connexion-mdp").value = "";
+  zoneErreur.hidden      = true;
+  zoneErreur.textContent = "";
+}
+
+/* Vérifie si une session Supabase est active au chargement de la page */
+async function verifierSession() {
+  const { data } = await clientSupabase.auth.getSession();
+  if (data.session) {
+    afficherTableauDeBord();
+  } else {
+    afficherEcranConnexion();
+  }
+}
+
+/* Soumission du formulaire de connexion */
+formulaireConnexion.addEventListener("submit", async function(evenement) {
+  evenement.preventDefault();
+  const email = document.getElementById("connexion-email").value.trim();
+  const mdp   = document.getElementById("connexion-mdp").value;
+
+  /* Masquer le message d'erreur précédent avant une nouvelle tentative */
+  zoneErreur.hidden      = true;
+  zoneErreur.textContent = "";
+
+  const { error } = await clientSupabase.auth.signInWithPassword({ email, password: mdp });
+
+  if (error) {
+    /* Message d'erreur en français, sans détail technique */
+    zoneErreur.textContent = "E-mail ou mot de passe incorrect.";
+    zoneErreur.hidden      = false;
+  } else {
+    afficherTableauDeBord();
+  }
+});
+
+/* Déconnexion */
+btnDeconnexion.addEventListener("click", async function() {
+  await clientSupabase.auth.signOut();
+  afficherEcranConnexion();
+});
+
 /* ---------- INITIALISATION ---------- */
-/* Remplit le tableau au chargement de la page */
 document.addEventListener("DOMContentLoaded", function() {
-  remplirTableau();
+  verifierSession(); /* Détermine quel écran afficher et charge les données si connecté */
 });

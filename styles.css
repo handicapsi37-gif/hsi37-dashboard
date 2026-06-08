@@ -54,6 +54,11 @@ body {
   flex-direction: column;
 }
 
+/* Garantit que l'attribut HTML hidden prime sur tout display: flex/block défini en CSS */
+[hidden] {
+  display: none !important;
+}
+
 /* Classe utilitaire : masqué visuellement mais lisible par les lecteurs d'écran (accessibilité RGAA) */
 .sr-only {
   position: absolute;
@@ -712,4 +717,109 @@ body {
     flex-direction: column;
     gap: 0.25rem;
   }
+}
+
+/* =====================================================
+   ÉCRAN DE CONNEXION
+   ===================================================== */
+
+/* Pleine page, centré — s'inscrit dans le flex du body */
+#ecran-connexion {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--gris-fond);
+  padding: 1.5rem;
+}
+
+/* Carte blanche centrée */
+.connexion-carte {
+  background: var(--blanc);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre-modale);
+  padding: 2.5rem 2rem;
+  width: 100%;
+  max-width: 420px;
+}
+
+/* Logo + baseline en colonne, centrés */
+.connexion-entete {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.75rem;
+}
+
+.connexion-baseline {
+  font-size: 0.85rem;
+  color: var(--gris-moyen);
+  font-style: italic;
+  text-align: center;
+}
+
+/* Titre "Connexion" */
+.connexion-titre {
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--encre);
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+/* Formulaire : champs empilés */
+.connexion-formulaire {
+  display: flex;
+  flex-direction: column;
+  gap: 1.1rem;
+}
+
+/* Message d'erreur : fond rouge clair, texte rouge foncé */
+.connexion-erreur {
+  background-color: var(--rouge-fond);
+  color: var(--rouge-statut);
+  border: 1px solid var(--rouge-statut);
+  border-radius: var(--rayon);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
+
+/* Ligne de message dans le tableau (tableau vide ou erreur) */
+.tableau-message {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--gris-moyen);
+  font-size: 0.95rem;
+  font-style: italic;
+}
+
+.tableau-message--erreur {
+  color: var(--rouge-statut);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* Bouton "Se connecter" pleine largeur */
+.connexion-btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+/* Bouton "Se déconnecter" dans l'en-tête */
+.btn--deconnexion {
+  background-color: rgba(255, 255, 255, 0.15);
+  color: var(--blanc);
+  border-color: rgba(255, 255, 255, 0.45);
+  font-size: 0.85rem;
+  padding: 0.4rem 1rem;
+  white-space: nowrap;
+}
+
+.btn--deconnexion:hover,
+.btn--deconnexion:focus-visible {
+  background-color: rgba(255, 255, 255, 0.28);
+  border-color: var(--blanc);
+  color: var(--blanc);
 }

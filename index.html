@@ -8,18 +8,65 @@
 </head>
 <body>
 
+  <!-- ========== ÉCRAN DE CONNEXION ========== -->
+  <!-- Affiché au chargement si aucune session n'est active ; masqué dès la connexion réussie -->
+  <div id="ecran-connexion" aria-labelledby="connexion-titre">
+    <div class="connexion-carte">
+
+      <!-- Logo et baseline HSI37 -->
+      <div class="connexion-entete">
+        <span class="entete__logo" aria-label="HSI37 — Handicap Solidarité pour l'Inclusion 37">hsi37</span>
+        <span class="connexion-baseline">Handicap Solidarité pour l'Inclusion</span>
+      </div>
+
+      <h1 class="connexion-titre" id="connexion-titre">Connexion</h1>
+
+      <!-- Formulaire de connexion — labels liés aux champs (RGAA) -->
+      <form id="formulaire-connexion" class="connexion-formulaire" novalidate
+            aria-label="Formulaire de connexion au tableau de bord HSI37">
+
+        <div class="champ-groupe">
+          <label for="connexion-email" class="champ-label">E-mail</label>
+          <input type="email" id="connexion-email" class="champ-input"
+                 autocomplete="email" required placeholder="votre@email.fr" />
+        </div>
+
+        <div class="champ-groupe">
+          <label for="connexion-mdp" class="champ-label">Mot de passe</label>
+          <input type="password" id="connexion-mdp" class="champ-input"
+                 autocomplete="current-password" required placeholder="••••••••" />
+        </div>
+
+        <!-- Zone d'erreur : visible uniquement en cas d'échec de connexion -->
+        <div id="connexion-erreur" class="connexion-erreur"
+             role="alert" aria-live="polite" hidden></div>
+
+        <button type="submit" class="btn btn--primaire connexion-btn">
+          Se connecter
+        </button>
+
+      </form>
+    </div>
+  </div>
+
   <!-- ========== EN-TÊTE ========== -->
-  <header class="entete" role="banner">
+  <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
+  <header class="entete" role="banner" hidden>
     <div class="entete__logo-bloc">
       <!-- Logo textuel avec aria-label pour l'accessibilité (lisibilité par les lecteurs d'écran) -->
       <span class="entete__logo" aria-label="HSI37 — Handicap Solidarité pour l'Inclusion 37">hsi37</span>
       <span class="entete__baseline">Handicap Solidarité pour l'Inclusion</span>
     </div>
     <h1 class="entete__titre">Gestion des adhérents</h1>
+    <!-- Bouton de déconnexion — géré par app.js (signOut Supabase) -->
+    <button class="btn btn--deconnexion" id="btn-deconnexion" type="button">
+      Se déconnecter
+    </button>
   </header>
 
   <!-- ========== CONTENU PRINCIPAL ========== -->
-  <main class="contenu-principal" id="contenu-principal">
+  <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
+  <main class="contenu-principal" id="contenu-principal" hidden>
 
     <!-- ---- Barre d'actions ---- -->
     <section class="barre-actions" aria-label="Barre d'actions">
@@ -200,10 +247,15 @@
   </div>
 
   <!-- ========== PIED DE PAGE ========== -->
-  <footer class="pied-de-page" role="contentinfo">
+  <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
+  <footer class="pied-de-page" role="contentinfo" hidden>
     <p>© 2026 HSI37 — Handicap Solidarité pour l'Inclusion 37 &bull; Saint-Pierre-des-Corps</p>
   </footer>
 
+  <!-- Librairie Supabase (CDN jsDelivr) — doit être chargée avant config.js et app.js -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- Clés de configuration (SUPABASE_URL, SUPABASE_KEY) -->
+  <script src="config.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
