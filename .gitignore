@@ -1,0 +1,8 @@
+# Fichier de configuration local — contient les clés Supabase, ne jamais envoyer sur GitHub
+config.js
+
+# Fichier système macOS
+.DS_Store
+
+# Dépendances Node.js (si npm est utilisé un jour)
+node_modules/

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSI37 — Gestion des adhérents</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ========== EN-TÊTE ========== -->
+  <header class="entete" role="banner">
+    <div class="entete__logo-bloc">
+      <!-- Logo textuel avec aria-label pour l'accessibilité (lisibilité par les lecteurs d'écran) -->
+      <span class="entete__logo" aria-label="HSI37 — Handicap Solidarité pour l'Inclusion 37">hsi37</span>
+      <span class="entete__baseline">Handicap Solidarité pour l'Inclusion</span>
+    </div>
+    <h1 class="entete__titre">Gestion des adhérents</h1>
+  </header>
+
+  <!-- ========== CONTENU PRINCIPAL ========== -->
+  <main class="contenu-principal" id="contenu-principal">
+
+    <!-- ---- Barre d'actions ---- -->
+    <section class="barre-actions" aria-label="Barre d'actions">
+
+      <div class="barre-actions__gauche">
+        <!-- Champ de recherche — visuel uniquement en Phase 0 -->
+        <div class="champ-recherche">
+          <label for="recherche" class="sr-only">Rechercher un adhérent</label>
+          <svg class="champ-recherche__icone" aria-hidden="true" focusable="false"
+               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          <input type="search" id="recherche" class="champ-recherche__input"
+                 placeholder="Rechercher…" aria-label="Rechercher un adhérent" />
+        </div>
+
+        <!-- Menu de tri — visuel uniquement en Phase 0 -->
+        <div class="tri">
+          <label for="tri-select" class="sr-only">Trier par</label>
+          <select id="tri-select" class="tri__select" aria-label="Trier les adhérents par">
+            <option value="">Trier par…</option>
+            <option value="nom">Nom</option>
+            <option value="type">Type de membre</option>
+            <option value="statut">Statut</option>
+            <option value="date">Date d'adhésion</option>
+            <option value="montant">Montant</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Bouton ouvrant la modale (fenêtre superposée) d'ajout d'adhérent -->
+      <button class="btn btn--primaire" id="btn-ajouter"
+              aria-haspopup="dialog" aria-controls="modale-adherent">
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24" width="16" height="16">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round"/>
+        </svg>
+        Ajouter un adhérent
+      </button>
+    </section>
+
+    <!-- ---- Tableau des adhérents ---- -->
+    <section class="section-tableau" aria-label="Liste des adhérents">
+      <div class="tableau-conteneur" role="region" aria-label="Tableau des adhérents" tabindex="0">
+        <!-- Structure sémantique : <table> avec <thead> et <th scope="col"> (RGAA) -->
+        <table class="tableau" id="tableau-adherents">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Nom</th>
+              <th scope="col">Prénom</th>
+              <th scope="col">E-mail</th>
+              <th scope="col">Téléphone</th>
+              <th scope="col">Type de membre</th>
+              <th scope="col">Date d'adhésion</th>
+              <th scope="col">Montant</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <!-- Le corps du tableau est rempli dynamiquement par app.js -->
+          <tbody id="corps-tableau">
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== MODALE D'AJOUT / MODIFICATION ========== -->
+  <!-- role="dialog" + aria-modal="true" + aria-labelledby : exigences RGAA pour les modales -->
+  <div class="modale-fond" id="modale-fond" role="presentation" hidden>
+    <div class="modale"
+         id="modale-adherent"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modale-titre"
+         tabindex="-1">
+
+      <!-- En-tête de la modale -->
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="modale-titre">Ajouter un adhérent</h2>
+        <!-- Bouton de fermeture — accessible au clavier et aux lecteurs d'écran -->
+        <button class="modale__fermer" id="btn-fermer-modale"
+                aria-label="Fermer la fenêtre d'ajout d'adhérent">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Corps du formulaire — Phase 0 : visuel uniquement, aucun enregistrement -->
+      <form class="modale__formulaire" id="formulaire-adherent" novalidate
+            aria-label="Formulaire d'ajout ou de modification d'un adhérent">
+
+        <div class="formulaire__grille">
+
+          <!-- Chaque <input> est lié à son <label> via l'attribut "for" (RGAA obligatoire) -->
+          <div class="champ-groupe">
+            <label for="champ-nom" class="champ-label">Nom <span aria-hidden="true">*</span></label>
+            <input type="text" id="champ-nom" class="champ-input"
+                   placeholder="Ex : Dupont" autocomplete="family-name" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="champ-prenom" class="champ-label">Prénom <span aria-hidden="true">*</span></label>
+            <input type="text" id="champ-prenom" class="champ-input"
+                   placeholder="Ex : Marie" autocomplete="given-name" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="champ-email" class="champ-label">E-mail <span aria-hidden="true">*</span></label>
+            <input type="email" id="champ-email" class="champ-input"
+                   placeholder="Ex : marie.dupont@exemple.fr" autocomplete="email" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="champ-telephone" class="champ-label">Téléphone</label>
+            <input type="tel" id="champ-telephone" class="champ-input"
+                   placeholder="Ex : 06 12 34 56 78" autocomplete="tel" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="champ-adresse" class="champ-label">Adresse</label>
+            <input type="text" id="champ-adresse" class="champ-input"
+                   placeholder="Ex : 12 rue de la Liberté, 37700 Saint-Pierre-des-Corps"
+                   autocomplete="street-address" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="champ-date" class="champ-label">Date d'adhésion <span aria-hidden="true">*</span></label>
+            <input type="date" id="champ-date" class="champ-input" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="champ-montant" class="champ-label">Montant cotisation (€)</label>
+            <input type="number" id="champ-montant" class="champ-input"
+                   placeholder="Ex : 20" min="0" step="0.01" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="champ-type" class="champ-label">Type de membre <span aria-hidden="true">*</span></label>
+            <!-- Menu déroulant avec les 6 types définis par la charte HSI -->
+            <select id="champ-type" class="champ-input champ-select">
+              <option value="">— Sélectionner un type —</option>
+              <option value="actif">Membre actif</option>
+              <option value="bienfaiteur">Membre bienfaiteur</option>
+              <option value="honneur">Membre d'honneur</option>
+              <option value="benevole">Membre bénévole</option>
+              <option value="fondateur">Membre fondateur</option>
+              <option value="droit">Membre de droit</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Mention champs obligatoires -->
+        <p class="formulaire__mention">
+          <span aria-hidden="true">*</span> Champs obligatoires
+        </p>
+
+        <!-- Actions du formulaire -->
+        <div class="modale__actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-modale">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn--primaire">
+            Enregistrer
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== PIED DE PAGE ========== -->
+  <footer class="pied-de-page" role="contentinfo">
+    <p>© 2026 HSI37 — Handicap Solidarité pour l'Inclusion 37 &bull; Saint-Pierre-des-Corps</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,715 @@
+/* =====================================================
+   STYLES HSI37 — Gestion des adhérents
+   Phase 0 : Maquette statique
+   Charte visuelle officielle HSI37
+   ===================================================== */
+
+/* ---------- Variables CSS (charte HSI37) ---------- */
+:root {
+  --bleu-hsi: #1e79bf;        /* Primaire : aplats, en-têtes, boutons */
+  --bleu-fonce: #155a8f;      /* Texte bleu, liens, survols */
+  --corail: #fe5260;          /* Accent UI/gros texte SEULEMENT */
+  --corail-fonce: #d63a47;    /* Texte d'accent sur fond clair */
+  --encre: #1a2433;           /* Texte principal */
+  --gris-fond: #f4f6f8;       /* Fonds de section */
+  --blanc: #ffffff;
+
+  /* Tons neutres complémentaires */
+  --gris-bord: #d0d7e0;
+  --gris-moyen: #6b7a8f;
+  --gris-clair: #e8ecf0;
+
+  /* Statuts */
+  --vert-statut: #1e7d45;
+  --vert-fond: #e6f5ec;
+  --rouge-statut: #b91c1c;
+  --rouge-fond: #fee2e2;
+
+  /* Espacement et arrondi */
+  --rayon: 6px;
+  --rayon-large: 10px;
+  --ombre: 0 2px 8px rgba(30, 36, 51, 0.10);
+  --ombre-modale: 0 8px 32px rgba(30, 36, 51, 0.22);
+}
+
+/* ---------- Réinitialisation et base ---------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background-color: var(--gris-fond);
+  color: var(--encre);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Classe utilitaire : masqué visuellement mais lisible par les lecteurs d'écran (accessibilité RGAA) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus visible net pour la navigation clavier (WCAG 2.4.7) */
+:focus-visible {
+  outline: 3px solid var(--corail);
+  outline-offset: 3px;
+  border-radius: var(--rayon);
+}
+
+/* ---------- EN-TÊTE ---------- */
+.entete {
+  background-color: var(--bleu-hsi);
+  color: var(--blanc);
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  min-height: 72px;
+  box-shadow: var(--ombre);
+  flex-wrap: wrap;
+}
+
+.entete__logo-bloc {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+/* Logo textuel : pavé blanc sur fond bleu, caractères gras et espacés */
+.entete__logo {
+  background-color: var(--blanc);
+  color: var(--bleu-hsi);
+  font-size: 1.35rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: lowercase;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--rayon);
+  line-height: 1;
+}
+
+.entete__baseline {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-style: italic;
+  letter-spacing: 0.02em;
+}
+
+.entete__titre {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--blanc);
+  letter-spacing: 0.01em;
+}
+
+/* ---------- CONTENU PRINCIPAL ---------- */
+.contenu-principal {
+  flex: 1;
+  padding: 2rem;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* ---------- BARRE D'ACTIONS ---------- */
+.barre-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  background: var(--blanc);
+  padding: 1rem 1.25rem;
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+}
+
+.barre-actions__gauche {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+/* Champ de recherche avec icône intégrée */
+.champ-recherche {
+  position: relative;
+  flex: 1;
+  min-width: 200px;
+  max-width: 380px;
+}
+
+.champ-recherche__icone {
+  position: absolute;
+  left: 0.75rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--gris-moyen);
+  pointer-events: none; /* L'icône ne capte pas les clics */
+}
+
+.champ-recherche__input {
+  width: 100%;
+  padding: 0.55rem 0.75rem 0.55rem 2.5rem;
+  border: 1.5px solid var(--gris-bord);
+  border-radius: var(--rayon);
+  font-size: 0.95rem;
+  color: var(--encre);
+  background: var(--gris-fond);
+  transition: border-color 0.2s;
+}
+
+.champ-recherche__input:focus {
+  border-color: var(--bleu-hsi);
+  background: var(--blanc);
+  outline: none; /* Géré par :focus-visible global */
+}
+
+.champ-recherche__input::placeholder {
+  color: var(--gris-moyen);
+}
+
+/* Menu de tri (select = liste déroulante) */
+.tri__select {
+  padding: 0.55rem 2rem 0.55rem 0.75rem;
+  border: 1.5px solid var(--gris-bord);
+  border-radius: var(--rayon);
+  font-size: 0.95rem;
+  color: var(--encre);
+  background: var(--gris-fond);
+  cursor: pointer;
+  appearance: none; /* Supprime le style natif du navigateur */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a8f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  min-width: 160px;
+  transition: border-color 0.2s;
+}
+
+.tri__select:focus {
+  border-color: var(--bleu-hsi);
+  outline: none;
+}
+
+/* ---------- BOUTONS ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--rayon);
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s, color 0.2s;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+/* Bouton principal : fond bleu */
+.btn--primaire {
+  background-color: var(--bleu-hsi);
+  color: var(--blanc);
+  border-color: var(--bleu-hsi);
+}
+
+.btn--primaire:hover,
+.btn--primaire:focus-visible {
+  background-color: var(--bleu-fonce);
+  border-color: var(--bleu-fonce);
+}
+
+/* Bouton secondaire : contour bleu, fond blanc */
+.btn--secondaire {
+  background-color: var(--blanc);
+  color: var(--bleu-fonce);
+  border-color: var(--bleu-hsi);
+}
+
+.btn--secondaire:hover,
+.btn--secondaire:focus-visible {
+  background-color: var(--gris-fond);
+}
+
+/* Boutons d'action dans le tableau (icônes modifier / supprimer) */
+.btn-icone {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.35rem;
+  border-radius: var(--rayon);
+  color: var(--gris-moyen);
+  transition: color 0.2s, background-color 0.2s;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-icone--modifier:hover,
+.btn-icone--modifier:focus-visible {
+  color: var(--bleu-fonce);
+  background-color: var(--gris-clair);
+}
+
+.btn-icone--supprimer:hover,
+.btn-icone--supprimer:focus-visible {
+  color: var(--rouge-statut);
+  background-color: var(--rouge-fond);
+}
+
+/* ---------- SECTION TABLEAU ---------- */
+.section-tableau {
+  background: var(--blanc);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+  overflow: hidden; /* Contient les bords arrondis */
+}
+
+/* Conteneur avec défilement horizontal sur mobile */
+.tableau-conteneur {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Le tableau principal */
+.tableau {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+/* En-têtes de colonnes */
+.tableau thead {
+  background-color: var(--bleu-hsi);
+  color: var(--blanc);
+}
+
+.tableau thead th {
+  padding: 0.85rem 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.88rem;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+  border-bottom: 2px solid var(--bleu-fonce);
+}
+
+/* Lignes du corps du tableau */
+.tableau tbody tr {
+  border-bottom: 1px solid var(--gris-clair);
+  transition: background-color 0.15s;
+}
+
+.tableau tbody tr:last-child {
+  border-bottom: none;
+}
+
+.tableau tbody tr:hover {
+  background-color: var(--gris-fond);
+}
+
+.tableau tbody td {
+  padding: 0.8rem 1rem;
+  color: var(--encre);
+  vertical-align: middle;
+}
+
+/* Colonne ID : police monospace pour lisibilité du code */
+.tableau .col-id {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.82rem;
+  color: var(--gris-moyen);
+  white-space: nowrap;
+}
+
+/* Colonne email : pas de retour à la ligne */
+.tableau .col-email {
+  white-space: nowrap;
+}
+
+/* Colonne téléphone : numéro affiché d'un seul bloc, jamais coupé */
+.tableau .col-telephone {
+  white-space: nowrap;
+}
+
+/* Colonne Nom : largeur minimale pour éviter l'empilement mot par mot */
+.tableau .col-nom {
+  min-width: 170px;
+}
+
+/* Colonne actions : centrer les icônes */
+.tableau .col-actions {
+  text-align: center;
+  white-space: nowrap;
+}
+
+/* ---------- BADGES DE STATUT ---------- */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px; /* Pilule arrondie */
+  font-size: 0.82rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Badge "À jour" : vert */
+.badge--ajour {
+  background-color: var(--vert-fond);
+  color: var(--vert-statut); /* Contraste ≥ 4.5:1 sur fond vert clair */
+}
+
+/* Badge "Expiré" : rouge */
+.badge--expire {
+  background-color: var(--rouge-fond);
+  color: var(--rouge-statut); /* Contraste ≥ 4.5:1 sur fond rouge clair */
+}
+
+/* ---------- INFOBULLES (tooltips = bulles d'aide au survol) ---------- */
+.type-membre {
+  position: relative;
+  cursor: help;
+  display: inline-block;
+}
+
+/* Texte du type souligné en pointillés pour signaler l'infobulle */
+.type-membre__texte {
+  border-bottom: 1px dashed var(--gris-moyen);
+  padding-bottom: 1px;
+}
+
+/* L'infobulle elle-même : masquée par défaut */
+.type-membre__infobulle {
+  display: none; /* Remplacé par 'block' au survol/focus */
+  position: absolute;
+  bottom: calc(100% + 8px); /* Au-dessus de la cellule */
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--encre);
+  color: var(--blanc);
+  font-size: 0.80rem;
+  line-height: 1.5;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--rayon);
+  width: 240px;
+  z-index: 100;
+  box-shadow: var(--ombre);
+  pointer-events: none; /* L'infobulle ne bloque pas les clics */
+}
+
+/* Petite flèche pointant vers le bas */
+.type-membre__infobulle::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--encre);
+}
+
+/* Affichage au survol ou au focus clavier */
+.type-membre:hover .type-membre__infobulle,
+.type-membre:focus-within .type-membre__infobulle {
+  display: block;
+}
+
+/* Si l'infobulle dépasse à droite, la décaler vers la gauche */
+.type-membre--droite .type-membre__infobulle {
+  left: auto;
+  right: 0;
+  transform: none;
+}
+
+.type-membre--droite .type-membre__infobulle::after {
+  left: auto;
+  right: 1.5rem;
+  transform: none;
+}
+
+/* ---------- MODALE (fenêtre superposée) ---------- */
+
+/* Fond semi-transparent derrière la modale */
+.modale-fond {
+  position: fixed;
+  inset: 0; /* Équivalent à top/right/bottom/left: 0 */
+  background-color: rgba(26, 36, 51, 0.55);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  /* Animation d'apparition */
+  animation: fondu-entree 0.18s ease;
+}
+
+/* Supprime l'animation quand hidden */
+.modale-fond[hidden] {
+  display: none;
+}
+
+@keyframes fondu-entree {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* La boîte de dialogue elle-même */
+.modale {
+  background: var(--blanc);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre-modale);
+  width: 100%;
+  max-width: 620px;
+  max-height: 90vh;
+  overflow-y: auto;
+  animation: glisser-entree 0.20s ease;
+}
+
+@keyframes glisser-entree {
+  from { transform: translateY(-16px); opacity: 0; }
+  to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* En-tête de la modale */
+.modale__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1.5px solid var(--gris-clair);
+  background-color: var(--bleu-hsi);
+  border-radius: var(--rayon-large) var(--rayon-large) 0 0;
+}
+
+.modale__titre {
+  color: var(--blanc);
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+/* Bouton × de fermeture */
+.modale__fermer {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: var(--rayon);
+  color: var(--blanc);
+  cursor: pointer;
+  padding: 0.35rem;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s;
+}
+
+.modale__fermer:hover,
+.modale__fermer:focus-visible {
+  background-color: rgba(255, 255, 255, 0.30);
+}
+
+/* Corps du formulaire */
+.modale__formulaire {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Grille à 2 colonnes pour les champs */
+.formulaire__grille {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+/* Un champ occupe les 2 colonnes si classe --large */
+.champ-groupe--large {
+  grid-column: 1 / -1;
+}
+
+.champ-groupe {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.champ-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--encre);
+}
+
+/* Couleur de l'astérisque obligatoire */
+.champ-label span {
+  color: var(--corail-fonce);
+}
+
+.champ-input {
+  padding: 0.55rem 0.75rem;
+  border: 1.5px solid var(--gris-bord);
+  border-radius: var(--rayon);
+  font-size: 0.95rem;
+  color: var(--encre);
+  background: var(--gris-fond);
+  transition: border-color 0.2s;
+  width: 100%;
+  font-family: inherit;
+}
+
+.champ-input:focus {
+  border-color: var(--bleu-hsi);
+  background: var(--blanc);
+  outline: none;
+}
+
+.champ-input::placeholder {
+  color: var(--gris-moyen);
+  font-size: 0.88rem;
+}
+
+.champ-select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b7a8f' stroke-width='1.8' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.75rem center;
+  padding-right: 2.2rem;
+}
+
+.formulaire__mention {
+  font-size: 0.82rem;
+  color: var(--gris-moyen);
+  margin-top: -0.25rem;
+}
+
+.formulaire__mention span {
+  color: var(--corail-fonce);
+}
+
+/* Actions en bas de la modale */
+.modale__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--gris-clair);
+  margin-top: 0.5rem;
+}
+
+/* ---------- PIED DE PAGE ---------- */
+.pied-de-page {
+  background-color: var(--encre);
+  color: rgba(255, 255, 255, 0.65);
+  text-align: center;
+  padding: 1rem 2rem;
+  font-size: 0.82rem;
+  margin-top: auto;
+}
+
+/* =====================================================
+   RESPONSIVE — Adaptation mobile
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  .entete {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1rem;
+    gap: 0.5rem;
+  }
+
+  .entete__titre {
+    font-size: 1rem;
+  }
+
+  .contenu-principal {
+    padding: 1rem;
+  }
+
+  .barre-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .barre-actions__gauche {
+    flex-direction: column;
+  }
+
+  .champ-recherche {
+    max-width: 100%;
+  }
+
+  .tri__select {
+    width: 100%;
+  }
+
+  .btn--primaire {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Tableau : taille réduite sur mobile */
+  .tableau {
+    font-size: 0.82rem;
+  }
+
+  .tableau thead th,
+  .tableau tbody td {
+    padding: 0.65rem 0.6rem;
+  }
+
+  /* Modale : plein écran sur mobile */
+  .modale {
+    max-height: 95vh;
+    border-radius: var(--rayon);
+  }
+
+  .formulaire__grille {
+    grid-template-columns: 1fr;
+  }
+
+  .champ-groupe--large {
+    grid-column: 1;
+  }
+
+  .modale__actions {
+    flex-direction: column-reverse;
+  }
+
+  .modale__actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .entete__logo-bloc {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+}
