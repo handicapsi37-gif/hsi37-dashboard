@@ -6,17 +6,19 @@
 
 /* ---------- Variables CSS (charte HSI37) ---------- */
 :root {
-  --bleu-hsi: #1e79bf;        /* Primaire : aplats, en-têtes, boutons */
-  --bleu-fonce: #155a8f;      /* Texte bleu, liens, survols */
-  --corail: #fe5260;          /* Accent UI/gros texte SEULEMENT */
-  --corail-fonce: #d63a47;    /* Texte d'accent sur fond clair */
-  --encre: #1a2433;           /* Texte principal */
-  --gris-fond: #f4f6f8;       /* Fonds de section */
+  --bleu-hsi: #2D82C4;        /* Bleu principal officiel : aplats, en-têtes, boutons */
+  --bleu-clair: #5AA9E6;      /* Bleu clair : survols, icônes, éléments secondaires */
+  --bleu-fonce: #1F4E79;      /* Bleu foncé : texte bleu sur fond clair, liens */
+  --corail: #F28C28;          /* Orange officiel : accent, CTA */
+  --corail-fonce: #D96F00;    /* Orange foncé : survol orange, texte orange sur fond clair */
+  --encre: #333333;           /* Gris texte officiel : texte courant principal */
+  --gris-fond: #F8F9FA;       /* Fond clair officiel : fonds de section */
   --blanc: #ffffff;
 
   /* Tons neutres complémentaires */
   --gris-bord: #d0d7e0;
-  --gris-moyen: #6b7a8f;
+  --gris-moyen: #666666;      /* Gris secondaire officiel : texte secondaire, légendes */
+  --gris-secondaire: #666666; /* Alias charte explicite */
   --gris-clair: #e8ecf0;
 
   /* Statuts */
@@ -93,33 +95,22 @@ body {
   min-height: 72px;
   box-shadow: var(--ombre);
   flex-wrap: wrap;
+  /* Filet orange discret — accent charte HSI37 */
+  border-bottom: 3px solid var(--corail);
 }
 
 .entete__logo-bloc {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
 }
 
-/* Logo textuel : pavé blanc sur fond bleu, caractères gras et espacés */
-.entete__logo {
-  background-color: var(--blanc);
-  color: var(--bleu-hsi);
-  font-size: 1.35rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: lowercase;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--rayon);
-  line-height: 1;
-}
-
-.entete__baseline {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.85);
-  font-style: italic;
-  letter-spacing: 0.02em;
+/* Logo officiel image dans l'en-tête */
+.entete__logo-img {
+  height: 64px;
+  width: auto;
+  display: block;
 }
 
 .entete__titre {
@@ -249,6 +240,8 @@ body {
 .btn--primaire:focus-visible {
   background-color: var(--bleu-fonce);
   border-color: var(--bleu-fonce);
+  /* Soulignement orange au survol — accent charte, sans toucher au texte */
+  box-shadow: 0 3px 0 var(--corail);
 }
 
 /* Bouton secondaire : contour bleu, fond blanc */
@@ -685,6 +678,8 @@ body {
   padding: 1rem 2rem;
   font-size: 0.82rem;
   margin-top: auto;
+  /* Filet orange discret — accent charte HSI37 */
+  border-top: 3px solid var(--corail);
 }
 
 /* =====================================================
@@ -804,7 +799,7 @@ body {
   max-width: 420px;
 }
 
-/* Logo + baseline en colonne, centrés */
+/* Logo centré sur l'écran de connexion */
 .connexion-entete {
   display: flex;
   flex-direction: column;
@@ -813,11 +808,13 @@ body {
   margin-bottom: 1.75rem;
 }
 
-.connexion-baseline {
-  font-size: 0.85rem;
-  color: var(--gris-moyen);
-  font-style: italic;
-  text-align: center;
+/* Logo carré officiel sur l'écran de connexion */
+.connexion-logo-img {
+  height: 140px;
+  width: auto;
+  display: block;
+  margin: 0 auto;
+  border-radius: var(--rayon-large);
 }
 
 /* Titre "Connexion" */
