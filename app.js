@@ -179,6 +179,22 @@ function genererBoutonsActions(idAdherent, idTechnique) {
               stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
     </button>
+    <button class="btn-icone btn-icone--carte"
+            aria-label="Générer la carte d'adhérent ${idAdherent}"
+            title="Générer la carte"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           width="17" height="17">
+        <rect x="2" y="5" width="20" height="14" rx="2"
+              stroke="currentColor" stroke-width="2" fill="none"/>
+        <line x1="2" y1="10" x2="22" y2="10"
+              stroke="currentColor" stroke-width="2"/>
+        <line x1="6" y1="15" x2="10" y2="15"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
   `.trim();
 }
 
@@ -674,6 +690,7 @@ document.getElementById("corps-tableau").addEventListener("click", function(even
   /* closest() remonte l'arbre DOM même si le clic a touché le SVG interne */
   const btnModifier  = evenement.target.closest(".btn-icone--modifier");
   const btnSupprimer = evenement.target.closest(".btn-icone--supprimer");
+  const btnCarte     = evenement.target.closest(".btn-icone--carte");
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
@@ -685,6 +702,12 @@ document.getElementById("corps-tableau").addEventListener("click", function(even
     const idTechnique = btnSupprimer.dataset.idTechnique;
     const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
     if (adherent) ouvrirConfirmationSuppression(adherent);
+  }
+
+  if (btnCarte) {
+    const idTechnique = btnCarte.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirModaleCarte(adherent);
   }
 });
 
@@ -884,6 +907,146 @@ function initialiserSelectsDate() {
     selectAnnee.appendChild(opt);
   }
 }
+
+/* =====================================================
+   CARTE D'ADHÉRENT
+   ===================================================== */
+
+const carteFond   = document.getElementById("carte-fond");
+const modaleCarte = document.getElementById("modale-carte");
+let elementAvantCarte = null;
+
+/**
+ * Remplit la carte et ouvre la modale.
+ * @param {Object} adherent
+ */
+function ouvrirModaleCarte(adherent) {
+  elementAvantCarte = document.activeElement;
+
+  document.getElementById("carte-nom-prenom").textContent =
+    (`${adherent.prenom || ""} ${adherent.nom || ""}`).trim() || "—";
+  document.getElementById("carte-id").textContent =
+    adherent.id_adherent || "—";
+  document.getElementById("carte-type").textContent =
+    adherent.type_membre || "—";
+  document.getElementById("carte-saison").textContent =
+    adherent.saison || "—";
+
+  carteFond.hidden = false;
+  requestAnimationFrame(function() { modaleCarte.focus(); });
+  document.addEventListener("keydown", gererToucheCarte);
+}
+
+/**
+ * Ferme la modale carte et restitue le focus.
+ */
+function fermerModaleCarte() {
+  carteFond.hidden = true;
+  document.removeEventListener("keydown", gererToucheCarte);
+  if (elementAvantCarte) elementAvantCarte.focus();
+}
+
+/**
+ * Focus trap dans la modale carte, Échap = fermer.
+ * @param {KeyboardEvent} evenement
+ */
+function gererToucheCarte(evenement) {
+  if (evenement.key === "Escape") {
+    fermerModaleCarte();
+    return;
+  }
+  if (evenement.key === "Tab") {
+    const focusables = modaleCarte.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault();
+      dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault();
+      premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-fermer-carte").addEventListener("click", fermerModaleCarte);
+document.getElementById("btn-fermer-carte-bas").addEventListener("click", fermerModaleCarte);
+carteFond.addEventListener("click", function(evenement) {
+  if (evenement.target === carteFond) fermerModaleCarte();
+});
+
+/**
+ * Charge une image depuis une URL relative et la retourne en data URL base64.
+ * Contourne le blocage XHR de html2canvas sur les serveurs locaux sans CORS.
+ * @param {string} src - Chemin relatif (ex. "assets/logo.png")
+ * @returns {Promise<string>} - data URL ou src original en cas d'échec
+ */
+function chargerImageCommeDataUrl(src) {
+  return new Promise(function(resolve) {
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", src, true);
+    xhr.responseType = "blob";
+    xhr.onload = function() {
+      const reader = new FileReader();
+      reader.onloadend = function() { resolve(reader.result); };
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.onerror = function() { resolve(src); };
+    xhr.send();
+  });
+}
+
+/**
+ * Capture la carte via html2canvas et déclenche le téléchargement PNG.
+ * Le logo est converti en data URL avant la capture pour éviter SecurityError
+ * sur les serveurs locaux qui n'envoient pas d'en-tête CORS.
+ */
+document.getElementById("btn-telecharger-carte").addEventListener("click", function() {
+  const carte          = document.getElementById("carte-adherent");
+  const imgLogo        = carte.querySelector(".carte__logo");
+  const idAdherent     = document.getElementById("carte-id").textContent.trim();
+  const nomFichier     = `carte-adherent-${idAdherent || "HSI37"}.png`;
+  const btnTelecharger = this;
+
+  btnTelecharger.disabled = true;
+  btnTelecharger.textContent = "Génération…";
+
+  const srcOriginal = imgLogo.src;
+
+  chargerImageCommeDataUrl("assets/hsi37-redim-demi.png").then(function(dataUrl) {
+    imgLogo.src = dataUrl;
+    return new Promise(function(resolve) {
+      imgLogo.onload = resolve;
+      imgLogo.onerror = resolve;
+    });
+  }).then(function() {
+    return html2canvas(carte, {
+      scale: 2,
+      useCORS: false,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      logging: false
+    });
+  }).then(function(canvas) {
+    const lien = document.createElement("a");
+    lien.download = nomFichier;
+    lien.href     = canvas.toDataURL("image/png");
+    lien.click();
+  }).finally(function() {
+    imgLogo.src = srcOriginal;
+    btnTelecharger.disabled = false;
+    btnTelecharger.innerHTML = `
+      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24" width="16" height="16">
+        <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      Télécharger la carte
+    `.trim();
+  });
+});
 
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
