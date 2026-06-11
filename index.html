@@ -115,6 +115,20 @@
           </div>
         </div>
 
+      <div class="barre-actions__droite">
+        <button class="btn btn--secondaire" id="btn-bulletin"
+                aria-haspopup="dialog" aria-controls="modale-bulletin">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="16" height="16">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <polyline points="14 2 14 8 20 8"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          Bulletin d'adhésion
+        </button>
         <button class="btn btn--primaire" id="btn-ajouter"
                 aria-haspopup="dialog" aria-controls="modale-adherent">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
@@ -124,6 +138,7 @@
           </svg>
           Ajouter un adhérent
         </button>
+      </div>
       </section>
 
       <div id="message-succes" class="message-succes" role="status" aria-live="polite" hidden></div>
@@ -891,6 +906,184 @@
 
     </div>
   </div>
+
+  <!-- ========== MODALE CHOIX BULLETIN ========== -->
+  <div class="modale-fond" id="bulletin-fond" role="presentation" hidden>
+    <div class="modale modale--bulletin-choix"
+         id="modale-bulletin"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="bulletin-choix-titre"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="bulletin-choix-titre">Bulletin d'adhésion vierge</h2>
+        <button class="modale__fermer" id="btn-fermer-bulletin"
+                aria-label="Fermer la sélection du bulletin">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="bulletin-choix__corps">
+        <p class="bulletin-choix__intro">Choisissez la version à télécharger :</p>
+        <div class="bulletin-choix__options">
+
+          <div class="bulletin-choix__option">
+            <div class="bulletin-choix__option-icone" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      stroke="#2D82C4" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                <polyline points="14 2 14 8 20 8" stroke="#2D82C4" stroke-width="1.8" fill="none"/>
+                <line x1="16" y1="13" x2="8" y2="13" stroke="#2D82C4" stroke-width="1.5"/>
+                <line x1="16" y1="17" x2="8" y2="17" stroke="#2D82C4" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <p class="bulletin-choix__option-titre">Bulletin standard</p>
+            <p class="bulletin-choix__option-desc">Adhésion uniquement (20,00 €)</p>
+            <button type="button" class="btn btn--primaire bulletin-choix__btn" id="btn-bulletin-standard">
+              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+              Télécharger
+            </button>
+          </div>
+
+          <div class="bulletin-choix__option">
+            <div class="bulletin-choix__option-icone" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                      stroke="#F28C28" stroke-width="1.8" fill="none" stroke-linecap="round"/>
+                <polyline points="14 2 14 8 20 8" stroke="#F28C28" stroke-width="1.8" fill="none"/>
+                <line x1="16" y1="13" x2="8" y2="13" stroke="#F28C28" stroke-width="1.5"/>
+                <line x1="16" y1="17" x2="8" y2="17" stroke="#F28C28" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <p class="bulletin-choix__option-titre">Bulletin avec don</p>
+            <p class="bulletin-choix__option-desc">Adhésion + don libre</p>
+            <button type="button" class="btn btn--primaire bulletin-choix__btn" id="btn-bulletin-don">
+              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+              Télécharger
+            </button>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="modale__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-fermer-bulletin-bas">Fermer</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== DOCUMENT BULLETIN (hors écran — capturé par html2canvas) ========== -->
+  <div id="bulletin-document" class="bulletin-document" aria-hidden="true">
+
+    <!-- PARTIE HAUTE : BULLETIN À REMPLIR PAR L'ADHÉRENT -->
+    <div class="bulletin__partie-haute">
+
+      <div class="bulletin__entete">
+        <div class="bulletin__entete-texte">
+          <h1 class="bulletin__grand-titre">BULLETIN ADHÉSION ANNÉE <span class="bulletin-annee"></span></h1>
+          <p class="bulletin__adresse-retour">Compléter et retourner à l'Association Handicap Solidarité pour l'Inclusion 37</p>
+          <p class="bulletin__adresse-retour">Par courrier : 17 rue Gabriel Péri 37700 Saint Pierre des Corps</p>
+          <p class="bulletin__adresse-retour">Par email : handicapsi37@gmail.com</p>
+        </div>
+        <img src="assets/hsi37-redim-demi.png" class="bulletin__logo"
+             alt="HSI37 — Handicap Solidarité pour l'Inclusion 37" />
+      </div>
+
+      <div class="bulletin__filet"></div>
+
+      <div class="bulletin__champs">
+        <div class="bulletin__champ-ligne">
+          <span class="bulletin__champ-label">M, Mme, Mlle.</span>
+          <span class="bulletin__tirets"></span>
+        </div>
+        <div class="bulletin__champ-ligne">
+          <span class="bulletin__champ-label">Nom</span>
+          <span class="bulletin__tirets"></span>
+        </div>
+        <div class="bulletin__champ-ligne">
+          <span class="bulletin__champ-label">Prénom</span>
+          <span class="bulletin__tirets"></span>
+        </div>
+        <div class="bulletin__champ-ligne">
+          <span class="bulletin__champ-label">Adresse</span>
+          <span class="bulletin__tirets"></span>
+        </div>
+        <div class="bulletin__champ-ligne bulletin__champ-ligne--double">
+          <div class="bulletin__champ-demi">
+            <span class="bulletin__champ-label">Code postal</span>
+            <span class="bulletin__tirets"></span>
+          </div>
+          <div class="bulletin__champ-demi">
+            <span class="bulletin__champ-label">Ville</span>
+            <span class="bulletin__tirets"></span>
+          </div>
+        </div>
+        <div class="bulletin__champ-ligne bulletin__champ-ligne--double">
+          <div class="bulletin__champ-demi">
+            <span class="bulletin__champ-label">Téléphone</span>
+            <span class="bulletin__tirets"></span>
+          </div>
+          <div class="bulletin__champ-demi">
+            <span class="bulletin__champ-label">Email</span>
+            <span class="bulletin__tirets"></span>
+          </div>
+        </div>
+      </div>
+
+      <p class="bulletin__mention-statuts">
+        L'adhésion implique le respect des statuts dont un exemplaire est à la disposition de l'adhérent, sur simple demande, au siège de l'association.
+      </p>
+
+      <div class="bulletin__filet"></div>
+
+      <div class="bulletin__adhesion-section">
+        <p class="bulletin__adhesion-intro">J'adhère à l'Association Handicap Solidarité pour l'Inclusion 37, je verse au titre de l'année <span class="bulletin-annee"></span> :</p>
+        <div class="bulletin__montant-ligne">
+          <span>1- Adhésion</span>
+          <span class="bulletin__tirets"></span>
+          <span class="bulletin__montant-euro">20,00 €</span>
+        </div>
+        <div class="bulletin__montant-ligne" id="bulletin-ligne-don">
+          <span>2- Je fais un don de</span>
+          <span class="bulletin__tirets"></span>
+          <span class="bulletin__montant-euro">€</span>
+        </div>
+      </div>
+
+      <div class="bulletin__paiements-section">
+        <p class="bulletin__paiements-titre">Mode de paiement :</p>
+        <div class="bulletin__paiements-liste">
+          <span>Espèces</span>
+          <span>Virement &mdash; IBAN : FR76 1027 8374 …. …. …. 116</span>
+          <span>Chèque à l'ordre de l'Association Handicap Solidarité pour l'Inclusion 37</span>
+          <span>Carte bancaire</span>
+          <span>PayPal</span>
+          <span>HelloAsso</span>
+        </div>
+      </div>
+
+      <div class="bulletin__champ-ligne bulletin__signature-bloc">
+        <span class="bulletin__champ-label">Date et signature :</span>
+        <span class="bulletin__tirets"></span>
+      </div>
+
+    </div><!-- fin partie haute -->
+
+  </div><!-- fin bulletin-document -->
 
   <!-- ========== PIED DE PAGE ========== -->
   <!-- hidden : masqué par défaut, affiché par app.js après connexion -->

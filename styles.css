@@ -1483,3 +1483,283 @@ body {
 .recu-modale__signataire-select {
   max-width: 340px;
 }
+
+/* =====================================================
+   BULLETIN D'ADHÉSION VIERGE
+   ===================================================== */
+
+/* ---- Bouton bulletin dans la barre d'actions ---- */
+.barre-actions__droite {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+  .barre-actions__droite {
+    width: 100%;
+  }
+  .barre-actions__droite .btn {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
+/* ---- Modale de choix ---- */
+.modale--bulletin-choix {
+  max-width: 520px;
+}
+
+.bulletin-choix__corps {
+  padding: 1.5rem;
+}
+
+.bulletin-choix__intro {
+  font-size: 0.95rem;
+  color: var(--encre);
+  margin-bottom: 1.25rem;
+}
+
+.bulletin-choix__options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.bulletin-choix__option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1.25rem 1rem;
+  border: 2px solid var(--gris-bord);
+  border-radius: var(--rayon-large);
+  text-align: center;
+  transition: border-color 0.2s, background-color 0.2s;
+}
+
+.bulletin-choix__option:hover {
+  border-color: var(--bleu-hsi);
+  background-color: var(--gris-fond);
+}
+
+.bulletin-choix__option-titre {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bleu-fonce);
+}
+
+.bulletin-choix__option-desc {
+  font-size: 0.82rem;
+  color: var(--gris-moyen);
+  flex: 1;
+}
+
+.bulletin-choix__btn {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 480px) {
+  .bulletin-choix__options {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---- Document bulletin hors écran ---- */
+.bulletin-document {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  width: 794px;
+  background: #ffffff;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  color: #333333;
+  line-height: 1.6;
+  border-top: 5px solid #F28C28;
+}
+
+/* Partie inscription */
+.bulletin__partie-haute {
+  padding: 34px 44px 36px;
+  background: #ffffff;
+  border-bottom: 4px solid #F28C28;
+}
+
+/* En-tête : titre + logo */
+.bulletin__entete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.bulletin__entete-texte {
+  flex: 1;
+}
+
+.bulletin__grand-titre {
+  font-family: 'Oswald', sans-serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #1F4E79;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0 0 10px;
+  line-height: 1.2;
+  padding-bottom: 7px;
+  border-bottom: 2px solid #F28C28;
+  display: inline-block;
+}
+
+.bulletin__adresse-retour {
+  font-size: 12px;
+  color: #666666;
+  line-height: 1.6;
+  margin: 0;
+}
+
+.bulletin__logo {
+  height: 72px;
+  width: auto;
+  flex-shrink: 0;
+  display: block;
+}
+
+/* Filets colorés */
+.bulletin__filet {
+  height: 3px;
+  background: #2D82C4;
+  margin: 18px 0;
+  border-radius: 2px;
+}
+
+.bulletin__filet--orange {
+  background: #F28C28;
+}
+
+/* Bloc champs à remplir */
+.bulletin__champs {
+  margin-bottom: 16px;
+}
+
+.bulletin__champ-ligne {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 13px;
+}
+
+.bulletin__champ-ligne--double {
+  gap: 24px;
+}
+
+.bulletin__champ-demi {
+  flex: 1;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.bulletin__champ-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333333;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* Ligne pointillée extensible (dans flex) */
+.bulletin__tirets {
+  flex: 1;
+  border-bottom: 1px dotted #888888;
+  min-width: 30px;
+  margin-bottom: 2px;
+}
+
+/* Mention statutaire */
+.bulletin__mention-statuts {
+  font-size: 12px;
+  color: #555555;
+  font-style: italic;
+  margin: 14px 0;
+  padding: 9px 12px;
+  background: #F0F5FA;
+  border-left: 3px solid #2D82C4;
+  border-radius: 0 4px 4px 0;
+  line-height: 1.55;
+}
+
+/* Bloc adhésion + montants */
+.bulletin__adhesion-section {
+  margin: 16px 0 14px;
+}
+
+.bulletin__adhesion-intro {
+  font-size: 14px;
+  margin: 0 0 10px;
+}
+
+.bulletin__montant-ligne {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  margin-bottom: 10px;
+  font-size: 14px;
+}
+
+.bulletin__montant-euro {
+  font-weight: 700;
+  color: #1F4E79;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* La ligne don est masquée par défaut ; JS l'active pour la version avec don */
+#bulletin-ligne-don {
+  display: none;
+}
+
+/* Modes de paiement */
+.bulletin__paiements-section {
+  margin: 16px 0;
+}
+
+.bulletin__paiements-titre {
+  font-weight: 700;
+  font-size: 14px;
+  color: #2D82C4;
+  margin: 0 0 9px;
+}
+
+.bulletin__paiements-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bulletin__paiements-liste span {
+  font-size: 13.5px;
+  color: #333333;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.bulletin__paiements-liste span::before {
+  content: '\2610';
+  color: #F28C28;
+  font-size: 15px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+
+/* Zone signature */
+.bulletin__signature-bloc {
+  margin-top: 26px;
+}

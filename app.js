@@ -2168,6 +2168,126 @@ document.getElementById("btn-telecharger-recu-don").addEventListener("click", fu
   });
 });
 
+/* =====================================================
+   BULLETIN D'ADHÉSION VIERGE
+   ===================================================== */
+
+const bulletinFond   = document.getElementById("bulletin-fond");
+const modaleBulletin = document.getElementById("modale-bulletin");
+let elementAvantBulletin = null;
+
+function ouvrirModaleBulletin() {
+  elementAvantBulletin = document.activeElement;
+  bulletinFond.hidden  = false;
+  requestAnimationFrame(function() { modaleBulletin.focus(); });
+  document.addEventListener("keydown", gererToucheBulletin);
+}
+
+function fermerModaleBulletin() {
+  bulletinFond.hidden = true;
+  document.removeEventListener("keydown", gererToucheBulletin);
+  if (elementAvantBulletin) elementAvantBulletin.focus();
+}
+
+function gererToucheBulletin(evenement) {
+  if (evenement.key === "Escape") { fermerModaleBulletin(); return; }
+  if (evenement.key === "Tab") {
+    const focusables = modaleBulletin.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault(); dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault(); premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-bulletin").addEventListener("click", ouvrirModaleBulletin);
+document.getElementById("btn-fermer-bulletin").addEventListener("click", fermerModaleBulletin);
+document.getElementById("btn-fermer-bulletin-bas").addEventListener("click", fermerModaleBulletin);
+bulletinFond.addEventListener("click", function(ev) {
+  if (ev.target === bulletinFond) fermerModaleBulletin();
+});
+
+/**
+ * Génère et télécharge le bulletin d'adhésion vierge au format PNG (scale 2).
+ * @param {boolean} avecDon - true = version avec ligne de don libre
+ */
+function genererBulletin(avecDon) {
+  const annee      = new Date().getFullYear();
+  const doc        = document.getElementById("bulletin-document");
+  const logos      = doc.querySelectorAll(".bulletin__logo");
+  const ligneDon   = document.getElementById("bulletin-ligne-don");
+  const nomFichier = avecDon
+    ? `bulletin-adhesion-don-${annee}.png`
+    : `bulletin-adhesion-${annee}.png`;
+
+  /* Injecter l'année courante dans tous les espans dédiés */
+  doc.querySelectorAll(".bulletin-annee").forEach(function(el) {
+    el.textContent = String(annee);
+  });
+
+  /* Afficher ou masquer la ligne don avant capture */
+  ligneDon.style.display = avecDon ? "flex" : "none";
+
+  const btnStd   = document.getElementById("btn-bulletin-standard");
+  const btnDon   = document.getElementById("btn-bulletin-don");
+  const btnActif = avecDon ? btnDon : btnStd;
+  btnActif.disabled    = true;
+  btnActif.textContent = "Génération…";
+
+  /* Sauvegarder les src originaux de tous les logos */
+  const srcsOriginaux = Array.from(logos).map(function(img) { return img.src; });
+
+  chargerImageCommeDataUrl("assets/hsi37-redim-demi.png").then(function(dataUrl) {
+    /* Remplacer chaque logo par sa version base64 pour html2canvas */
+    const promesses = Array.from(logos).map(function(img) {
+      return new Promise(function(resolve) {
+        img.src    = dataUrl;
+        img.onload  = resolve;
+        img.onerror = resolve;
+      });
+    });
+    return Promise.all(promesses);
+  }).then(function() {
+    return html2canvas(doc, {
+      scale: 2,
+      useCORS: false,
+      allowTaint: true,
+      backgroundColor: "#ffffff",
+      logging: false
+    });
+  }).then(function(canvas) {
+    const lien    = document.createElement("a");
+    lien.download = nomFichier;
+    lien.href     = canvas.toDataURL("image/png");
+    lien.click();
+  }).finally(function() {
+    /* Rétablir les src d'origine */
+    Array.from(logos).forEach(function(img, i) { img.src = srcsOriginaux[i]; });
+    btnActif.disabled = false;
+    btnActif.innerHTML = `
+      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24" width="16" height="16">
+        <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      Télécharger
+    `.trim();
+  });
+}
+
+document.getElementById("btn-bulletin-standard").addEventListener("click", function() {
+  genererBulletin(false);
+});
+
+document.getElementById("btn-bulletin-don").addEventListener("click", function() {
+  genererBulletin(true);
+});
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();
