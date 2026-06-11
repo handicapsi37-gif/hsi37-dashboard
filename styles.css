@@ -1182,3 +1182,52 @@ body {
   background-color: #F28C28;
   flex-shrink: 0;
 }
+
+/* =====================================================
+   NAVIGATION PAR ONGLETS
+   ===================================================== */
+
+.nav-onglets {
+  display: flex;
+  background: var(--blanc);
+  border-radius: var(--rayon-large);
+  box-shadow: var(--ombre);
+  overflow: hidden;
+  padding: 0 0.5rem;
+}
+
+/* Onglet individuel */
+.onglet {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 0.85rem 1.75rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--gris-moyen);
+  cursor: pointer;
+  transition: color 0.2s, border-bottom-color 0.2s, background-color 0.2s;
+  white-space: nowrap;
+}
+
+.onglet:hover {
+  color: var(--bleu-fonce);
+  background-color: var(--gris-fond);
+}
+
+/* Onglet actif : bleu + filet orange en bas */
+.onglet--actif {
+  color: var(--bleu-hsi);
+  border-bottom-color: var(--corail);
+}
+
+.onglet--actif:hover {
+  color: var(--bleu-fonce);
+}
+
+/* Panneau tabpanel : hérite du gap de .contenu-principal via son contenu interne */
+[role="tabpanel"] {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

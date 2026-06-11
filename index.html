@@ -73,81 +73,143 @@
   <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
   <main class="contenu-principal" id="contenu-principal" hidden>
 
-    <!-- ---- Barre d'actions ---- -->
-    <section class="barre-actions" aria-label="Barre d'actions">
-
-      <div class="barre-actions__gauche">
-        <!-- Champ de recherche — visuel uniquement en Phase 0 -->
-        <div class="champ-recherche">
-          <label for="recherche" class="sr-only">Rechercher un adhérent</label>
-          <svg class="champ-recherche__icone" aria-hidden="true" focusable="false"
-               xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
-            <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-          <input type="search" id="recherche" class="champ-recherche__input"
-                 placeholder="Rechercher…" aria-label="Rechercher un adhérent" />
-        </div>
-
-        <!-- Menu de tri — visuel uniquement en Phase 0 -->
-        <div class="tri">
-          <label for="tri-select" class="sr-only">Trier par</label>
-          <select id="tri-select" class="tri__select" aria-label="Trier les adhérents par">
-            <option value="">Trier par…</option>
-            <option value="nom">Nom</option>
-            <option value="type">Type de membre</option>
-            <option value="statut">Statut</option>
-            <option value="date">Date d'adhésion</option>
-            <option value="montant">Montant</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Bouton ouvrant la modale (fenêtre superposée) d'ajout d'adhérent -->
-      <button class="btn btn--primaire" id="btn-ajouter"
-              aria-haspopup="dialog" aria-controls="modale-adherent">
-        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-             viewBox="0 0 24 24" width="16" height="16">
-          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
-                stroke-linecap="round"/>
-        </svg>
-        Ajouter un adhérent
+    <!-- ---- Navigation par onglets ---- -->
+    <nav class="nav-onglets" role="tablist" aria-label="Sections du tableau de bord">
+      <button class="onglet onglet--actif" id="onglet-adherents" role="tab"
+              aria-selected="true" aria-controls="panneau-adherents" type="button">
+        Adhérents
       </button>
-    </section>
+      <button class="onglet" id="onglet-donateurs" role="tab"
+              aria-selected="false" aria-controls="panneau-donateurs" type="button">
+        Donateurs
+      </button>
+    </nav>
 
-    <!-- Message de confirmation après ajout/modification/suppression réussie -->
-    <div id="message-succes" class="message-succes"
-         role="status" aria-live="polite" hidden></div>
+    <!-- ========== PANNEAU ADHÉRENTS ========== -->
+    <div id="panneau-adherents" role="tabpanel" aria-labelledby="onglet-adherents">
 
-    <!-- Message d'erreur global (suppression ou modification échouée) -->
-    <div id="message-erreur" class="message-erreur"
-         role="alert" aria-live="assertive" hidden></div>
+      <!-- ---- Barre d'actions adhérents ---- -->
+      <section class="barre-actions" aria-label="Barre d'actions adhérents">
 
-    <!-- ---- Tableau des adhérents ---- -->
-    <section class="section-tableau" aria-label="Liste des adhérents">
-      <div class="tableau-conteneur" role="region" aria-label="Tableau des adhérents" tabindex="0">
-        <!-- Structure sémantique : <table> avec <thead> et <th scope="col"> (RGAA) -->
-        <table class="tableau" id="tableau-adherents">
-          <thead>
-            <tr>
-              <th scope="col">ID</th>
-              <th scope="col">Nom</th>
-              <th scope="col">Prénom</th>
-              <th scope="col">E-mail</th>
-              <th scope="col">Téléphone</th>
-              <th scope="col">Type de membre</th>
-              <th scope="col">Date d'adhésion</th>
-              <th scope="col">Montant</th>
-              <th scope="col">Statut</th>
-              <th scope="col">Actions</th>
-            </tr>
-          </thead>
-          <!-- Le corps du tableau est rempli dynamiquement par app.js -->
-          <tbody id="corps-tableau">
-          </tbody>
-        </table>
-      </div>
-    </section>
+        <div class="barre-actions__gauche">
+          <div class="champ-recherche">
+            <label for="recherche" class="sr-only">Rechercher un adhérent</label>
+            <svg class="champ-recherche__icone" aria-hidden="true" focusable="false"
+                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+              <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+            <input type="search" id="recherche" class="champ-recherche__input"
+                   placeholder="Rechercher…" aria-label="Rechercher un adhérent" />
+          </div>
+          <div class="tri">
+            <label for="tri-select" class="sr-only">Trier par</label>
+            <select id="tri-select" class="tri__select" aria-label="Trier les adhérents par">
+              <option value="">Trier par…</option>
+              <option value="nom">Nom</option>
+              <option value="type">Type de membre</option>
+              <option value="statut">Statut</option>
+              <option value="date">Date d'adhésion</option>
+              <option value="montant">Montant</option>
+            </select>
+          </div>
+        </div>
+
+        <button class="btn btn--primaire" id="btn-ajouter"
+                aria-haspopup="dialog" aria-controls="modale-adherent">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+          Ajouter un adhérent
+        </button>
+      </section>
+
+      <div id="message-succes" class="message-succes" role="status" aria-live="polite" hidden></div>
+      <div id="message-erreur" class="message-erreur" role="alert" aria-live="assertive" hidden></div>
+
+      <!-- ---- Tableau des adhérents ---- -->
+      <section class="section-tableau" aria-label="Liste des adhérents">
+        <div class="tableau-conteneur" role="region" aria-label="Tableau des adhérents" tabindex="0">
+          <table class="tableau" id="tableau-adherents">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Prénom</th>
+                <th scope="col">E-mail</th>
+                <th scope="col">Téléphone</th>
+                <th scope="col">Type de membre</th>
+                <th scope="col">Date d'adhésion</th>
+                <th scope="col">Montant</th>
+                <th scope="col">Statut</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="corps-tableau"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+    <!-- fin panneau-adherents -->
+
+    <!-- ========== PANNEAU DONATEURS ========== -->
+    <div id="panneau-donateurs" role="tabpanel" aria-labelledby="onglet-donateurs" hidden>
+
+      <!-- ---- Barre d'actions donateurs ---- -->
+      <section class="barre-actions" aria-label="Barre d'actions donateurs">
+        <div class="barre-actions__gauche">
+          <div class="champ-recherche">
+            <label for="recherche-don" class="sr-only">Rechercher un donateur</label>
+            <svg class="champ-recherche__icone" aria-hidden="true" focusable="false"
+                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+              <path d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+            <input type="search" id="recherche-don" class="champ-recherche__input"
+                   placeholder="Rechercher…" aria-label="Rechercher un donateur" />
+          </div>
+        </div>
+        <button class="btn btn--primaire" id="btn-ajouter-don"
+                aria-haspopup="dialog" aria-controls="modale-donateur">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+          Ajouter un donateur
+        </button>
+      </section>
+
+      <div id="message-succes-don" class="message-succes" role="status" aria-live="polite" hidden></div>
+      <div id="message-erreur-don" class="message-erreur" role="alert" aria-live="assertive" hidden></div>
+
+      <!-- ---- Tableau des donateurs ---- -->
+      <section class="section-tableau" aria-label="Liste des donateurs">
+        <div class="tableau-conteneur" role="region" aria-label="Tableau des donateurs" tabindex="0">
+          <table class="tableau" id="tableau-donateurs">
+            <thead>
+              <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Nom</th>
+                <th scope="col">Prénom / Organisme</th>
+                <th scope="col">Type de don</th>
+                <th scope="col">Montant</th>
+                <th scope="col">Description</th>
+                <th scope="col">Date du don</th>
+                <th scope="col">Mode de paiement</th>
+                <th scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="corps-tableau-donateurs"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+    <!-- fin panneau-donateurs -->
 
   </main>
 
@@ -308,6 +370,182 @@
           Annuler
         </button>
         <button type="button" class="btn btn--danger" id="btn-confirmer-suppression">
+          Supprimer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== MODALE D'AJOUT / MODIFICATION DONATEUR ========== -->
+  <div class="modale-fond" id="modale-fond-don" role="presentation" hidden>
+    <div class="modale"
+         id="modale-donateur"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modale-don-titre"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="modale-don-titre">Ajouter un donateur</h2>
+        <button class="modale__fermer" id="btn-fermer-modale-don"
+                aria-label="Fermer la fenêtre d'ajout de donateur">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <form class="modale__formulaire" id="formulaire-donateur" novalidate
+            aria-label="Formulaire d'ajout ou de modification d'un donateur">
+
+        <div id="modale-don-erreur" class="modale-erreur"
+             role="alert" aria-live="polite" hidden></div>
+
+        <div class="formulaire__grille">
+
+          <!-- ID donateur : lecture seule en mode modification -->
+          <div class="champ-groupe champ-groupe--large" id="groupe-id-don" hidden>
+            <label for="don-id" class="champ-label">ID donateur</label>
+            <input type="text" id="don-id" class="champ-input"
+                   disabled aria-label="Identifiant donateur, non modifiable" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="don-nom" class="champ-label">Nom <span aria-hidden="true">*</span></label>
+            <input type="text" id="don-nom" class="champ-input"
+                   placeholder="Ex : Dupont" autocomplete="family-name" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="don-prenom" class="champ-label">Prénom</label>
+            <input type="text" id="don-prenom" class="champ-input"
+                   placeholder="Ex : Marie" autocomplete="given-name" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="don-organisme" class="champ-label">Organisme</label>
+            <input type="text" id="don-organisme" class="champ-input"
+                   placeholder="Ex : Fondation XYZ" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="don-email" class="champ-label">E-mail</label>
+            <input type="email" id="don-email" class="champ-input"
+                   placeholder="Ex : contact@exemple.fr" autocomplete="email" />
+          </div>
+
+          <div class="champ-groupe">
+            <label for="don-telephone" class="champ-label">Téléphone</label>
+            <input type="tel" id="don-telephone" class="champ-input"
+                   placeholder="Ex : 06 12 34 56 78" autocomplete="tel" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="don-adresse" class="champ-label">Adresse</label>
+            <input type="text" id="don-adresse" class="champ-input"
+                   placeholder="Ex : 12 rue de la Liberté, 37700 Saint-Pierre-des-Corps"
+                   autocomplete="street-address" />
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="don-type" class="champ-label">Type de don <span aria-hidden="true">*</span></label>
+            <select id="don-type" class="champ-input champ-select">
+              <option value="">— Sélectionner un type —</option>
+              <option value="Don financier">Don financier</option>
+              <option value="Don de matériel">Don de matériel</option>
+            </select>
+          </div>
+
+          <!-- Montant — visible si don financier -->
+          <div class="champ-groupe" id="groupe-don-montant" hidden>
+            <label for="don-montant" class="champ-label">Montant (€) <span aria-hidden="true">*</span></label>
+            <input type="number" id="don-montant" class="champ-input"
+                   placeholder="Ex : 50" min="0" step="0.01" />
+          </div>
+
+          <!-- Mode de paiement — visible si don financier -->
+          <div class="champ-groupe" id="groupe-don-mode" hidden>
+            <label for="don-mode" class="champ-label">Mode de paiement</label>
+            <select id="don-mode" class="champ-input champ-select">
+              <option value="">— Sélectionner —</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Virement">Virement</option>
+              <option value="Chèque">Chèque</option>
+            </select>
+          </div>
+
+          <!-- Description — visible si don de matériel, texte libre -->
+          <div class="champ-groupe champ-groupe--large" id="groupe-don-description" hidden>
+            <label for="don-description" class="champ-label">Description du matériel <span aria-hidden="true">*</span></label>
+            <input type="text" id="don-description" class="champ-input"
+                   placeholder="Ex : Fauteuil roulant pliable, 2 déambulateurs…" />
+          </div>
+
+          <!-- Date du don — 3 menus déroulants -->
+          <fieldset class="champ-groupe champ-groupe--large champ-groupe--date" id="groupe-date-don">
+            <legend class="champ-label">Date du don <span aria-hidden="true">*</span></legend>
+            <div class="date-adhesion__conteneur">
+              <div class="date-adhesion__champ">
+                <label for="don-date-jour" class="sr-only">Jour</label>
+                <select id="don-date-jour" class="champ-input champ-select"></select>
+              </div>
+              <div class="date-adhesion__champ">
+                <label for="don-date-mois" class="sr-only">Mois</label>
+                <select id="don-date-mois" class="champ-input champ-select"></select>
+              </div>
+              <div class="date-adhesion__champ date-adhesion__champ--annee">
+                <label for="don-date-annee" class="sr-only">Année</label>
+                <select id="don-date-annee" class="champ-input champ-select"></select>
+              </div>
+            </div>
+          </fieldset>
+
+        </div>
+
+        <p class="formulaire__mention">
+          <span aria-hidden="true">*</span> Champs obligatoires
+        </p>
+
+        <div class="modale__actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-modale-don">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn--primaire">
+            Enregistrer
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
+  <!-- ========== MODALE DE CONFIRMATION DE SUPPRESSION DONATEUR ========== -->
+  <div class="modale-fond" id="confirmation-fond-don" role="presentation" hidden>
+    <div class="modale modale--petite"
+         id="modale-confirmation-don"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="confirmation-don-titre"
+         tabindex="-1">
+
+      <div class="modale__entete modale__entete--danger">
+        <h2 class="modale__titre" id="confirmation-don-titre">Supprimer un donateur</h2>
+      </div>
+
+      <div class="confirmation__corps">
+        <p class="confirmation__question">Voulez-vous vraiment supprimer ce donateur ?</p>
+        <p class="confirmation__adherent" id="confirmation-don-info" aria-live="polite"></p>
+        <p class="confirmation__avertissement">Cette action est irréversible.</p>
+      </div>
+
+      <div class="modale__actions confirmation__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-annuler-confirmation-don">
+          Annuler
+        </button>
+        <button type="button" class="btn btn--danger" id="btn-confirmer-suppression-don">
           Supprimer
         </button>
       </div>

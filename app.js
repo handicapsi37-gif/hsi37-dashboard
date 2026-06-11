@@ -1048,8 +1048,669 @@ document.getElementById("btn-telecharger-carte").addEventListener("click", funct
   });
 });
 
+/* =====================================================
+   NAVIGATION PAR ONGLETS
+   ===================================================== */
+
+/**
+ * Active l'onglet et le panneau correspondant, masque l'autre.
+ * @param {string} idPanneau - "panneau-adherents" | "panneau-donateurs"
+ */
+function activerOnglet(idPanneau) {
+  const config = {
+    "panneau-adherents": "onglet-adherents",
+    "panneau-donateurs": "onglet-donateurs"
+  };
+
+  Object.keys(config).forEach(function(id) {
+    const panneau  = document.getElementById(id);
+    const onglet   = document.getElementById(config[id]);
+    const estActif = id === idPanneau;
+    panneau.hidden = !estActif;
+    onglet.setAttribute("aria-selected", estActif ? "true" : "false");
+    onglet.classList.toggle("onglet--actif", estActif);
+  });
+}
+
+document.getElementById("onglet-adherents").addEventListener("click", function() {
+  activerOnglet("panneau-adherents");
+});
+document.getElementById("onglet-donateurs").addEventListener("click", function() {
+  activerOnglet("panneau-donateurs");
+  chargerDonateurs();
+});
+
+/* =====================================================
+   SECTION DONATEURS — CACHE ET ÉTAT
+   ===================================================== */
+
+let donneesDonateurs      = [];
+let donateurEnCours       = null;
+let elementAvantModaleDon = null;
+
+/* =====================================================
+   SECTION DONATEURS — AFFICHAGE DU TABLEAU
+   ===================================================== */
+
+/**
+ * Génère les boutons modifier / supprimer pour une ligne du tableau donateurs.
+ * @param {string} idDonateur  - DON-AAAA-NNNN
+ * @param {string} idTechnique - UUID Supabase
+ * @returns {string}
+ */
+function genererBoutonsActionsDonateur(idDonateur, idTechnique) {
+  return `
+    <button class="btn-icone btn-icone--modifier btn-icone--mod-don"
+            aria-label="Modifier le donateur ${idDonateur}"
+            title="Modifier"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button class="btn-icone btn-icone--supprimer btn-icone--sup-don"
+            aria-label="Supprimer le donateur ${idDonateur}"
+            title="Supprimer"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17">
+        <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"
+                  fill="none" stroke-linecap="round"/>
+        <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M10 11v6M14 11v6"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </button>
+  `.trim();
+}
+
+/**
+ * Injecte les lignes dans le tableau des donateurs et met à jour le cache.
+ * @param {Array} donateurs
+ */
+function remplirTableauDonateurs(donateurs) {
+  const corps = document.getElementById("corps-tableau-donateurs");
+  if (!corps) return;
+
+  donneesDonateurs = donateurs || [];
+  corps.innerHTML  = "";
+
+  if (!donateurs || donateurs.length === 0) {
+    corps.innerHTML = `
+      <tr>
+        <td colspan="9" class="tableau-message">
+          Aucun donateur enregistré pour l'instant.
+        </td>
+      </tr>
+    `;
+    return;
+  }
+
+  donateurs.forEach(function(don) {
+    const ligne = document.createElement("tr");
+
+    const montant = (don.montant_don !== null && don.montant_don !== undefined)
+      ? Number(don.montant_don).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+      : "—";
+
+    const prenomOrganisme = [don.prenom, don.organisme].filter(Boolean).join(" / ") || "—";
+
+    ligne.innerHTML = `
+      <td class="col-id">${don.id_donateur || "—"}</td>
+      <td class="col-nom">${don.nom || "—"}</td>
+      <td>${prenomOrganisme}</td>
+      <td>${don.type_don || "—"}</td>
+      <td>${montant}</td>
+      <td>${don.description_don || "—"}</td>
+      <td>${formaterDate(don.date_don)}</td>
+      <td>${don.mode_paiement || "—"}</td>
+      <td class="col-actions">${genererBoutonsActionsDonateur(don.id_donateur || don.id, don.id)}</td>
+    `;
+    corps.appendChild(ligne);
+  });
+}
+
+/**
+ * Lit tous les donateurs depuis Supabase et met à jour le tableau.
+ */
+async function chargerDonateurs() {
+  const corps = document.getElementById("corps-tableau-donateurs");
+  if (corps) {
+    corps.innerHTML = `
+      <tr><td colspan="9" class="tableau-message">Chargement en cours…</td></tr>
+    `;
+  }
+
+  const { data, error } = await clientSupabase.from("donateurs").select("*");
+
+  if (error) {
+    if (corps) {
+      corps.innerHTML = `
+        <tr>
+          <td colspan="9" class="tableau-message tableau-message--erreur" role="alert">
+            Impossible de charger les donateurs. Vérifiez votre connexion et réessayez.
+          </td>
+        </tr>
+      `;
+    }
+    return;
+  }
+
+  remplirTableauDonateurs(data);
+}
+
+/* =====================================================
+   SECTION DONATEURS — CHAMPS CONDITIONNELS
+   ===================================================== */
+
+/**
+ * Affiche / masque montant, mode de paiement et description selon le type de don.
+ */
+function majChampsConditionnelsDon() {
+  const type        = document.getElementById("don-type").value;
+  const estFinancier = type === "Don financier";
+  const estMateriel  = type === "Don de matériel";
+
+  document.getElementById("groupe-don-montant").hidden     = !estFinancier;
+  document.getElementById("groupe-don-mode").hidden        = !estFinancier;
+  document.getElementById("groupe-don-description").hidden = !estMateriel;
+}
+
+document.getElementById("don-type").addEventListener("change", majChampsConditionnelsDon);
+
+/* =====================================================
+   SECTION DONATEURS — MODALE AJOUT / MODIFICATION
+   ===================================================== */
+
+const fondDon    = document.getElementById("modale-fond-don");
+const modaleDon  = document.getElementById("modale-donateur");
+const formulaireDon  = document.getElementById("formulaire-donateur");
+
+/**
+ * Réinitialise les erreurs de validation du formulaire donateur.
+ */
+function reinitialiserErreursDon() {
+  const zoneErreur = document.getElementById("modale-don-erreur");
+  if (zoneErreur) { zoneErreur.hidden = true; zoneErreur.textContent = ""; }
+  document.querySelectorAll("#formulaire-donateur .champ-erreur").forEach(function(el) { el.remove(); });
+  document.querySelectorAll("#formulaire-donateur .champ-input--erreur").forEach(function(el) {
+    el.classList.remove("champ-input--erreur");
+  });
+}
+
+/**
+ * Ouvre la modale en mode AJOUT : formulaire vide.
+ */
+function ouvrirModaleDonAjout() {
+  donateurEnCours       = null;
+  elementAvantModaleDon = document.activeElement;
+
+  formulaireDon.reset();
+  reinitialiserErreursDon();
+  majChampsConditionnelsDon();
+
+  document.getElementById("groupe-id-don").hidden = true;
+  document.getElementById("modale-don-titre").textContent = "Ajouter un donateur";
+  document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer";
+  document.getElementById("btn-fermer-modale-don").setAttribute("aria-label", "Fermer la fenêtre d'ajout de donateur");
+
+  fondDon.hidden = false;
+  requestAnimationFrame(function() { modaleDon.focus(); });
+  document.addEventListener("keydown", gererToucheDon);
+}
+
+/**
+ * Ouvre la modale en mode MODIFICATION : champs pré-remplis.
+ * @param {Object} donateur
+ */
+function ouvrirModaleDonModification(donateur) {
+  donateurEnCours       = donateur;
+  elementAvantModaleDon = document.activeElement;
+
+  formulaireDon.reset();
+  reinitialiserErreursDon();
+
+  document.getElementById("groupe-id-don").hidden  = false;
+  document.getElementById("don-id").value          = donateur.id_donateur || "";
+  document.getElementById("don-nom").value         = donateur.nom || "";
+  document.getElementById("don-prenom").value      = donateur.prenom || "";
+  document.getElementById("don-organisme").value   = donateur.organisme || "";
+  document.getElementById("don-email").value       = donateur.email || "";
+  document.getElementById("don-telephone").value   = donateur.telephone || "";
+  document.getElementById("don-adresse").value     = donateur.adresse || "";
+  document.getElementById("don-type").value        = donateur.type_don || "";
+  document.getElementById("don-montant").value     =
+    (donateur.montant_don !== null && donateur.montant_don !== undefined) ? donateur.montant_don : "";
+  document.getElementById("don-description").value = donateur.description_don || "";
+  document.getElementById("don-mode").value        = donateur.mode_paiement || "";
+
+  if (donateur.date_don) {
+    const [a, m, j] = donateur.date_don.split("-");
+    document.getElementById("don-date-annee").value = a || "";
+    document.getElementById("don-date-mois").value  = m || "";
+    document.getElementById("don-date-jour").value  = j || "";
+  } else {
+    document.getElementById("don-date-annee").value = "";
+    document.getElementById("don-date-mois").value  = "";
+    document.getElementById("don-date-jour").value  = "";
+  }
+
+  majChampsConditionnelsDon();
+
+  document.getElementById("modale-don-titre").textContent = "Modifier un donateur";
+  document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer les modifications";
+  document.getElementById("btn-fermer-modale-don").setAttribute("aria-label", "Fermer la fenêtre de modification de donateur");
+
+  fondDon.hidden = false;
+  requestAnimationFrame(function() { modaleDon.focus(); });
+  document.addEventListener("keydown", gererToucheDon);
+}
+
+/**
+ * Ferme la modale donateur et restitue le focus.
+ */
+function fermerModaleDon() {
+  fondDon.hidden    = true;
+  donateurEnCours   = null;
+  document.removeEventListener("keydown", gererToucheDon);
+  if (elementAvantModaleDon) elementAvantModaleDon.focus();
+}
+
+/**
+ * Focus trap + Échap pour la modale donateur.
+ * @param {KeyboardEvent} evenement
+ */
+function gererToucheDon(evenement) {
+  if (evenement.key === "Escape") { fermerModaleDon(); return; }
+  if (evenement.key === "Tab") {
+    const focusables = modaleDon.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault(); dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault(); premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-ajouter-don").addEventListener("click", ouvrirModaleDonAjout);
+document.getElementById("btn-fermer-modale-don").addEventListener("click", fermerModaleDon);
+document.getElementById("btn-annuler-modale-don").addEventListener("click", fermerModaleDon);
+fondDon.addEventListener("click", function(ev) { if (ev.target === fondDon) fermerModaleDon(); });
+
+/* =====================================================
+   SECTION DONATEURS — VALIDATION
+   ===================================================== */
+
+/**
+ * Marque un champ du formulaire donateur en erreur.
+ * @param {string} idChamp
+ * @param {string} message
+ */
+function marquerChampErreurDon(idChamp, message) {
+  const champ = document.getElementById(idChamp);
+  champ.classList.add("champ-input--erreur");
+  const msg = document.createElement("span");
+  msg.className = "champ-erreur";
+  msg.setAttribute("role", "alert");
+  msg.textContent = message;
+  champ.parentNode.appendChild(msg);
+}
+
+/**
+ * Valide le formulaire donateur.
+ * @returns {boolean}
+ */
+function validerFormulaireDonateur() {
+  document.querySelectorAll("#formulaire-donateur .champ-erreur").forEach(function(el) { el.remove(); });
+  document.querySelectorAll("#formulaire-donateur .champ-input--erreur").forEach(function(el) {
+    el.classList.remove("champ-input--erreur");
+  });
+
+  let valide = true;
+  const nom     = document.getElementById("don-nom").value.trim();
+  const type    = document.getElementById("don-type").value;
+  const jour    = document.getElementById("don-date-jour").value;
+  const mois    = document.getElementById("don-date-mois").value;
+  const annee   = document.getElementById("don-date-annee").value;
+  const montant = document.getElementById("don-montant").value.trim();
+  const email   = document.getElementById("don-email").value.trim();
+
+  if (!nom) { marquerChampErreurDon("don-nom", "Le nom est obligatoire."); valide = false; }
+  if (!type) { marquerChampErreurDon("don-type", "Le type de don est obligatoire."); valide = false; }
+
+  if (type === "Don financier" && !montant) {
+    marquerChampErreurDon("don-montant", "Le montant est obligatoire pour un don financier.");
+    valide = false;
+  }
+  if (type === "Don financier" && montant && isNaN(parseFloat(montant.replace(",", ".")))) {
+    marquerChampErreurDon("don-montant", "Le montant doit être un nombre (ex : 50 ou 50,50).");
+    valide = false;
+  }
+  if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    marquerChampErreurDon("don-email", "L'adresse e-mail n'est pas valide.");
+    valide = false;
+  }
+
+  /* Validation de la date */
+  if (!jour || !mois || !annee) {
+    if (!jour)  document.getElementById("don-date-jour").classList.add("champ-input--erreur");
+    if (!mois)  document.getElementById("don-date-mois").classList.add("champ-input--erreur");
+    if (!annee) document.getElementById("don-date-annee").classList.add("champ-input--erreur");
+    const errDate = document.createElement("span");
+    errDate.className = "champ-erreur";
+    errDate.setAttribute("role", "alert");
+    errDate.textContent = "La date du don est obligatoire (jour, mois et année requis).";
+    const conteneur = document.querySelector("#groupe-date-don .date-adhesion__conteneur");
+    conteneur.parentNode.insertBefore(errDate, conteneur.nextSibling);
+    valide = false;
+  } else {
+    const dateTest   = new Date(`${annee}-${mois}-${jour}`);
+    const dateValide = !isNaN(dateTest.getTime()) &&
+      dateTest.getFullYear() === parseInt(annee, 10) &&
+      (dateTest.getMonth() + 1) === parseInt(mois, 10) &&
+      dateTest.getDate() === parseInt(jour, 10);
+    if (!dateValide) {
+      ["don-date-jour", "don-date-mois", "don-date-annee"].forEach(function(id) {
+        document.getElementById(id).classList.add("champ-input--erreur");
+      });
+      const errDate = document.createElement("span");
+      errDate.className = "champ-erreur";
+      errDate.setAttribute("role", "alert");
+      errDate.textContent = "Cette date n'existe pas.";
+      const conteneur = document.querySelector("#groupe-date-don .date-adhesion__conteneur");
+      conteneur.parentNode.insertBefore(errDate, conteneur.nextSibling);
+      valide = false;
+    }
+  }
+
+  return valide;
+}
+
+/* =====================================================
+   SECTION DONATEURS — GÉNÉRATION ID
+   ===================================================== */
+
+/**
+ * Génère le prochain id_donateur (DON-AAAA-NNNN) pour une année donnée.
+ * @param {string} annee
+ * @returns {Promise<string>}
+ */
+async function genererIdDonateur(annee) {
+  const { data, error } = await clientSupabase
+    .from("donateurs")
+    .select("id_donateur")
+    .like("id_donateur", `DON-${annee}-%`);
+
+  if (error) throw new Error("Lecture Supabase échouée");
+
+  let maxNumero = 0;
+  if (data && data.length > 0) {
+    data.forEach(function(don) {
+      if (don.id_donateur) {
+        const parties = don.id_donateur.split("-");
+        if (parties.length === 3) {
+          const n = parseInt(parties[2], 10);
+          if (!isNaN(n) && n > maxNumero) maxNumero = n;
+        }
+      }
+    });
+  }
+
+  return `DON-${annee}-${String(maxNumero + 1).padStart(4, "0")}`;
+}
+
+/* =====================================================
+   SECTION DONATEURS — MESSAGES
+   ===================================================== */
+
+function afficherSuccesDon(texte) {
+  const zone = document.getElementById("message-succes-don");
+  zone.textContent = texte;
+  zone.hidden = false;
+  setTimeout(function() { zone.hidden = true; zone.textContent = ""; }, 5000);
+}
+
+function afficherErreurDon(texte) {
+  const zone = document.getElementById("message-erreur-don");
+  zone.textContent = texte;
+  zone.hidden = false;
+  setTimeout(function() { zone.hidden = true; zone.textContent = ""; }, 7000);
+}
+
+/* =====================================================
+   SECTION DONATEURS — SOUMISSION FORMULAIRE
+   ===================================================== */
+
+formulaireDon.addEventListener("submit", async function(evenement) {
+  evenement.preventDefault();
+
+  const zoneErreur = document.getElementById("modale-don-erreur");
+  zoneErreur.hidden = true;
+  zoneErreur.textContent = "";
+
+  if (!validerFormulaireDonateur()) return;
+
+  const nom          = document.getElementById("don-nom").value.trim();
+  const prenom       = document.getElementById("don-prenom").value.trim() || null;
+  const organisme    = document.getElementById("don-organisme").value.trim() || null;
+  const email        = document.getElementById("don-email").value.trim() || null;
+  const telephone    = document.getElementById("don-telephone").value.trim() || null;
+  const adresse      = document.getElementById("don-adresse").value.trim() || null;
+  const typeDon      = document.getElementById("don-type").value;
+  const jour         = document.getElementById("don-date-jour").value;
+  const mois         = document.getElementById("don-date-mois").value;
+  const annee        = document.getElementById("don-date-annee").value;
+  const dateDon      = `${annee}-${mois}-${jour}`;
+  const montantBrut  = document.getElementById("don-montant").value.trim();
+  const montantDon   = montantBrut ? parseFloat(montantBrut.replace(",", ".")) : null;
+  const description  = document.getElementById("don-description").value.trim() || null;
+  const modePaiement = document.getElementById("don-mode").value || null;
+
+  if (donateurEnCours) {
+    /* ---- MODE MODIFICATION : UPDATE Supabase ---- */
+    const { error } = await clientSupabase
+      .from("donateurs")
+      .update({
+        nom, prenom, organisme, email, telephone, adresse,
+        type_don: typeDon, montant_don: montantDon,
+        description_don: description, date_don: dateDon,
+        mode_paiement: modePaiement
+      })
+      .eq("id", donateurEnCours.id);
+
+    if (error) {
+      zoneErreur.textContent = "La modification a échoué. Vérifiez votre connexion et réessayez.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    fermerModaleDon();
+    await chargerDonateurs();
+    afficherSuccesDon(`Donateur modifié : ${prenom ? prenom + " " : ""}${nom}.`);
+
+  } else {
+    /* ---- MODE AJOUT : INSERT Supabase ---- */
+    let idDonateur;
+    try {
+      idDonateur = await genererIdDonateur(annee);
+    } catch (_) {
+      zoneErreur.textContent = "Impossible de générer l'identifiant. Vérifiez votre connexion et réessayez.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    const { error } = await clientSupabase
+      .from("donateurs")
+      .insert([{
+        id_donateur: idDonateur,
+        nom, prenom, organisme, email, telephone, adresse,
+        type_don: typeDon, montant_don: montantDon,
+        description_don: description, date_don: dateDon,
+        mode_paiement: modePaiement
+      }]);
+
+    if (error) {
+      zoneErreur.textContent = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    fermerModaleDon();
+    await chargerDonateurs();
+    afficherSuccesDon(`Donateur ajouté : ${prenom ? prenom + " " : ""}${nom} (${idDonateur}).`);
+  }
+});
+
+/* =====================================================
+   SECTION DONATEURS — DÉLÉGATION DES CLICS TABLEAU
+   ===================================================== */
+
+document.getElementById("corps-tableau-donateurs").addEventListener("click", function(evenement) {
+  const btnModifier  = evenement.target.closest(".btn-icone--mod-don");
+  const btnSupprimer = evenement.target.closest(".btn-icone--sup-don");
+
+  if (btnModifier) {
+    const idTechnique = btnModifier.dataset.idTechnique;
+    const donateur = donneesDonateurs.find(function(d) { return String(d.id) === idTechnique; });
+    if (donateur) ouvrirModaleDonModification(donateur);
+  }
+
+  if (btnSupprimer) {
+    const idTechnique = btnSupprimer.dataset.idTechnique;
+    const donateur = donneesDonateurs.find(function(d) { return String(d.id) === idTechnique; });
+    if (donateur) ouvrirConfirmationSuppressionDon(donateur);
+  }
+});
+
+/* =====================================================
+   SECTION DONATEURS — CONFIRMATION SUPPRESSION
+   ===================================================== */
+
+const confirmationFondDon   = document.getElementById("confirmation-fond-don");
+const modaleConfirmDon      = document.getElementById("modale-confirmation-don");
+let donateurASupprimer         = null;
+let elementAvantConfirmationDon = null;
+
+function ouvrirConfirmationSuppressionDon(donateur) {
+  donateurASupprimer          = donateur;
+  elementAvantConfirmationDon = document.activeElement;
+
+  document.getElementById("confirmation-don-info").textContent =
+    `${donateur.prenom || ""} ${donateur.nom || ""} — ${donateur.id_donateur || donateur.id}`.trim();
+
+  confirmationFondDon.hidden = false;
+  requestAnimationFrame(function() { modaleConfirmDon.focus(); });
+  document.addEventListener("keydown", gererToucheConfirmationDon);
+}
+
+function fermerConfirmationDon() {
+  confirmationFondDon.hidden  = true;
+  donateurASupprimer          = null;
+  document.removeEventListener("keydown", gererToucheConfirmationDon);
+  if (elementAvantConfirmationDon) elementAvantConfirmationDon.focus();
+}
+
+function gererToucheConfirmationDon(evenement) {
+  if (evenement.key === "Escape") { fermerConfirmationDon(); return; }
+  if (evenement.key === "Tab") {
+    const focusables = modaleConfirmDon.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault(); dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault(); premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-annuler-confirmation-don").addEventListener("click", fermerConfirmationDon);
+confirmationFondDon.addEventListener("click", function(ev) {
+  if (ev.target === confirmationFondDon) fermerConfirmationDon();
+});
+
+document.getElementById("btn-confirmer-suppression-don").addEventListener("click", async function() {
+  if (!donateurASupprimer) return;
+
+  const nomComplet = `${donateurASupprimer.prenom || ""} ${donateurASupprimer.nom || ""}`.trim();
+
+  const { error } = await clientSupabase
+    .from("donateurs")
+    .delete()
+    .eq("id", donateurASupprimer.id);
+
+  if (error) {
+    fermerConfirmationDon();
+    afficherErreurDon("La suppression a échoué. Vérifiez votre connexion et réessayez.");
+    return;
+  }
+
+  fermerConfirmationDon();
+  await chargerDonateurs();
+  afficherSuccesDon(`Donateur supprimé : ${nomComplet}.`);
+});
+
+/* =====================================================
+   SECTION DONATEURS — SÉLECTS DE DATE
+   ===================================================== */
+
+/**
+ * Peuple les trois selects Jour / Mois / Année du formulaire donateur.
+ * IDs distincts de ceux du formulaire adhérent.
+ */
+function initialiserSelectsDateDon() {
+  const selectJour  = document.getElementById("don-date-jour");
+  const selectMois  = document.getElementById("don-date-mois");
+  const selectAnnee = document.getElementById("don-date-annee");
+
+  selectJour.innerHTML = '<option value="">Jour</option>';
+  for (let j = 1; j <= 31; j++) {
+    const opt = document.createElement("option");
+    opt.value       = String(j).padStart(2, "0");
+    opt.textContent = String(j);
+    selectJour.appendChild(opt);
+  }
+
+  const moisFr = [
+    "Janvier", "Février", "Mars", "Avril", "Mai", "Juin",
+    "Juillet", "Août", "Septembre", "Octobre", "Novembre", "Décembre"
+  ];
+  selectMois.innerHTML = '<option value="">Mois</option>';
+  moisFr.forEach(function(libelle, index) {
+    const opt = document.createElement("option");
+    opt.value       = String(index + 1).padStart(2, "0");
+    opt.textContent = libelle;
+    selectMois.appendChild(opt);
+  });
+
+  const anneeActuelle = new Date().getFullYear();
+  selectAnnee.innerHTML = '<option value="">Année</option>';
+  for (let a = 2020; a <= anneeActuelle; a++) {
+    const opt = document.createElement("option");
+    opt.value       = String(a);
+    opt.textContent = String(a);
+    selectAnnee.appendChild(opt);
+  }
+}
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();
+  initialiserSelectsDateDon();
   verifierSession();
 });
