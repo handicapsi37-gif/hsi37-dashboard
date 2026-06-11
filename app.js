@@ -195,6 +195,26 @@ function genererBoutonsActions(idAdherent, idTechnique) {
               stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
+    <button class="btn-icone btn-icone--recu-adh"
+            aria-label="Générer le reçu d'adhésion ${idAdherent}"
+            title="Reçu d'adhésion"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           width="17" height="17">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <polyline points="14 2 14 8 20 8"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <line x1="16" y1="13" x2="8" y2="13"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="16" y1="17" x2="8" y2="17"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <polyline points="10 9 9 9 8 9"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </button>
   `.trim();
 }
 
@@ -214,7 +234,7 @@ function remplirTableau(adherents) {
   if (!adherents || adherents.length === 0) {
     corps.innerHTML = `
       <tr>
-        <td colspan="10" class="tableau-message">
+        <td colspan="11" class="tableau-message">
           Aucun adhérent enregistré pour l'instant.
         </td>
       </tr>
@@ -244,6 +264,7 @@ function remplirTableau(adherents) {
       <td>${genererCelluleType(adherent.type_membre)}</td>
       <td>${formaterDate(adherent.date_adhesion)}</td>
       <td>${montant}</td>
+      <td>${adherent.mode_paiement || "—"}</td>
       <td>${genererBadge(calculerStatut(adherent.saison))}</td>
       <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id)}</td>
     `;
@@ -261,7 +282,7 @@ async function chargerAdherents() {
   if (corps) {
     corps.innerHTML = `
       <tr>
-        <td colspan="10" class="tableau-message">Chargement en cours…</td>
+        <td colspan="11" class="tableau-message">Chargement en cours…</td>
       </tr>
     `;
   }
@@ -274,7 +295,7 @@ async function chargerAdherents() {
     if (corps) {
       corps.innerHTML = `
         <tr>
-          <td colspan="10" class="tableau-message tableau-message--erreur" role="alert">
+          <td colspan="11" class="tableau-message tableau-message--erreur" role="alert">
             Impossible de charger les adhérents. Vérifiez votre connexion et réessayez.
           </td>
         </tr>
@@ -298,6 +319,19 @@ const btnAnnuler = document.getElementById("btn-annuler-modale");
 const formulaire = document.getElementById("formulaire-adherent");
 
 let elementAvantModale = null;
+
+/* Cache éphémère des champs chèque adhérents (form-only, non persistés en DB) */
+const champsChequesAdherents = new Map();
+
+/**
+ * Affiche / masque les champs chèque selon le mode de paiement sélectionné (adhérent).
+ */
+function majChampsConditionnelsAdherent() {
+  const mode = document.getElementById("champ-mode-paiement").value;
+  document.getElementById("groupe-cheque-adh").hidden = (mode !== "Chèque");
+}
+
+document.getElementById("champ-mode-paiement").addEventListener("change", majChampsConditionnelsAdherent);
 
 /**
  * Efface les erreurs de validation du formulaire.
@@ -323,6 +357,7 @@ function ouvrirModaleAjout() {
 
   formulaire.reset();
   reinitialiserErreursFormulaire();
+  majChampsConditionnelsAdherent();
 
   document.getElementById("groupe-id-adherent").hidden = true;
   document.getElementById("modale-titre").textContent = "Ajouter un adhérent";
@@ -350,6 +385,7 @@ function ouvrirModaleModification(adherent) {
   document.getElementById("champ-id-adherent").value = adherent.id_adherent || "";
 
   /* Pré-remplir les champs modifiables */
+  document.getElementById("champ-civilite").value  = adherent.civilite || "";
   document.getElementById("champ-nom").value       = adherent.nom || "";
   document.getElementById("champ-prenom").value    = adherent.prenom || "";
   document.getElementById("champ-email").value     = adherent.email || "";
@@ -370,6 +406,12 @@ function ouvrirModaleModification(adherent) {
     (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? adherent.montant_cotisation
       : "";
+  document.getElementById("champ-mode-paiement").value = adherent.mode_paiement || "";
+
+  const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
+  document.getElementById("champ-numero-cheque").value = chequeAdh.numero_cheque || "";
+  document.getElementById("champ-banque-adh").value    = chequeAdh.banque        || "";
+  majChampsConditionnelsAdherent();
 
   document.getElementById("modale-titre").textContent = "Modifier un adhérent";
   document.querySelector("#formulaire-adherent [type='submit']").textContent = "Enregistrer les modifications";
@@ -612,6 +654,10 @@ formulaire.addEventListener("submit", async function(evenement) {
   const typeMembre        = document.getElementById("champ-type").value;
   const montantBrut       = document.getElementById("champ-montant").value.trim();
   const montantCotisation = montantBrut ? parseFloat(montantBrut.replace(",", ".")) : null;
+  const civilite          = document.getElementById("champ-civilite").value || null;
+  const modePaiement      = document.getElementById("champ-mode-paiement").value || null;
+  const numeroCheque      = document.getElementById("champ-numero-cheque").value.trim() || null;
+  const banqueAdh         = document.getElementById("champ-banque-adh").value.trim() || null;
 
   if (adherentEnCours) {
     /* ---- MODE MODIFICATION : UPDATE Supabase ---- */
@@ -625,7 +671,9 @@ formulaire.addEventListener("submit", async function(evenement) {
         adresse,
         date_adhesion:      dateAdhesion,
         montant_cotisation: montantCotisation,
-        type_membre:        typeMembre
+        type_membre:        typeMembre,
+        civilite,
+        mode_paiement:      modePaiement
       })
       .eq("id", adherentEnCours.id);
 
@@ -633,6 +681,12 @@ formulaire.addEventListener("submit", async function(evenement) {
       zoneErreurModale.textContent = "La modification a échoué. Vérifiez votre connexion et réessayez.";
       zoneErreurModale.hidden = false;
       return;
+    }
+
+    if (modePaiement === "Chèque") {
+      champsChequesAdherents.set(String(adherentEnCours.id), { numero_cheque: numeroCheque, banque: banqueAdh });
+    } else {
+      champsChequesAdherents.delete(String(adherentEnCours.id));
     }
 
     fermerModale();
@@ -656,12 +710,14 @@ formulaire.addEventListener("submit", async function(evenement) {
       id_adherent:        idAdherent,
       nom,
       prenom,
+      civilite,
       email,
       telephone,
       adresse,
       date_adhesion:      dateAdhesion,
       montant_cotisation: montantCotisation,
       type_membre:        typeMembre,
+      mode_paiement:      modePaiement,
       saison
     };
 
@@ -677,6 +733,14 @@ formulaire.addEventListener("submit", async function(evenement) {
 
     fermerModale();
     await chargerAdherents();
+
+    if (modePaiement === "Chèque") {
+      const nouvelAdherentEnCache = donneesAdherents.find(function(a) { return a.id_adherent === idAdherent; });
+      if (nouvelAdherentEnCache) {
+        champsChequesAdherents.set(String(nouvelAdherentEnCache.id), { numero_cheque: numeroCheque, banque: banqueAdh });
+      }
+    }
+
     afficherMessageSucces(`Adhérent ajouté : ${prenom} ${nom} (${idAdherent}).`);
   }
 });
@@ -691,6 +755,7 @@ document.getElementById("corps-tableau").addEventListener("click", function(even
   const btnModifier  = evenement.target.closest(".btn-icone--modifier");
   const btnSupprimer = evenement.target.closest(".btn-icone--supprimer");
   const btnCarte     = evenement.target.closest(".btn-icone--carte");
+  const btnRecuAdh   = evenement.target.closest(".btn-icone--recu-adh");
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
@@ -708,6 +773,12 @@ document.getElementById("corps-tableau").addEventListener("click", function(even
     const idTechnique = btnCarte.dataset.idTechnique;
     const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
     if (adherent) ouvrirModaleCarte(adherent);
+  }
+
+  if (btnRecuAdh) {
+    const idTechnique = btnRecuAdh.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirModaleRecuAdherent(adherent);
   }
 });
 
@@ -1130,6 +1201,25 @@ function genererBoutonsActionsDonateur(idDonateur, idTechnique) {
               stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
     </button>
+    <button class="btn-icone btn-icone--recu-don"
+            aria-label="Générer le reçu de don ${idDonateur}"
+            title="Reçu de don"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <polyline points="14 2 14 8 20 8"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <line x1="16" y1="13" x2="8" y2="13"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="16" y1="17" x2="8" y2="17"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <polyline points="10 9 9 9 8 9"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+    </button>
   `.trim();
 }
 
@@ -1158,16 +1248,27 @@ function remplirTableauDonateurs(donateurs) {
   donateurs.forEach(function(don) {
     const ligne = document.createElement("tr");
 
-    const montant = (don.montant_don !== null && don.montant_don !== undefined)
+    const estDonMat = (don.type_don || "").toLowerCase().includes("mat");
+    const montant = (!estDonMat && don.montant_don !== null && don.montant_don !== undefined)
       ? Number(don.montant_don).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
 
-    const prenomOrganisme = [don.prenom, don.organisme].filter(Boolean).join(" / ") || "—";
+    const nomAffiche = don.nom ? don.nom.toUpperCase() : "—";
+    let prenomOrgAffiche;
+    if (don.prenom && don.organisme) {
+      prenomOrgAffiche = `${don.prenom} — <em>${don.organisme}</em>`;
+    } else if (don.prenom) {
+      prenomOrgAffiche = don.prenom;
+    } else if (don.organisme) {
+      prenomOrgAffiche = `<em>${don.organisme}</em>`;
+    } else {
+      prenomOrgAffiche = "—";
+    }
 
     ligne.innerHTML = `
       <td class="col-id">${don.id_donateur || "—"}</td>
-      <td class="col-nom">${don.nom || "—"}</td>
-      <td>${prenomOrganisme}</td>
+      <td class="col-nom">${nomAffiche}</td>
+      <td>${prenomOrgAffiche}</td>
       <td>${don.type_don || "—"}</td>
       <td>${montant}</td>
       <td>${don.description_don || "—"}</td>
@@ -1214,18 +1315,55 @@ async function chargerDonateurs() {
 
 /**
  * Affiche / masque montant, mode de paiement et description selon le type de don.
+ * Gère aussi les champs chèque conditionnels.
  */
+function majCiviliteVisibiliteDon() {
+  const organisme = document.getElementById("don-organisme").value.trim();
+  document.getElementById("groupe-civilite-don").hidden = organisme.length > 0;
+
+  const avertissement = document.getElementById("avertissement-don-organisme");
+  if (avertissement) {
+    const civilite = document.getElementById("don-civilite").value.trim();
+    const nom      = document.getElementById("don-nom").value.trim();
+    const prenom   = document.getElementById("don-prenom").value.trim();
+    avertissement.hidden = !(organisme && (civilite || nom || prenom));
+  }
+}
+
+document.getElementById("don-organisme").addEventListener("input", majCiviliteVisibiliteDon);
+document.getElementById("don-nom").addEventListener("input", majCiviliteVisibiliteDon);
+document.getElementById("don-prenom").addEventListener("input", majCiviliteVisibiliteDon);
+
 function majChampsConditionnelsDon() {
-  const type        = document.getElementById("don-type").value;
-  const estFinancier = type === "Don financier";
-  const estMateriel  = type === "Don de matériel";
+  const type         = document.getElementById("don-type").value;
+  const typeLower    = type.toLowerCase();
+  const estFinancier = typeLower.includes("financier");
+  const estMateriel  = typeLower.includes("mat");
 
   document.getElementById("groupe-don-montant").hidden     = !estFinancier;
   document.getElementById("groupe-don-mode").hidden        = !estFinancier;
   document.getElementById("groupe-don-description").hidden = !estMateriel;
+
+  if (estMateriel) {
+    document.getElementById("don-montant").value = "";
+    document.getElementById("don-mode").value    = "";
+  }
+  if (estFinancier) {
+    document.getElementById("don-description").value = "";
+  }
+
+  majChampsChequeDon();
+}
+
+function majChampsChequeDon() {
+  const mode     = document.getElementById("don-mode").value;
+  const estCheque = mode === "Chèque";
+  const groupeMode = document.getElementById("groupe-don-mode");
+  document.getElementById("groupe-cheque-don").hidden = groupeMode.hidden || !estCheque;
 }
 
 document.getElementById("don-type").addEventListener("change", majChampsConditionnelsDon);
+document.getElementById("don-mode").addEventListener("change", majChampsChequeDon);
 
 /* =====================================================
    SECTION DONATEURS — MODALE AJOUT / MODIFICATION
@@ -1257,6 +1395,7 @@ function ouvrirModaleDonAjout() {
   formulaireDon.reset();
   reinitialiserErreursDon();
   majChampsConditionnelsDon();
+  majCiviliteVisibiliteDon();
 
   document.getElementById("groupe-id-don").hidden = true;
   document.getElementById("modale-don-titre").textContent = "Ajouter un donateur";
@@ -1281,6 +1420,7 @@ function ouvrirModaleDonModification(donateur) {
 
   document.getElementById("groupe-id-don").hidden  = false;
   document.getElementById("don-id").value          = donateur.id_donateur || "";
+  document.getElementById("don-civilite").value    = donateur.civilite || "";
   document.getElementById("don-nom").value         = donateur.nom || "";
   document.getElementById("don-prenom").value      = donateur.prenom || "";
   document.getElementById("don-organisme").value   = donateur.organisme || "";
@@ -1290,8 +1430,10 @@ function ouvrirModaleDonModification(donateur) {
   document.getElementById("don-type").value        = donateur.type_don || "";
   document.getElementById("don-montant").value     =
     (donateur.montant_don !== null && donateur.montant_don !== undefined) ? donateur.montant_don : "";
-  document.getElementById("don-description").value = donateur.description_don || "";
-  document.getElementById("don-mode").value        = donateur.mode_paiement || "";
+  document.getElementById("don-description").value    = donateur.description_don || "";
+  document.getElementById("don-mode").value            = donateur.mode_paiement || "";
+  document.getElementById("don-numero-cheque").value   = donateur.numero_cheque || "";
+  document.getElementById("don-banque-cheque").value   = donateur.banque_cheque || "";
 
   if (donateur.date_don) {
     const [a, m, j] = donateur.date_don.split("-");
@@ -1305,6 +1447,7 @@ function ouvrirModaleDonModification(donateur) {
   }
 
   majChampsConditionnelsDon();
+  majCiviliteVisibiliteDon();
 
   document.getElementById("modale-don-titre").textContent = "Modifier un donateur";
   document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer les modifications";
@@ -1388,7 +1531,8 @@ function validerFormulaireDonateur() {
   const montant = document.getElementById("don-montant").value.trim();
   const email   = document.getElementById("don-email").value.trim();
 
-  if (!nom) { marquerChampErreurDon("don-nom", "Le nom est obligatoire."); valide = false; }
+  const organismeVal = document.getElementById("don-organisme").value.trim();
+  if (!nom && !organismeVal) { marquerChampErreurDon("don-nom", "Le nom ou l’organisme est obligatoire."); valide = false; }
   if (!type) { marquerChampErreurDon("don-type", "Le type de don est obligatoire."); valide = false; }
 
   if (type === "Don financier" && !montant) {
@@ -1505,6 +1649,7 @@ formulaireDon.addEventListener("submit", async function(evenement) {
 
   const nom          = document.getElementById("don-nom").value.trim();
   const prenom       = document.getElementById("don-prenom").value.trim() || null;
+  const civilite     = document.getElementById("don-civilite").value || null;
   const organisme    = document.getElementById("don-organisme").value.trim() || null;
   const email        = document.getElementById("don-email").value.trim() || null;
   const telephone    = document.getElementById("don-telephone").value.trim() || null;
@@ -1518,16 +1663,20 @@ formulaireDon.addEventListener("submit", async function(evenement) {
   const montantDon   = montantBrut ? parseFloat(montantBrut.replace(",", ".")) : null;
   const description  = document.getElementById("don-description").value.trim() || null;
   const modePaiement = document.getElementById("don-mode").value || null;
+  const numeroCheque = document.getElementById("don-numero-cheque").value.trim() || null;
+  const banqueCheque = document.getElementById("don-banque-cheque").value.trim() || null;
 
   if (donateurEnCours) {
     /* ---- MODE MODIFICATION : UPDATE Supabase ---- */
     const { error } = await clientSupabase
       .from("donateurs")
       .update({
-        nom, prenom, organisme, email, telephone, adresse,
+        nom, prenom, civilite, organisme, email, telephone, adresse,
         type_don: typeDon, montant_don: montantDon,
         description_don: description, date_don: dateDon,
-        mode_paiement: modePaiement
+        mode_paiement: modePaiement,
+        numero_cheque: modePaiement === "Chèque" ? numeroCheque : null,
+        banque_cheque: modePaiement === "Chèque" ? banqueCheque : null
       })
       .eq("id", donateurEnCours.id);
 
@@ -1556,10 +1705,12 @@ formulaireDon.addEventListener("submit", async function(evenement) {
       .from("donateurs")
       .insert([{
         id_donateur: idDonateur,
-        nom, prenom, organisme, email, telephone, adresse,
+        nom, prenom, civilite, organisme, email, telephone, adresse,
         type_don: typeDon, montant_don: montantDon,
         description_don: description, date_don: dateDon,
-        mode_paiement: modePaiement
+        mode_paiement: modePaiement,
+        numero_cheque: modePaiement === "Chèque" ? numeroCheque : null,
+        banque_cheque: modePaiement === "Chèque" ? banqueCheque : null
       }]);
 
     if (error) {
@@ -1581,6 +1732,7 @@ formulaireDon.addEventListener("submit", async function(evenement) {
 document.getElementById("corps-tableau-donateurs").addEventListener("click", function(evenement) {
   const btnModifier  = evenement.target.closest(".btn-icone--mod-don");
   const btnSupprimer = evenement.target.closest(".btn-icone--sup-don");
+  const btnRecuDon   = evenement.target.closest(".btn-icone--recu-don");
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
@@ -1592,6 +1744,12 @@ document.getElementById("corps-tableau-donateurs").addEventListener("click", fun
     const idTechnique = btnSupprimer.dataset.idTechnique;
     const donateur = donneesDonateurs.find(function(d) { return String(d.id) === idTechnique; });
     if (donateur) ouvrirConfirmationSuppressionDon(donateur);
+  }
+
+  if (btnRecuDon) {
+    const idTechnique = btnRecuDon.dataset.idTechnique;
+    const donateur = donneesDonateurs.find(function(d) { return String(d.id) === idTechnique; });
+    if (donateur) ouvrirModaleRecuDonateur(donateur);
   }
 });
 
@@ -1707,6 +1865,308 @@ function initialiserSelectsDateDon() {
     selectAnnee.appendChild(opt);
   }
 }
+
+/* =====================================================
+   REÇU D'ADHÉSION
+   ===================================================== */
+
+/* ---- Utilitaires reçus ---- */
+
+function formaterNomRecu(civilite, prenom, nom, organisme) {
+  if (organisme) return `de <strong>${organisme}</strong>`;
+  const prenomF    = prenom ? prenom.charAt(0).toUpperCase() + prenom.slice(1).toLowerCase() : "";
+  const nomF       = nom ? nom.toUpperCase() : "";
+  const nomComplet = [prenomF, nomF].filter(Boolean).join(" ");
+  if (nomComplet) {
+    const prefixe = civilite ? `${civilite} ` : "";
+    return `de <strong>${prefixe}${nomComplet}</strong>`;
+  }
+  return "de —";
+}
+
+function dateDuJourFormate() {
+  const d  = new Date();
+  const jj = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  return `${jj}/${mm}/${d.getFullYear()}`;
+}
+
+const recuAdhFond   = document.getElementById("recu-adh-fond");
+const modaleRecuAdh = document.getElementById("modale-recu-adh");
+let elementAvantRecuAdh = null;
+let adherentRecuEnCours = null;
+
+function ouvrirModaleRecuAdherent(adherent) {
+  elementAvantRecuAdh = document.activeElement;
+  adherentRecuEnCours = adherent;
+
+  const saison = adherent.saison || "—";
+  document.getElementById("recu-adh-annee").textContent  = `Saison ${saison}`;
+  const suffixeAdh = adherent.id_adherent ? adherent.id_adherent.replace(/^HSI-/, "") : "?";
+  document.getElementById("recu-adh-numero").textContent = `REC-ADH-${suffixeAdh}`;
+  document.getElementById("recu-adh-fait-a").textContent =
+    `Fait à Saint-Pierre-des-Corps, le ${dateDuJourFormate()}`;
+
+  document.getElementById("select-signataire-adh").value = "La trésorière";
+
+  document.getElementById("recu-adh-date").textContent = formaterDate(adherent.date_adhesion);
+
+  const mode       = adherent.mode_paiement || "";
+  const chequeInfo = champsChequesAdherents.get(String(adherent.id)) || {};
+  const lignMode   = document.getElementById("recu-adh-mode-ligne");
+  const lignCheque = document.getElementById("recu-adh-cheque-ligne");
+
+  if (mode) {
+    document.getElementById("recu-adh-mode").textContent = mode;
+    lignMode.hidden = false;
+  } else {
+    lignMode.hidden = true;
+  }
+
+  if (mode === "Chèque") {
+    const numCheque = chequeInfo.numero_cheque || "";
+    const banque    = chequeInfo.banque        || "";
+    document.getElementById("recu-adh-num-cheque").textContent = numCheque || "—";
+    document.getElementById("recu-adh-banque-sep").textContent = banque ? ` — Banque : ${banque}` : "";
+    lignCheque.hidden = false;
+  } else {
+    lignCheque.hidden = true;
+  }
+
+  majTexteRecuAdh();
+
+  recuAdhFond.hidden = false;
+  requestAnimationFrame(function() { modaleRecuAdh.focus(); });
+  document.addEventListener("keydown", gererToucheRecuAdh);
+}
+
+function majTexteRecuAdh() {
+  if (!adherentRecuEnCours) return;
+  const a          = adherentRecuEnCours;
+  const signataire = document.getElementById("select-signataire-adh").value;
+  const saison     = a.saison || "—";
+  const montant    = (a.montant_cotisation !== null && a.montant_cotisation !== undefined)
+    ? Number(a.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+    : "—";
+  const donneurHtml = formaterNomRecu(a.civilite || "", a.prenom || "", a.nom || "", "");
+  document.getElementById("recu-adh-certification").innerHTML =
+    `${signataire} de l’association <strong>Handicap Solidarité pour l’Inclusion 37</strong> ` +
+    `certifie avoir reçu la somme de <strong>${montant}</strong> ` +
+    `au titre de l'adhésion annuelle de la saison <strong>${saison}</strong> ` +
+    `${donneurHtml}.`;
+}
+
+document.getElementById("select-signataire-adh").addEventListener("change", majTexteRecuAdh);
+
+function fermerModaleRecuAdh() {
+  recuAdhFond.hidden  = true;
+  adherentRecuEnCours = null;
+  document.removeEventListener("keydown", gererToucheRecuAdh);
+  if (elementAvantRecuAdh) elementAvantRecuAdh.focus();
+}
+
+function gererToucheRecuAdh(evenement) {
+  if (evenement.key === "Escape") { fermerModaleRecuAdh(); return; }
+  if (evenement.key === "Tab") {
+    const focusables = modaleRecuAdh.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault(); dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault(); premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-fermer-recu-adh").addEventListener("click", fermerModaleRecuAdh);
+document.getElementById("btn-fermer-recu-adh-bas").addEventListener("click", fermerModaleRecuAdh);
+recuAdhFond.addEventListener("click", function(ev) { if (ev.target === recuAdhFond) fermerModaleRecuAdh(); });
+
+document.getElementById("btn-telecharger-recu-adh").addEventListener("click", function() {
+  const doc         = document.getElementById("recu-adherent-document");
+  const imgLogo     = document.getElementById("recu-adh-logo");
+  const idAdherent  = (adherentRecuEnCours && adherentRecuEnCours.id_adherent) || "recu";
+  const nomFichier  = `recu-adhesion-${idAdherent}.png`;
+  const btn         = this;
+
+  btn.disabled = true;
+  btn.textContent = "Génération…";
+
+  const srcOriginal = imgLogo.src;
+
+  chargerImageCommeDataUrl("assets/hsi37-redim-demi.png").then(function(dataUrl) {
+    imgLogo.src = dataUrl;
+    return new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+  }).then(function() {
+    return html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+  }).then(function(canvas) {
+    const lien = document.createElement("a");
+    lien.download = nomFichier;
+    lien.href     = canvas.toDataURL("image/png");
+    lien.click();
+  }).finally(function() {
+    imgLogo.src = srcOriginal;
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24" width="16" height="16">
+        <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      Télécharger le reçu
+    `.trim();
+  });
+});
+
+/* =====================================================
+   REÇU DE DON
+   ===================================================== */
+
+const recuDonFond   = document.getElementById("recu-don-fond");
+const modaleRecuDon = document.getElementById("modale-recu-don");
+let elementAvantRecuDon = null;
+let donateurRecuEnCours = null;
+
+function ouvrirModaleRecuDonateur(donateur) {
+  console.log("[RECU-DON] type_don =", JSON.stringify(donateur.type_don));
+  elementAvantRecuDon = document.activeElement;
+  donateurRecuEnCours = donateur;
+
+  const annee = donateur.date_don ? donateur.date_don.split("-")[0] : "—";
+  document.getElementById("recu-don-annee").textContent  = `Année ${annee}`;
+  const suffixeDon = donateur.id_donateur ? donateur.id_donateur.replace(/^DON-/, "") : "?";
+  document.getElementById("recu-don-numero").textContent = `REC-DON-${suffixeDon}`;
+  document.getElementById("recu-don-fait-a").textContent =
+    `Fait à Saint-Pierre-des-Corps, le ${dateDuJourFormate()}`;
+
+  document.getElementById("select-signataire-don").value = "La trésorière";
+
+  document.getElementById("recu-don-date").textContent = formaterDate(donateur.date_don);
+
+  const mode       = donateur.mode_paiement || "";
+  const lignMode   = document.getElementById("recu-don-mode-ligne");
+  const lignCheque = document.getElementById("recu-don-cheque-ligne");
+
+  if (mode) {
+    document.getElementById("recu-don-mode").textContent = mode;
+    lignMode.hidden = false;
+  } else {
+    lignMode.hidden = true;
+  }
+
+  if (mode === "Chèque") {
+    const numCheque = donateur.numero_cheque || "";
+    const banque    = donateur.banque_cheque  || "";
+    document.getElementById("recu-don-num-cheque").textContent = numCheque || "—";
+    document.getElementById("recu-don-banque-sep").textContent = banque ? ` — Banque : ${banque}` : "";
+    lignCheque.hidden = false;
+  } else {
+    lignCheque.hidden = true;
+  }
+
+  majTexteRecuDon();
+
+  recuDonFond.hidden = false;
+  requestAnimationFrame(function() { modaleRecuDon.focus(); });
+  document.addEventListener("keydown", gererToucheRecuDon);
+}
+
+function majTexteRecuDon() {
+  if (!donateurRecuEnCours) return;
+  const d            = donateurRecuEnCours;
+  const signataire   = document.getElementById("select-signataire-don").value;
+  const typeDonLower = (d.type_don || "").trim().toLowerCase();
+  const donneurHtml  = formaterNomRecu(d.civilite || "", d.prenom || "", d.nom || "", d.organisme || "");
+  const asso = "<strong>Handicap Solidarité pour l’Inclusion 37</strong>";
+  let certif = "";
+  if (typeDonLower.includes("mat")) {
+    const description = d.description_don || "—";
+    certif =
+      `${signataire} de l’association ${asso} ` +
+      `certifie avoir reçu un don de matériel (<strong>${description}</strong>) ` +
+      `${donneurHtml}.`;
+  } else if (typeDonLower.includes("financier")) {
+    const montant = (d.montant_don !== null && d.montant_don !== undefined)
+      ? Number(d.montant_don).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+      : "—";
+    certif =
+      `${signataire} de l’association ${asso} ` +
+      `certifie avoir reçu la somme de <strong>${montant}</strong> ` +
+      `${donneurHtml}.`;
+  } else {
+    certif =
+      `${signataire} de l’association ${asso} ` +
+      `certifie avoir reçu un don ${donneurHtml}.`;
+  }
+  document.getElementById("recu-don-certification").innerHTML = certif;
+}
+document.getElementById("select-signataire-don").addEventListener("change", majTexteRecuDon);
+
+function fermerModaleRecuDon() {
+  recuDonFond.hidden  = true;
+  donateurRecuEnCours = null;
+  document.removeEventListener("keydown", gererToucheRecuDon);
+  if (elementAvantRecuDon) elementAvantRecuDon.focus();
+}
+
+function gererToucheRecuDon(evenement) {
+  if (evenement.key === "Escape") { fermerModaleRecuDon(); return; }
+  if (evenement.key === "Tab") {
+    const focusables = modaleRecuDon.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = focusables[0];
+    const dernier  = focusables[focusables.length - 1];
+    if (evenement.shiftKey && document.activeElement === premier) {
+      evenement.preventDefault(); dernier.focus();
+    } else if (!evenement.shiftKey && document.activeElement === dernier) {
+      evenement.preventDefault(); premier.focus();
+    }
+  }
+}
+
+document.getElementById("btn-fermer-recu-don").addEventListener("click", fermerModaleRecuDon);
+document.getElementById("btn-fermer-recu-don-bas").addEventListener("click", fermerModaleRecuDon);
+recuDonFond.addEventListener("click", function(ev) { if (ev.target === recuDonFond) fermerModaleRecuDon(); });
+
+document.getElementById("btn-telecharger-recu-don").addEventListener("click", function() {
+  const doc        = document.getElementById("recu-donateur-document");
+  const imgLogo    = document.getElementById("recu-don-logo");
+  const idDonateur = (donateurRecuEnCours && donateurRecuEnCours.id_donateur) || "recu-don";
+  const nomFichier = `recu-don-${idDonateur}.png`;
+  const btn        = this;
+
+  btn.disabled = true;
+  btn.textContent = "Génération…";
+
+  const srcOriginal = imgLogo.src;
+
+  chargerImageCommeDataUrl("assets/hsi37-redim-demi.png").then(function(dataUrl) {
+    imgLogo.src = dataUrl;
+    return new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+  }).then(function() {
+    return html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+  }).then(function(canvas) {
+    const lien = document.createElement("a");
+    lien.download = nomFichier;
+    lien.href     = canvas.toDataURL("image/png");
+    lien.click();
+  }).finally(function() {
+    imgLogo.src = srcOriginal;
+    btn.disabled = false;
+    btn.innerHTML = `
+      <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+           viewBox="0 0 24 24" width="16" height="16">
+        <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </svg>
+      Télécharger le reçu
+    `.trim();
+  });
+});
 
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {

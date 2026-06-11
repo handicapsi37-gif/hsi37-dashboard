@@ -641,6 +641,12 @@ body {
   font-size: 0.88rem;
 }
 
+.champ-textarea {
+  resize: vertical;
+  min-height: 4.5rem;
+  line-height: 1.5;
+}
+
 .champ-select {
   cursor: pointer;
   appearance: none;
@@ -654,6 +660,24 @@ body {
   font-size: 0.82rem;
   color: var(--gris-moyen);
   margin-top: -0.25rem;
+}
+
+.champ-aide {
+  font-size: 0.85rem;
+  color: var(--orange, #F28C28);
+  font-style: italic;
+  margin-top: 0.3rem;
+  line-height: 1.4;
+}
+
+.alerte-avertissement {
+  font-size: 0.85rem;
+  color: var(--orange-fonce, #D96F00);
+  background: #FFF8EE;
+  border: 1px solid #F5D89A;
+  border-radius: var(--rayon);
+  padding: 0.55rem 0.85rem;
+  margin-bottom: 0.5rem;
 }
 
 .formulaire__mention span {
@@ -1230,4 +1254,232 @@ body {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+/* =====================================================
+   CHAMPS CHÈQUE (sous-groupe conditionnel dans formulaire)
+   ===================================================== */
+
+.formulaire__cheque-champs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* =====================================================
+   REÇU D'ADHÉSION / REÇU DE DON
+   ===================================================== */
+
+/* Boutons reçu dans le tableau */
+.btn-icone--recu-adh:hover,
+.btn-icone--recu-adh:focus-visible,
+.btn-icone--recu-don:hover,
+.btn-icone--recu-don:focus-visible {
+  color: var(--corail-fonce);
+  background-color: #fff3e0;
+}
+
+/* Modale reçu : même largeur que la modale carte */
+.modale--recu-wrapper {
+  max-width: 660px;
+}
+
+/* Corps de la modale reçu : fond gris, document centré */
+.recu-modale__corps {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: center;
+  background-color: var(--gris-fond);
+  overflow-x: auto;
+}
+
+/* Boutons bas de la modale reçu */
+.recu-modale__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border-top: 1px solid var(--gris-clair);
+}
+
+/* ---- Document reçu ---- */
+.recu-document {
+  width: 560px;
+  background: #ffffff;
+  box-shadow: 0 4px 20px rgba(30, 36, 51, 0.18);
+  font-family: 'Open Sans', sans-serif;
+  flex-shrink: 0;
+}
+
+/* En-tête bleu foncé */
+.recu__entete {
+  background-color: var(--bleu-fonce);
+  padding: 1.25rem 1.75rem;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.recu__logo {
+  height: 44px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.recu__titre-bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.recu__titre {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  line-height: 1.1;
+}
+
+.recu__sous-titre {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.78);
+  font-weight: 400;
+}
+
+/* Filet orange sous l'en-tête */
+.recu__accent {
+  height: 4px;
+  background-color: var(--corail);
+}
+
+/* Corps du reçu */
+.recu__corps {
+  padding: 1.5rem 1.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Bloc association centré */
+.recu__asso-bloc {
+  text-align: center;
+  padding-bottom: 1rem;
+  border-bottom: 2px dashed var(--gris-bord);
+}
+
+.recu__asso-nom {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--bleu-fonce);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.recu__asso-details {
+  font-size: 0.80rem;
+  color: var(--gris-moyen);
+  line-height: 1.6;
+  margin-top: 0.3rem;
+}
+
+/* Texte de certification */
+.recu__certification {
+  font-size: 0.92rem;
+  color: var(--encre);
+  line-height: 1.75;
+}
+
+.recu__certification strong {
+  color: var(--bleu-fonce);
+}
+
+/* Bloc paiement avec liseré bleu */
+.recu__paiement {
+  background-color: var(--gris-fond);
+  border-left: 4px solid var(--bleu-hsi);
+  border-radius: 0 var(--rayon) var(--rayon) 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.90rem;
+  color: var(--encre);
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.recu__paiement strong {
+  color: var(--bleu-fonce);
+}
+
+/* Zone signature */
+.recu__signature {
+  margin-top: 0.5rem;
+}
+
+.recu__sig-bloc {
+  flex: 1;
+}
+
+.recu__sig-label {
+  font-size: 0.80rem;
+  color: var(--gris-moyen);
+  margin-bottom: 0.4rem;
+}
+
+.recu__sig-zone {
+  border-bottom: 1px solid var(--encre);
+  height: 56px;
+}
+
+/* Pied de page du reçu */
+.recu__pied {
+  background-color: var(--corail);
+  padding: 0.45rem 1rem;
+  font-size: 0.72rem;
+  color: #ffffff;
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* Numéro de reçu — coin supérieur droit de l'en-tête */
+.recu__numero {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.68rem;
+  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.04em;
+  margin-left: auto;
+  align-self: flex-start;
+  padding-top: 0.15rem;
+  white-space: nowrap;
+}
+
+/* Mention "Fait à Saint-Pierre-des-Corps, le..." */
+.recu__fait-a {
+  font-size: 0.82rem;
+  color: var(--gris-moyen);
+  font-style: italic;
+  text-align: right;
+  margin-top: 0.25rem;
+}
+
+/* Barre signataire au-dessus de l'aperçu du reçu */
+.recu-modale__signataire {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.5rem 0;
+  background: var(--blanc);
+}
+
+.recu-modale__signataire-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--encre);
+  white-space: nowrap;
+}
+
+.recu-modale__signataire-select {
+  max-width: 340px;
 }

@@ -143,6 +143,7 @@
                 <th scope="col">Type de membre</th>
                 <th scope="col">Date d'adhésion</th>
                 <th scope="col">Montant</th>
+                <th scope="col">Paiement</th>
                 <th scope="col">Statut</th>
                 <th scope="col">Actions</th>
               </tr>
@@ -254,6 +255,15 @@
                    disabled aria-label="Identifiant adhérent, non modifiable" />
           </div>
 
+          <div class="champ-groupe">
+            <label for="champ-civilite" class="champ-label">Civilité</label>
+            <select id="champ-civilite" class="champ-input champ-select">
+              <option value="">—</option>
+              <option value="Madame">Madame</option>
+              <option value="Monsieur">Monsieur</option>
+            </select>
+          </div>
+
           <!-- Chaque <input> est lié à son <label> via l'attribut "for" (RGAA obligatoire) -->
           <div class="champ-groupe">
             <label for="champ-nom" class="champ-label">Nom <span aria-hidden="true">*</span></label>
@@ -322,6 +332,35 @@
               <option value="Membre fondateur">Membre fondateur</option>
               <option value="Membre de droit">Membre de droit</option>
             </select>
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="champ-mode-paiement" class="champ-label">Mode de paiement</label>
+            <select id="champ-mode-paiement" class="champ-input champ-select">
+              <option value="">— Sélectionner —</option>
+              <option value="Espèces">Espèces</option>
+              <option value="Virement">Virement</option>
+              <option value="Chèque">Chèque</option>
+              <option value="Carte bancaire">Carte bancaire</option>
+              <option value="PayPal">PayPal</option>
+              <option value="HelloAsso">HelloAsso</option>
+            </select>
+          </div>
+
+          <!-- Champs chèque adhérent — form uniquement, non envoyés à Supabase -->
+          <div id="groupe-cheque-adh" class="champ-groupe champ-groupe--large" hidden>
+            <div class="formulaire__cheque-champs">
+              <div class="champ-groupe">
+                <label for="champ-numero-cheque" class="champ-label">N° de chèque</label>
+                <input type="text" id="champ-numero-cheque" class="champ-input"
+                       placeholder="Ex : 1234567" />
+              </div>
+              <div class="champ-groupe">
+                <label for="champ-banque-adh" class="champ-label">Banque</label>
+                <input type="text" id="champ-banque-adh" class="champ-input"
+                       placeholder="Ex : Crédit Agricole" />
+              </div>
+            </div>
           </div>
 
         </div>
@@ -413,8 +452,17 @@
                    disabled aria-label="Identifiant donateur, non modifiable" />
           </div>
 
+          <div class="champ-groupe" id="groupe-civilite-don">
+            <label for="don-civilite" class="champ-label">Civilité</label>
+            <select id="don-civilite" class="champ-input champ-select">
+              <option value="">—</option>
+              <option value="Madame">Madame</option>
+              <option value="Monsieur">Monsieur</option>
+            </select>
+          </div>
+
           <div class="champ-groupe">
-            <label for="don-nom" class="champ-label">Nom <span aria-hidden="true">*</span></label>
+            <label for="don-nom" class="champ-label">Nom</label>
             <input type="text" id="don-nom" class="champ-input"
                    placeholder="Ex : Dupont" autocomplete="family-name" />
           </div>
@@ -428,7 +476,12 @@
           <div class="champ-groupe champ-groupe--large">
             <label for="don-organisme" class="champ-label">Organisme</label>
             <input type="text" id="don-organisme" class="champ-input"
-                   placeholder="Ex : Fondation XYZ" />
+                   placeholder="Ex : Fondation XYZ"
+                   aria-describedby="aide-don-organisme" />
+            <p id="aide-don-organisme" class="champ-aide">
+              Si le donateur est un organisme, remplissez uniquement ce champ.
+              Laissez les champs Civilité, Nom et Prénom vides.
+            </p>
           </div>
 
           <div class="champ-groupe champ-groupe--large">
@@ -474,14 +527,36 @@
               <option value="Espèces">Espèces</option>
               <option value="Virement">Virement</option>
               <option value="Chèque">Chèque</option>
+              <option value="Carte bancaire">Carte bancaire</option>
+              <option value="PayPal">PayPal</option>
+              <option value="HelloAsso">HelloAsso</option>
             </select>
+          </div>
+
+          <!-- Champs chèque donateur — visible si mode Chèque, envoyés à Supabase -->
+          <div class="champ-groupe champ-groupe--large" id="groupe-cheque-don" hidden>
+            <div class="formulaire__cheque-champs">
+              <div class="champ-groupe">
+                <label for="don-numero-cheque" class="champ-label">N° de chèque</label>
+                <input type="text" id="don-numero-cheque" class="champ-input"
+                       placeholder="Ex : 1234567" />
+              </div>
+              <div class="champ-groupe">
+                <label for="don-banque-cheque" class="champ-label">Banque</label>
+                <input type="text" id="don-banque-cheque" class="champ-input"
+                       placeholder="Ex : Crédit Agricole" />
+              </div>
+            </div>
           </div>
 
           <!-- Description — visible si don de matériel, texte libre -->
           <div class="champ-groupe champ-groupe--large" id="groupe-don-description" hidden>
             <label for="don-description" class="champ-label">Description du matériel <span aria-hidden="true">*</span></label>
-            <input type="text" id="don-description" class="champ-input"
-                   placeholder="Ex : Fauteuil roulant pliable, 2 déambulateurs…" />
+            <textarea id="don-description" class="champ-input champ-textarea"
+                      rows="3"
+                      placeholder="Ex : 2 fauteuils roulants pliables
+1 déambulateur
+3 cannes…"></textarea>
           </div>
 
           <!-- Date du don — 3 menus déroulants -->
@@ -508,6 +583,10 @@
         <p class="formulaire__mention">
           <span aria-hidden="true">*</span> Champs obligatoires
         </p>
+
+        <div id="avertissement-don-organisme" class="alerte-avertissement" role="status" aria-live="polite" hidden>
+          Note : pour un organisme, les champs Civilité, Nom et Prénom sont généralement laissés vides.
+        </div>
 
         <div class="modale__actions">
           <button type="button" class="btn btn--secondaire" id="btn-annuler-modale-don">
@@ -629,6 +708,184 @@
                   stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
           Télécharger la carte
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== MODALE REÇU D'ADHÉSION ========== -->
+  <div class="modale-fond" id="recu-adh-fond" role="presentation" hidden>
+    <div class="modale modale--recu-wrapper"
+         id="modale-recu-adh"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="recu-adh-titre-modal"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="recu-adh-titre-modal">Reçu d'adhésion</h2>
+        <button class="modale__fermer" id="btn-fermer-recu-adh"
+                aria-label="Fermer le reçu d'adhésion">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="recu-modale__signataire">
+        <label for="select-signataire-adh" class="recu-modale__signataire-label">Signataire :</label>
+        <select id="select-signataire-adh" class="champ-input champ-select recu-modale__signataire-select">
+          <option value="Le président">Le président — BELHAJ Mohammed</option>
+          <option value="La trésorière" selected>La trésorière — BELHAJ Oum Keltoum</option>
+          <option value="La secrétaire">La secrétaire — BELHAJ Nawel</option>
+        </select>
+      </div>
+
+      <div class="recu-modale__corps">
+        <div id="recu-adherent-document" class="recu-document" aria-label="Reçu d'adhésion HSI37">
+          <div class="recu__entete">
+            <img src="assets/hsi37-redim-demi.png"
+                 alt="HSI37 — Handicap Solidarité pour l'Inclusion 37"
+                 class="recu__logo" id="recu-adh-logo" />
+            <div class="recu__titre-bloc">
+              <p class="recu__titre">Reçu d'adhésion</p>
+              <p class="recu__sous-titre" id="recu-adh-annee">Saison —</p>
+            </div>
+            <span class="recu__numero" id="recu-adh-numero"></span>
+          </div>
+          <div class="recu__accent"></div>
+          <div class="recu__corps">
+            <div class="recu__asso-bloc">
+              <p class="recu__asso-nom">Handicap Solidarité pour l'Inclusion 37</p>
+              <p class="recu__asso-details">
+                Association loi 1901 — n° W372020254<br>
+                17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps<br>
+                07 43 29 58 30 &nbsp;|&nbsp; handicapsi37@gmail.com &nbsp;|&nbsp; hsi37.fr
+              </p>
+            </div>
+            <p class="recu__certification" id="recu-adh-certification"></p>
+            <div class="recu__paiement">
+              <div>Cotisation payée le&nbsp;: <strong id="recu-adh-date">—</strong></div>
+              <div id="recu-adh-mode-ligne" hidden>par <strong id="recu-adh-mode">—</strong></div>
+              <div id="recu-adh-cheque-ligne" hidden>Chèque n°&nbsp;<strong id="recu-adh-num-cheque">—</strong><span id="recu-adh-banque-sep"></span></div>
+            </div>
+            <p class="recu__fait-a" id="recu-adh-fait-a"></p>
+            <div class="recu__signature">
+              <div class="recu__sig-bloc">
+                <p class="recu__sig-label">Date et signature :</p>
+                <div class="recu__sig-zone"></div>
+              </div>
+            </div>
+          </div>
+          <div class="recu__pied">
+            Handicap Solidarité pour l'Inclusion 37 &nbsp;|&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps &nbsp;|&nbsp; hsi37.fr
+          </div>
+        </div>
+      </div>
+
+      <div class="recu-modale__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-fermer-recu-adh-bas">
+          Fermer
+        </button>
+        <button type="button" class="btn btn--primaire" id="btn-telecharger-recu-adh">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          Télécharger le reçu
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========== MODALE REÇU DE DON ========== -->
+  <div class="modale-fond" id="recu-don-fond" role="presentation" hidden>
+    <div class="modale modale--recu-wrapper"
+         id="modale-recu-don"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="recu-don-titre-modal"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="recu-don-titre-modal">Reçu de don</h2>
+        <button class="modale__fermer" id="btn-fermer-recu-don"
+                aria-label="Fermer le reçu de don">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="recu-modale__signataire">
+        <label for="select-signataire-don" class="recu-modale__signataire-label">Signataire :</label>
+        <select id="select-signataire-don" class="champ-input champ-select recu-modale__signataire-select">
+          <option value="Le président">Le président — BELHAJ Mohammed</option>
+          <option value="La trésorière" selected>La trésorière — BELHAJ Oum Keltoum</option>
+          <option value="La secrétaire">La secrétaire — BELHAJ Nawel</option>
+        </select>
+      </div>
+
+      <div class="recu-modale__corps">
+        <div id="recu-donateur-document" class="recu-document" aria-label="Reçu de don HSI37">
+          <div class="recu__entete">
+            <img src="assets/hsi37-redim-demi.png"
+                 alt="HSI37 — Handicap Solidarité pour l'Inclusion 37"
+                 class="recu__logo" id="recu-don-logo" />
+            <div class="recu__titre-bloc">
+              <p class="recu__titre">Reçu de don</p>
+              <p class="recu__sous-titre" id="recu-don-annee">Année —</p>
+            </div>
+            <span class="recu__numero" id="recu-don-numero"></span>
+          </div>
+          <div class="recu__accent"></div>
+          <div class="recu__corps">
+            <div class="recu__asso-bloc">
+              <p class="recu__asso-nom">Handicap Solidarité pour l'Inclusion 37</p>
+              <p class="recu__asso-details">
+                Association loi 1901 — n° W372020254<br>
+                17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps<br>
+                07 43 29 58 30 &nbsp;|&nbsp; handicapsi37@gmail.com &nbsp;|&nbsp; hsi37.fr
+              </p>
+            </div>
+            <p class="recu__certification" id="recu-don-certification"></p>
+            <div class="recu__paiement">
+              <div>Don reçu le&nbsp;: <strong id="recu-don-date">—</strong></div>
+              <div id="recu-don-mode-ligne" hidden>par <strong id="recu-don-mode">—</strong></div>
+              <div id="recu-don-cheque-ligne" hidden>Chèque n°&nbsp;<strong id="recu-don-num-cheque">—</strong><span id="recu-don-banque-sep"></span></div>
+            </div>
+            <p class="recu__fait-a" id="recu-don-fait-a"></p>
+            <div class="recu__signature">
+              <div class="recu__sig-bloc">
+                <p class="recu__sig-label">Date et signature :</p>
+                <div class="recu__sig-zone"></div>
+              </div>
+            </div>
+          </div>
+          <div class="recu__pied">
+            Handicap Solidarité pour l'Inclusion 37 &nbsp;|&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps &nbsp;|&nbsp; hsi37.fr
+          </div>
+        </div>
+      </div>
+
+      <div class="recu-modale__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-fermer-recu-don-bas">
+          Fermer
+        </button>
+        <button type="button" class="btn btn--primaire" id="btn-telecharger-recu-don">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          Télécharger le reçu
         </button>
       </div>
 
