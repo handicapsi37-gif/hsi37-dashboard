@@ -883,12 +883,58 @@ const formulaireConnexion = document.getElementById("formulaire-connexion");
 const zoneErreur          = document.getElementById("connexion-erreur");
 const btnDeconnexion      = document.getElementById("btn-deconnexion");
 
+/* ---- Éléments hub ---- */
+const hubAccueil        = document.getElementById("hub-accueil");
+const navOnglets        = document.getElementById("nav-onglets");
+const btnRetourAccueil  = document.getElementById("btn-retour-accueil");
+const sectionDocuments  = document.getElementById("section-documents");
+const sectionSignatures = document.getElementById("section-signatures");
+
+/* Affiche le hub : masque tout sauf le hub */
+function afficherHub() {
+  hubAccueil.hidden        = false;
+  navOnglets.hidden        = true;
+  document.getElementById("panneau-adherents").hidden = true;
+  document.getElementById("panneau-donateurs").hidden = true;
+  sectionDocuments.hidden  = true;
+  sectionSignatures.hidden = true;
+  btnRetourAccueil.hidden  = true;
+}
+
+/* Navigue vers une section depuis le hub */
+function allerVers(vue) {
+  hubAccueil.hidden        = true;
+  btnRetourAccueil.hidden  = false;
+  sectionDocuments.hidden  = true;
+  sectionSignatures.hidden = true;
+
+  if (vue === "adherents") {
+    navOnglets.hidden = false;
+    activerOnglet("panneau-adherents");
+    chargerAdherents();
+  } else if (vue === "donateurs") {
+    navOnglets.hidden = false;
+    activerOnglet("panneau-donateurs");
+    chargerDonateurs();
+  } else if (vue === "documents") {
+    navOnglets.hidden = true;
+    document.getElementById("panneau-adherents").hidden = true;
+    document.getElementById("panneau-donateurs").hidden = true;
+    sectionDocuments.hidden = false;
+  } else if (vue === "signatures") {
+    navOnglets.hidden = true;
+    document.getElementById("panneau-adherents").hidden = true;
+    document.getElementById("panneau-donateurs").hidden = true;
+    sectionSignatures.hidden = false;
+  }
+}
+
 function afficherTableauDeBord() {
   ecranConnexion.hidden   = true;
   entetePrincipal.hidden  = false;
   contenuPrincipal.hidden = false;
   piedDePage.hidden       = false;
-  chargerAdherents();
+  afficherHub();
 }
 
 function afficherEcranConnexion() {
@@ -2286,6 +2332,26 @@ document.getElementById("btn-bulletin-standard").addEventListener("click", funct
 
 document.getElementById("btn-bulletin-don").addEventListener("click", function() {
   genererBulletin(true);
+});
+
+/* =====================================================
+   HUB — LISTENERS TUILES ET RETOUR ACCUEIL
+   ===================================================== */
+
+document.getElementById("tuile-adherents").addEventListener("click", function() {
+  allerVers("adherents");
+});
+document.getElementById("tuile-donateurs").addEventListener("click", function() {
+  allerVers("donateurs");
+});
+document.getElementById("tuile-documents").addEventListener("click", function() {
+  allerVers("documents");
+});
+document.getElementById("tuile-signatures").addEventListener("click", function() {
+  allerVers("signatures");
+});
+document.getElementById("btn-retour-accueil").addEventListener("click", function() {
+  afficherHub();
 });
 
 /* ---------- INITIALISATION ---------- */

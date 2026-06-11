@@ -62,19 +62,107 @@
            alt="hsi37 — Handicap Solidarité pour l'Inclusion 37"
            class="entete__logo-img" />
     </div>
-    <h1 class="entete__titre">Gestion des adhérents</h1>
-    <!-- Bouton de déconnexion — géré par app.js (signOut Supabase) -->
-    <button class="btn btn--deconnexion" id="btn-deconnexion" type="button">
-      Se déconnecter
-    </button>
+    <h1 class="entete__titre">Tableau de bord HSI37</h1>
+    <div class="entete__actions">
+      <!-- Bouton retour hub — masqué sur le hub, visible dans les sections -->
+      <button class="btn-retour-accueil" id="btn-retour-accueil" type="button" hidden
+              aria-label="Retour à l'accueil">
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24" width="15" height="15" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+          <polyline points="9 21 9 13 15 13 15 21"/>
+        </svg>
+        Accueil
+      </button>
+      <!-- Bouton de déconnexion — géré par app.js (signOut Supabase) -->
+      <button class="btn btn--deconnexion" id="btn-deconnexion" type="button">
+        Se déconnecter
+      </button>
+    </div>
   </header>
 
   <!-- ========== CONTENU PRINCIPAL ========== -->
   <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
   <main class="contenu-principal" id="contenu-principal" hidden>
 
+    <!-- ========== HUB D'ACCUEIL ========== -->
+    <section id="hub-accueil" class="hub-accueil" aria-label="Accueil — tableau de bord HSI37">
+
+      <div class="hub__bienvenue">
+        <h2 class="hub__titre">Bienvenue sur le tableau de bord HSI37</h2>
+        <p class="hub__sous-titre">Que souhaitez-vous faire ?</p>
+      </div>
+
+      <div class="hub__grille">
+
+        <!-- Tuile Adhérents -->
+        <button class="hub-tuile" id="tuile-adherents" type="button"
+                aria-label="Accéder à la gestion des adhérents">
+          <div class="hub-tuile__icone" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="8" r="4"/>
+              <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+            </svg>
+          </div>
+          <h3 class="hub-tuile__titre">Adhérents</h3>
+          <p class="hub-tuile__desc">Gérer les adhérents, cartes et reçus</p>
+        </button>
+
+        <!-- Tuile Donateurs -->
+        <button class="hub-tuile" id="tuile-donateurs" type="button"
+                aria-label="Accéder à la gestion des donateurs">
+          <div class="hub-tuile__icone" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+            </svg>
+          </div>
+          <h3 class="hub-tuile__titre">Donateurs</h3>
+          <p class="hub-tuile__desc">Gérer les donateurs et reçus de don</p>
+        </button>
+
+        <!-- Tuile Documents -->
+        <button class="hub-tuile" id="tuile-documents" type="button"
+                aria-label="Accéder aux documents de l'association">
+          <div class="hub-tuile__icone" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+              <polyline points="14 2 14 8 20 8"/>
+              <line x1="16" y1="13" x2="8" y2="13"/>
+              <line x1="16" y1="17" x2="8" y2="17"/>
+              <line x1="10" y1="9" x2="8" y2="9"/>
+            </svg>
+          </div>
+          <h3 class="hub-tuile__titre">Documents</h3>
+          <p class="hub-tuile__desc">Bulletins, attestations, courriers</p>
+        </button>
+
+        <!-- Tuile Signatures email -->
+        <button class="hub-tuile" id="tuile-signatures" type="button"
+                aria-label="Accéder aux signatures email du bureau">
+          <div class="hub-tuile__icone" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+          </div>
+          <h3 class="hub-tuile__titre">Signatures email</h3>
+          <p class="hub-tuile__desc">Signatures Gmail du bureau</p>
+        </button>
+
+      </div>
+    </section>
+
     <!-- ---- Navigation par onglets ---- -->
-    <nav class="nav-onglets" role="tablist" aria-label="Sections du tableau de bord">
+    <nav class="nav-onglets" id="nav-onglets" role="tablist" aria-label="Sections du tableau de bord">
       <button class="onglet onglet--actif" id="onglet-adherents" role="tab"
               aria-selected="true" aria-controls="panneau-adherents" type="button">
         Adhérents
@@ -116,19 +204,6 @@
         </div>
 
       <div class="barre-actions__droite">
-        <button class="btn btn--secondaire" id="btn-bulletin"
-                aria-haspopup="dialog" aria-controls="modale-bulletin">
-          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-               viewBox="0 0 24 24" width="16" height="16">
-            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <polyline points="14 2 14 8 20 8"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-            <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
-          </svg>
-          Bulletin d'adhésion
-        </button>
         <button class="btn btn--primaire" id="btn-ajouter"
                 aria-haspopup="dialog" aria-controls="modale-adherent">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
@@ -226,6 +301,123 @@
 
     </div>
     <!-- fin panneau-donateurs -->
+
+    <!-- ========== SECTION DOCUMENTS ========== -->
+    <section id="section-documents" class="section-hub-page" hidden
+             aria-label="Documents de l'association">
+
+      <div class="section-hub-page__entete">
+        <h2 class="section-hub-page__titre">Documents</h2>
+        <p class="section-hub-page__sous-titre">Bulletins, attestations et courriers de l'association</p>
+      </div>
+
+      <div class="section-hub-page__corps">
+        <div class="docs-grille">
+
+          <!-- Bulletin d'adhésion (déplacé depuis la barre d'actions adhérents) -->
+          <div class="doc-carte">
+            <div class="doc-carte__icone" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"
+                   fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+                <line x1="10" y1="9" x2="8" y2="9"/>
+              </svg>
+            </div>
+            <div class="doc-carte__info">
+              <h3 class="doc-carte__titre">Bulletin d'adhésion</h3>
+              <p class="doc-carte__desc">Bulletin vierge à télécharger — version standard ou avec don</p>
+            </div>
+            <button class="btn btn--primaire" id="btn-bulletin"
+                    aria-haspopup="dialog" aria-controls="modale-bulletin">
+              Générer
+            </button>
+          </div>
+
+        </div>
+        <p class="docs-note">D'autres documents (en-tête officiel, attestation de don, relance, convocation, PV) seront ajoutés prochainement.</p>
+      </div>
+
+    </section>
+
+    <!-- ========== SECTION SIGNATURES ========== -->
+    <section id="section-signatures" class="section-hub-page" hidden
+             aria-label="Signatures email du bureau">
+
+      <div class="section-hub-page__entete">
+        <h2 class="section-hub-page__titre">Signatures email</h2>
+        <p class="section-hub-page__sous-titre">Signatures Gmail pour les membres du bureau — ouvrir, sélectionner tout, copier, coller dans Gmail</p>
+      </div>
+
+      <div class="section-hub-page__corps">
+        <div class="sigs-grille">
+
+          <div class="sig-carte">
+            <div class="sig-carte__info">
+              <h3 class="sig-carte__titre">Présidente</h3>
+              <p class="sig-carte__chemin">signatures/signature-president.html</p>
+            </div>
+            <a href="signatures/signature-president.html" target="_blank"
+               class="btn btn--secondaire" rel="noopener">Ouvrir</a>
+          </div>
+
+          <div class="sig-carte">
+            <div class="sig-carte__info">
+              <h3 class="sig-carte__titre">Secrétaire</h3>
+              <p class="sig-carte__chemin">signatures/signature-secretaire.html</p>
+            </div>
+            <a href="signatures/signature-secretaire.html" target="_blank"
+               class="btn btn--secondaire" rel="noopener">Ouvrir</a>
+          </div>
+
+          <div class="sig-carte">
+            <div class="sig-carte__info">
+              <h3 class="sig-carte__titre">Trésorière</h3>
+              <p class="sig-carte__chemin">signatures/signature-tresoriere.html</p>
+            </div>
+            <a href="signatures/signature-tresoriere.html" target="_blank"
+               class="btn btn--secondaire" rel="noopener">Ouvrir</a>
+          </div>
+
+          <div class="sig-carte">
+            <div class="sig-carte__info">
+              <h3 class="sig-carte__titre">Institutionnelle</h3>
+              <p class="sig-carte__chemin">signatures/signature-institutionnelle.html</p>
+            </div>
+            <a href="signatures/signature-institutionnelle.html" target="_blank"
+               class="btn btn--secondaire" rel="noopener">Ouvrir</a>
+          </div>
+
+          <div class="sig-carte">
+            <div class="sig-carte__info">
+              <h3 class="sig-carte__titre">Recrutement</h3>
+              <p class="sig-carte__chemin">signatures/signature-recrutement.html</p>
+            </div>
+            <a href="signatures/signature-recrutement.html" target="_blank"
+               class="btn btn--secondaire" rel="noopener">Ouvrir</a>
+          </div>
+
+          <div class="sig-carte">
+            <div class="sig-carte__info">
+              <h3 class="sig-carte__titre">Dons</h3>
+              <p class="sig-carte__chemin">signatures/signature-dons.html</p>
+            </div>
+            <a href="signatures/signature-dons.html" target="_blank"
+               class="btn btn--secondaire" rel="noopener">Ouvrir</a>
+          </div>
+
+        </div>
+
+        <div class="sigs-info">
+          <strong>Comment utiliser une signature Gmail :</strong>
+          ouvrir le fichier → sélectionner tout (Ctrl+A) → copier (Ctrl+C) → dans Gmail : Paramètres → Voir tous les paramètres → Signatures → Nouvelle signature → coller.
+        </div>
+
+      </div>
+    </section>
 
   </main>
 
