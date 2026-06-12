@@ -1990,6 +1990,318 @@ body {
   font-style: italic;
 }
 
+/* ---- Cartes documents : variantes ---- */
+
+.doc-carte--info {
+  opacity: 0.85;
+  border-style: dashed;
+}
+
+.doc-carte__icone--orange {
+  background: #fff3e0;
+  color: var(--corail);
+}
+
+.doc-carte__badge {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--corail-fonce);
+  background: #fff0e0;
+  border: 1px solid #f5d0a0;
+  border-radius: 20px;
+  padding: 3px 10px;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---- Icônes boutons tableau — attestation & relance ---- */
+
+.btn-icone--attestation:hover,
+.btn-icone--attestation:focus-visible {
+  color: #1e7d45;
+  background-color: #e6f5ec;
+}
+
+.btn-icone--relance:hover,
+.btn-icone--relance:focus-visible {
+  color: var(--corail-fonce);
+  background-color: #fff3e0;
+}
+
+/* ---- Heure (selects heures + minutes) ---- */
+
+.heure-conteneur {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.heure-sep {
+  font-weight: 600;
+  color: var(--encre);
+}
+
+/* ---- Modale document (aperçu) — plus large que reçu ---- */
+
+.modale--doc-wrapper {
+  max-width: 720px;
+}
+
+/* ---- Modale formulaire document ---- */
+
+.modale--formulaire-doc {
+  max-width: 640px;
+}
+
+/* =====================================================
+   DOCUMENTS A4 COMMUNS (attestation, relance, convocation, PV, courrier)
+   ===================================================== */
+
+/* Document en aperçu (dans modale) ou hors écran */
+.doc-a4 {
+  width: 620px;
+  background: #ffffff;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 13px;
+  color: #333333;
+  line-height: 1.6;
+  box-shadow: 0 4px 20px rgba(30, 36, 51, 0.18);
+  flex-shrink: 0;
+}
+
+/* Version hors-écran pour html2canvas */
+.doc-a4--hors-ecran {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  box-shadow: none;
+}
+
+/* En-tête : logo gauche + coordonnées droite */
+.doc-a4__entete {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 28px 16px;
+  gap: 16px;
+}
+
+.doc-a4__logo {
+  height: 52px;
+  width: auto;
+  flex-shrink: 0;
+}
+
+.doc-a4__coords {
+  text-align: right;
+}
+
+/* Nom association : bleu foncé + "37" orange */
+.doc-a4__nom {
+  font-family: 'Oswald', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1F4E79;
+  margin: 0 0 4px;
+  line-height: 1.3;
+}
+
+.doc-a4__accent {
+  color: #F28C28;
+}
+
+/* Séparateur ◆ orange dans les coordonnées */
+.doc-a4__sep {
+  color: #F28C28;
+}
+
+.doc-a4__coord {
+  font-size: 11px;
+  color: #888888;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Filet orange (séparateur en-tête / pied de page) */
+.doc-a4__filet {
+  height: 3px;
+  background: #F28C28;
+  margin: 0;
+}
+
+.doc-a4__pied-filet {
+  height: 2px;
+  background: #F28C28;
+  margin-top: 0;
+}
+
+/* Corps du document */
+.doc-a4__corps {
+  padding: 22px 28px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Titre du document — bleu foncé + soulignement orange */
+.doc-a4__titre {
+  font-family: 'Oswald', sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1F4E79;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: center;
+  padding-bottom: 10px;
+  border-bottom: 2px solid #F28C28;
+  margin: 0 0 6px;
+}
+
+/* Paragraphe courant */
+.doc-a4__para {
+  margin: 0;
+  color: #333333;
+}
+
+.doc-a4__para--statut {
+  font-size: 11.5px;
+  color: #666666;
+  font-style: italic;
+}
+
+/* Bloc infos encadré */
+.doc-a4__infos-bloc {
+  background: #f8f9fa;
+  border-left: 3px solid #F28C28;
+  border-radius: 0 4px 4px 0;
+  padding: 10px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+}
+
+.doc-a4__infos-bloc p { margin: 0; }
+
+/* Sous-titre de section */
+.doc-a4__sous-titre-section {
+  font-weight: 700;
+  color: #1F4E79;
+  font-size: 13px;
+  margin: 0;
+}
+
+/* Liste numérotée (ordre du jour, résolutions) */
+.doc-a4__liste {
+  padding-left: 20px;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.doc-a4__liste li {
+  color: #333333;
+}
+
+/* Corps de texte avec sauts de ligne */
+.doc-a4__corps-texte {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.doc-a4__corps-texte p { margin: 0; }
+
+/* Lieu + date (lettre) */
+.doc-a4__lieu-date {
+  text-align: right;
+  color: #666666;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Bloc destinataire (courrier) */
+.doc-a4__destinataire {
+  background: #f8f9fa;
+  border: 1px solid #e0e0e0;
+  padding: 10px 14px;
+  font-size: 13px;
+  color: #333333;
+  white-space: pre-line;
+  min-height: 50px;
+}
+
+.doc-a4__destinataire p { margin: 0; }
+
+/* Objet du courrier */
+.doc-a4__objet {
+  margin: 0;
+  border-bottom: 1px solid #e0e0e0;
+  padding-bottom: 8px;
+}
+
+/* Mention "Fait à …" */
+.doc-a4__fait-a {
+  font-size: 12px;
+  color: #666666;
+  text-align: right;
+  margin: 0;
+}
+
+/* Bloc signature */
+.doc-a4__sig {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-self: flex-end;
+  min-width: 220px;
+  text-align: center;
+}
+
+.doc-a4__sig-label {
+  font-size: 12px;
+  color: #666666;
+  margin: 0;
+}
+
+.doc-a4__sig-zone {
+  border-bottom: 1px solid #333333;
+  height: 52px;
+}
+
+.doc-a4__sig-nom {
+  font-size: 12px;
+  font-weight: 600;
+  color: #1F4E79;
+  margin: 0;
+}
+
+/* Deux signatures côte à côte (PV) */
+.doc-a4__sigs-deux {
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-top: 8px;
+}
+
+.doc-a4__sigs-deux .doc-a4__sig {
+  flex: 1;
+  align-self: auto;
+  min-width: 0;
+}
+
+/* Pied de page du document */
+.doc-a4__pied {
+  padding: 8px 16px;
+  text-align: center;
+  font-size: 10px;
+  color: #888888;
+  background: #fafafa;
+  line-height: 1.6;
+}
+
 /* ---- Signatures ---- */
 
 .sigs-grille {

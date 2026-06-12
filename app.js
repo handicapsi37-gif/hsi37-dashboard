@@ -145,7 +145,23 @@ function genererBadge(cle) {
  * @param {string} idTechnique - UUID Supabase (clé primaire)
  * @returns {string}
  */
-function genererBoutonsActions(idAdherent, idTechnique) {
+function genererBoutonsActions(idAdherent, idTechnique, statutCle) {
+  const btnRelance = (statutCle === 'arenouveler' || statutCle === 'enretard') ? `
+    <button class="btn-icone btn-icone--relance"
+            aria-label="Relance de cotisation ${idAdherent}"
+            title="Relance de cotisation"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           width="17" height="17">
+        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+              stroke="currentColor" stroke-width="2" fill="none"/>
+        <polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="2" fill="none"/>
+      </svg>
+    </button>
+  ` : '';
+
   return `
     <button class="btn-icone btn-icone--modifier"
             aria-label="Modifier l'adhérent ${idAdherent}"
@@ -215,6 +231,23 @@ function genererBoutonsActions(idAdherent, idTechnique) {
               stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
     </button>
+    <button class="btn-icone btn-icone--attestation"
+            aria-label="Attestation d'adhésion ${idAdherent}"
+            title="Attestation d'adhésion"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           width="17" height="17">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <polyline points="14 2 14 8 20 8"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <polyline points="9 15 11 17 15 13"
+              stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    ${btnRelance}
   `.trim();
 }
 
@@ -266,7 +299,7 @@ function remplirTableau(adherents) {
       <td>${montant}</td>
       <td>${adherent.mode_paiement || "—"}</td>
       <td>${genererBadge(calculerStatut(adherent.saison))}</td>
-      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id)}</td>
+      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id, calculerStatut(adherent.saison))}</td>
     `;
 
     corps.appendChild(ligne);
@@ -752,10 +785,12 @@ formulaire.addEventListener("submit", async function(evenement) {
 
 document.getElementById("corps-tableau").addEventListener("click", function(evenement) {
   /* closest() remonte l'arbre DOM même si le clic a touché le SVG interne */
-  const btnModifier  = evenement.target.closest(".btn-icone--modifier");
-  const btnSupprimer = evenement.target.closest(".btn-icone--supprimer");
-  const btnCarte     = evenement.target.closest(".btn-icone--carte");
-  const btnRecuAdh   = evenement.target.closest(".btn-icone--recu-adh");
+  const btnModifier    = evenement.target.closest(".btn-icone--modifier");
+  const btnSupprimer   = evenement.target.closest(".btn-icone--supprimer");
+  const btnCarte       = evenement.target.closest(".btn-icone--carte");
+  const btnRecuAdh     = evenement.target.closest(".btn-icone--recu-adh");
+  const btnAttestation = evenement.target.closest(".btn-icone--attestation");
+  const btnRelance     = evenement.target.closest(".btn-icone--relance");
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
@@ -779,6 +814,18 @@ document.getElementById("corps-tableau").addEventListener("click", function(even
     const idTechnique = btnRecuAdh.dataset.idTechnique;
     const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
     if (adherent) ouvrirModaleRecuAdherent(adherent);
+  }
+
+  if (btnAttestation) {
+    const idTechnique = btnAttestation.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirModaleAttestation(adherent);
+  }
+
+  if (btnRelance) {
+    const idTechnique = btnRelance.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirModaleRelance(adherent);
   }
 });
 
@@ -2352,6 +2399,578 @@ document.getElementById("tuile-signatures").addEventListener("click", function()
 });
 document.getElementById("btn-retour-accueil").addEventListener("click", function() {
   afficherHub();
+});
+
+/* =====================================================
+   DOCUMENTS — UTILITAIRES COMMUNS
+   ===================================================== */
+
+const NOMS_SIGNATAIRES = {
+  'Le président':  'BELHAJ Mohammed',
+  'La trésorière': 'BELHAJ Oum Keltoum',
+  'La secrétaire': 'BELHAJ Nawel',
+};
+
+const MOIS_NOMS = ['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+
+function dateJourFormate() {
+  const d = new Date();
+  return `${d.getDate()} ${MOIS_NOMS[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function anneeEnCours() {
+  return new Date().getFullYear();
+}
+
+/* Initialise un groupe de selects jour/mois/année pour les modales docs */
+function initialiserSelectsDateDoc(idJour, idMois, idAnnee) {
+  const sJ = document.getElementById(idJour);
+  const sM = document.getElementById(idMois);
+  const sA = document.getElementById(idAnnee);
+  if (!sJ || !sM || !sA) return;
+
+  sJ.innerHTML = '<option value="">J</option>';
+  for (let j = 1; j <= 31; j++) {
+    const o = document.createElement('option');
+    o.value = String(j).padStart(2,'0');
+    o.textContent = String(j).padStart(2,'0');
+    sJ.appendChild(o);
+  }
+
+  sM.innerHTML = '<option value="">M</option>';
+  MOIS_NOMS.forEach(function(nom, i) {
+    const o = document.createElement('option');
+    o.value = String(i + 1).padStart(2,'0');
+    o.textContent = nom;
+    sM.appendChild(o);
+  });
+
+  const annee = anneeEnCours();
+  sA.innerHTML = '<option value="">Année</option>';
+  for (let a = annee - 1; a <= annee + 3; a++) {
+    const o = document.createElement('option');
+    o.value = String(a);
+    o.textContent = String(a);
+    if (a === annee) o.selected = true;
+    sA.appendChild(o);
+  }
+}
+
+/* Initialise les selects heures 00-23 */
+function initialiserSelectHeure(idSelect) {
+  const s = document.getElementById(idSelect);
+  if (!s) return;
+  s.innerHTML = '<option value="">HH</option>';
+  for (let h = 0; h <= 23; h++) {
+    const o = document.createElement('option');
+    o.value = String(h).padStart(2,'0');
+    o.textContent = String(h).padStart(2,'0');
+    if (h === 14) o.selected = true;
+    s.appendChild(o);
+  }
+}
+
+/* Capture un élément html2canvas → télécharge en PNG */
+function captureEtTelecharger(idElement, nomFichier, btn, texteOriginelBtn) {
+  btn.disabled   = true;
+  btn.textContent = 'Génération…';
+
+  const el   = document.getElementById(idElement);
+  const imgs = el.querySelectorAll('img.doc-a4__logo');
+
+  chargerImageCommeDataUrl('assets/hsi37-redim-demi.png').then(function(dataUrl) {
+    imgs.forEach(function(img) { img.src = dataUrl; });
+    return new Promise(function(resolve) { setTimeout(resolve, 80); });
+  }).then(function() {
+    return html2canvas(el, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: '#ffffff', logging: false });
+  }).then(function(canvas) {
+    const lien = document.createElement('a');
+    lien.download = nomFichier;
+    lien.href     = canvas.toDataURL('image/png');
+    document.body.appendChild(lien);
+    lien.click();
+    setTimeout(function() { document.body.removeChild(lien); }, 200);
+  }).finally(function() {
+    imgs.forEach(function(img) { img.src = 'assets/hsi37-redim-demi.png'; });
+    btn.disabled  = false;
+    btn.innerHTML = texteOriginelBtn;
+  });
+}
+
+/* Focus trap générique pour une modale */
+function creerFocusTrap(idModale, fnFermer) {
+  return function(ev) {
+    if (ev.key === 'Escape') { fnFermer(); return; }
+    if (ev.key !== 'Tab') return;
+    const modale     = document.getElementById(idModale);
+    const focusables = Array.from(modale.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    ));
+    if (!focusables.length) return;
+    const premier = focusables[0];
+    const dernier = focusables[focusables.length - 1];
+    if (ev.shiftKey) {
+      if (document.activeElement === premier) { ev.preventDefault(); dernier.focus(); }
+    } else {
+      if (document.activeElement === dernier)  { ev.preventDefault(); premier.focus(); }
+    }
+  };
+}
+
+/* =====================================================
+   DOCUMENT 2 — ATTESTATION D'ADHÉSION
+   ===================================================== */
+
+const attestationFond   = document.getElementById('attestation-fond');
+const modaleAttestation = document.getElementById('modale-attestation');
+let elementAvantAttestation = null;
+let trapAttestation = null;
+let adherentAttestation = null;
+
+function ouvrirModaleAttestation(adherent) {
+  adherentAttestation    = adherent;
+  elementAvantAttestation = document.activeElement;
+  peuplerAttestation(adherent, 'La trésorière');
+
+  attestationFond.hidden = false;
+  requestAnimationFrame(function() { modaleAttestation.focus(); });
+  trapAttestation = creerFocusTrap('modale-attestation', fermerModaleAttestation);
+  document.addEventListener('keydown', trapAttestation);
+}
+
+function fermerModaleAttestation() {
+  attestationFond.hidden = true;
+  document.removeEventListener('keydown', trapAttestation);
+  if (elementAvantAttestation) elementAvantAttestation.focus();
+  adherentAttestation = null;
+}
+
+function peuplerAttestation(adherent, qualite) {
+  const nomSig  = NOMS_SIGNATAIRES[qualite] || '';
+  const civilite = adherent.civilite || '';
+  const prenom   = adherent.prenom   || '';
+  const nom      = adherent.nom      || '';
+  const saison   = adherent.saison   || anneeEnCours();
+
+  document.getElementById('attestation-certification').textContent =
+    `Je soussigné(e), ${qualite} ${nomSig}, certifie que ${civilite} ${prenom} ${nom.toUpperCase()} est membre de l'association Handicap Solidarité pour l'Inclusion 37 pour la saison ${saison}.`.trim();
+  document.getElementById('attestation-type').textContent    = adherent.type_membre || '—';
+  document.getElementById('attestation-numero').textContent  = adherent.id_adherent || adherent.id || '—';
+  document.getElementById('attestation-fait-a').textContent  = `Fait à Saint-Pierre-des-Corps, le ${dateJourFormate()}`;
+  document.getElementById('attestation-sig-qualite').textContent = qualite;
+  document.getElementById('attestation-sig-nom').textContent     = nomSig;
+}
+
+document.getElementById('select-signataire-attestation').addEventListener('change', function() {
+  if (adherentAttestation) peuplerAttestation(adherentAttestation, this.value);
+});
+
+document.getElementById('btn-fermer-attestation').addEventListener('click', fermerModaleAttestation);
+document.getElementById('btn-fermer-attestation-bas').addEventListener('click', fermerModaleAttestation);
+document.getElementById('attestation-fond').addEventListener('click', function(ev) {
+  if (ev.target === attestationFond) fermerModaleAttestation();
+});
+
+document.getElementById('btn-telecharger-attestation').addEventListener('click', function() {
+  const idAdh = (adherentAttestation && (adherentAttestation.id_adherent || adherentAttestation.id)) || 'HSI37';
+  const logos  = document.getElementById('doc-attestation').querySelectorAll('img.doc-a4__logo');
+  const btn    = this;
+  const label  = btn.innerHTML;
+
+  btn.disabled    = true;
+  btn.textContent = 'Génération…';
+
+  chargerImageCommeDataUrl('assets/hsi37-redim-demi.png').then(function(dataUrl) {
+    logos.forEach(function(img) { img.src = dataUrl; });
+    return new Promise(function(resolve) { setTimeout(resolve, 80); });
+  }).then(function() {
+    return html2canvas(document.getElementById('doc-attestation'), {
+      scale: 2, useCORS: false, allowTaint: true, backgroundColor: '#ffffff', logging: false
+    });
+  }).then(function(canvas) {
+    const lien = document.createElement('a');
+    lien.download = `attestation-${idAdh}.png`;
+    lien.href     = canvas.toDataURL('image/png');
+    document.body.appendChild(lien);
+    lien.click();
+    setTimeout(function() { document.body.removeChild(lien); }, 200);
+  }).finally(function() {
+    logos.forEach(function(img) { img.src = 'assets/hsi37-redim-demi.png'; });
+    btn.disabled  = false;
+    btn.innerHTML = label;
+  });
+});
+
+/* =====================================================
+   DOCUMENT 3 — RELANCE DE COTISATION
+   ===================================================== */
+
+const relanceFond   = document.getElementById('relance-fond');
+const modaleRelance = document.getElementById('modale-relance');
+let elementAvantRelance = null;
+let trapRelance = null;
+let adherentRelance = null;
+
+function ouvrirModaleRelance(adherent) {
+  adherentRelance     = adherent;
+  elementAvantRelance  = document.activeElement;
+  peuplerRelance(adherent, 'La trésorière');
+
+  relanceFond.hidden = false;
+  requestAnimationFrame(function() { modaleRelance.focus(); });
+  trapRelance = creerFocusTrap('modale-relance', fermerModaleRelance);
+  document.addEventListener('keydown', trapRelance);
+}
+
+function fermerModaleRelance() {
+  relanceFond.hidden = true;
+  document.removeEventListener('keydown', trapRelance);
+  if (elementAvantRelance) elementAvantRelance.focus();
+  adherentRelance = null;
+}
+
+function peuplerRelance(adherent, qualite) {
+  const nomSig   = NOMS_SIGNATAIRES[qualite] || '';
+  const annee    = anneeEnCours();
+  const saisonDerniere = adherent.saison || (annee - 1);
+
+  document.getElementById('relance-lieu-date').textContent   = `Saint-Pierre-des-Corps, le ${dateJourFormate()}`;
+  document.getElementById('relance-dest-nom').textContent    = [adherent.civilite, adherent.prenom, (adherent.nom || '').toUpperCase()].filter(Boolean).join(' ');
+  document.getElementById('relance-dest-adresse').textContent = adherent.adresse || '';
+  document.getElementById('relance-annee-objet').textContent = annee;
+  document.getElementById('relance-derniere-saison').textContent = saisonDerniere;
+  document.getElementById('relance-annee-corps').textContent    = annee;
+  document.getElementById('relance-sig-qualite').textContent    = qualite;
+  document.getElementById('relance-sig-nom').textContent        = nomSig;
+}
+
+document.getElementById('select-signataire-relance').addEventListener('change', function() {
+  if (adherentRelance) peuplerRelance(adherentRelance, this.value);
+});
+
+document.getElementById('btn-fermer-relance').addEventListener('click', fermerModaleRelance);
+document.getElementById('btn-fermer-relance-bas').addEventListener('click', fermerModaleRelance);
+document.getElementById('relance-fond').addEventListener('click', function(ev) {
+  if (ev.target === relanceFond) fermerModaleRelance();
+});
+
+document.getElementById('btn-mail-relance').addEventListener('click', function() {
+  if (!adherentRelance) return;
+  const email  = adherentRelance.email || '';
+  const annee  = anneeEnCours();
+  const sujet  = encodeURIComponent(`Renouvellement adhésion HSI37 — Saison ${annee}`);
+  const saisonDerniere = adherentRelance.saison || (annee - 1);
+  const corps  = encodeURIComponent(
+    `Madame, Monsieur,\n\nNous vous informons que votre adhésion à l'association Handicap Solidarité pour l'Inclusion 37 pour la saison ${saisonDerniere} est arrivée à échéance.\n\nNous vous invitons à renouveler votre adhésion pour la saison ${annee} au montant de 20,00 €.\n\nVous pouvez régler par : espèces, virement (IBAN : FR76 1027 8374 …. …. …. 116), chèque à l'ordre de l'Association Handicap Solidarité pour l'Inclusion 37, carte bancaire, PayPal ou HelloAsso.\n\nNous vous remercions pour votre soutien et restons à votre disposition.\n\nCordialement,\nHSI37`
+  );
+  window.open(`mailto:${email}?subject=${sujet}&body=${corps}`);
+});
+
+document.getElementById('btn-telecharger-relance').addEventListener('click', function() {
+  const idAdh = (adherentRelance && (adherentRelance.id_adherent || adherentRelance.id)) || 'HSI37';
+  const logos  = document.getElementById('doc-relance').querySelectorAll('img.doc-a4__logo');
+  const btn    = this;
+  const label  = btn.innerHTML;
+
+  btn.disabled    = true;
+  btn.textContent = 'Génération…';
+
+  chargerImageCommeDataUrl('assets/hsi37-redim-demi.png').then(function(dataUrl) {
+    logos.forEach(function(img) { img.src = dataUrl; });
+    return new Promise(function(resolve) { setTimeout(resolve, 80); });
+  }).then(function() {
+    return html2canvas(document.getElementById('doc-relance'), {
+      scale: 2, useCORS: false, allowTaint: true, backgroundColor: '#ffffff', logging: false
+    });
+  }).then(function(canvas) {
+    const lien = document.createElement('a');
+    lien.download = `relance-${idAdh}.png`;
+    lien.href     = canvas.toDataURL('image/png');
+    document.body.appendChild(lien);
+    lien.click();
+    setTimeout(function() { document.body.removeChild(lien); }, 200);
+  }).finally(function() {
+    logos.forEach(function(img) { img.src = 'assets/hsi37-redim-demi.png'; });
+    btn.disabled  = false;
+    btn.innerHTML = label;
+  });
+});
+
+/* =====================================================
+   DOCUMENT 4 — CONVOCATION AG
+   ===================================================== */
+
+const convocationFond   = document.getElementById('convocation-fond');
+const modaleConvocation = document.getElementById('modale-convocation');
+let elementAvantConvocation = null;
+let trapConvocation = null;
+
+function ouvrirModaleConvocation() {
+  elementAvantConvocation = document.activeElement;
+  initialiserSelectsDateDoc('conv-jour','conv-mois','conv-annee');
+  initialiserSelectHeure('conv-heure');
+
+  convocationFond.hidden = false;
+  requestAnimationFrame(function() { modaleConvocation.focus(); });
+  trapConvocation = creerFocusTrap('modale-convocation', fermerModaleConvocation);
+  document.addEventListener('keydown', trapConvocation);
+}
+
+function fermerModaleConvocation() {
+  convocationFond.hidden = true;
+  document.removeEventListener('keydown', trapConvocation);
+  if (elementAvantConvocation) elementAvantConvocation.focus();
+}
+
+document.getElementById('btn-convocation').addEventListener('click', ouvrirModaleConvocation);
+document.getElementById('btn-fermer-convocation').addEventListener('click', fermerModaleConvocation);
+document.getElementById('btn-annuler-convocation').addEventListener('click', fermerModaleConvocation);
+document.getElementById('convocation-fond').addEventListener('click', function(ev) {
+  if (ev.target === convocationFond) fermerModaleConvocation();
+});
+
+document.getElementById('btn-mail-convocation').addEventListener('click', function() {
+  const annee  = document.getElementById('conv-annee').value || anneeEnCours();
+  const sujet  = encodeURIComponent(`Convocation Assemblée Générale HSI37 — ${annee}`);
+  const odj    = document.getElementById('conv-odj').value || '';
+  const date   = [document.getElementById('conv-jour').value, document.getElementById('conv-mois').value, document.getElementById('conv-annee').value].filter(Boolean).join('/') || '…';
+  const heure  = (document.getElementById('conv-heure').value || '…') + 'h' + (document.getElementById('conv-minutes').value || '00');
+  const lieu   = document.getElementById('conv-lieu').value || '…';
+  const corps  = encodeURIComponent(`Cher(e) adhérent(e),\n\nVous êtes convoqué(e) à l'Assemblée Générale Ordinaire de l'association Handicap Solidarité pour l'Inclusion 37.\n\nDate : ${date}\nHeure : ${heure}\nLieu : ${lieu}\n\nOrdre du jour :\n${odj}\n\nNous comptons sur votre présence.\n\nCordialement,\nHSI37`);
+  window.open(`mailto:?subject=${sujet}&body=${corps}`);
+});
+
+document.getElementById('formulaire-convocation').addEventListener('submit', function(ev) {
+  ev.preventDefault();
+  const jour    = document.getElementById('conv-jour').value;
+  const mois    = document.getElementById('conv-mois').value;
+  const annee   = document.getElementById('conv-annee').value;
+  const heure   = document.getElementById('conv-heure').value;
+  const minutes = document.getElementById('conv-minutes').value;
+  const lieu    = document.getElementById('conv-lieu').value.trim();
+  const odj     = document.getElementById('conv-odj').value.trim();
+  const qualite = document.getElementById('conv-signataire').value;
+
+  if (!jour || !mois || !annee || !heure || !lieu || !odj) {
+    alert('Veuillez remplir tous les champs obligatoires.');
+    return;
+  }
+
+  const dateFormatee = `${jour}/${mois}/${annee}`;
+  const heureFormatee = `${heure}h${minutes}`;
+
+  /* Peupler le div hors-écran */
+  document.getElementById('conv-out-date').textContent  = dateFormatee;
+  document.getElementById('conv-out-heure').textContent = heureFormatee;
+  document.getElementById('conv-out-lieu').textContent  = lieu;
+  document.getElementById('conv-out-fait-a').textContent = `Saint-Pierre-des-Corps, le ${dateJourFormate()}`;
+  document.getElementById('conv-out-sig-qualite').textContent = qualite;
+  document.getElementById('conv-out-sig-nom').textContent     = NOMS_SIGNATAIRES[qualite] || '';
+
+  const liste = document.getElementById('conv-out-odj');
+  liste.innerHTML = '';
+  odj.split('\n').filter(Boolean).forEach(function(point) {
+    const li = document.createElement('li');
+    li.textContent = point.replace(/^\d+[\.\-\)]\s*/, '');
+    liste.appendChild(li);
+  });
+
+  const btn   = this.querySelector('[type="submit"]');
+  const label = btn.innerHTML;
+  fermerModaleConvocation();
+  captureEtTelecharger('doc-convocation', `convocation-AG-${annee}.png`, btn, label);
+});
+
+/* =====================================================
+   DOCUMENT 5 — PROCÈS-VERBAL AG
+   ===================================================== */
+
+const pvFond   = document.getElementById('pv-fond');
+const modalePV = document.getElementById('modale-pv');
+let elementAvantPV = null;
+let trapPV = null;
+
+function ouvrirModalePV() {
+  elementAvantPV = document.activeElement;
+  initialiserSelectsDateDoc('pv-jour','pv-mois','pv-annee');
+  initialiserSelectHeure('pv-heure-debut');
+  initialiserSelectHeure('pv-heure-fin');
+
+  pvFond.hidden = false;
+  requestAnimationFrame(function() { modalePV.focus(); });
+  trapPV = creerFocusTrap('modale-pv', fermerModalePV);
+  document.addEventListener('keydown', trapPV);
+}
+
+function fermerModalePV() {
+  pvFond.hidden = true;
+  document.removeEventListener('keydown', trapPV);
+  if (elementAvantPV) elementAvantPV.focus();
+}
+
+document.getElementById('btn-pv-ag').addEventListener('click', ouvrirModalePV);
+document.getElementById('btn-fermer-pv').addEventListener('click', fermerModalePV);
+document.getElementById('btn-annuler-pv').addEventListener('click', fermerModalePV);
+document.getElementById('pv-fond').addEventListener('click', function(ev) {
+  if (ev.target === pvFond) fermerModalePV();
+});
+
+document.getElementById('formulaire-pv').addEventListener('submit', function(ev) {
+  ev.preventDefault();
+  const jour       = document.getElementById('pv-jour').value;
+  const mois       = document.getElementById('pv-mois').value;
+  const annee      = document.getElementById('pv-annee').value;
+  const hDebut     = document.getElementById('pv-heure-debut').value;
+  const mDebut     = document.getElementById('pv-minutes-debut').value;
+  const hFin       = document.getElementById('pv-heure-fin').value;
+  const mFin       = document.getElementById('pv-minutes-fin').value;
+  const lieu       = document.getElementById('pv-lieu').value.trim();
+  const presents   = document.getElementById('pv-presents').value;
+  const representes = document.getElementById('pv-representes').value;
+  const president  = document.getElementById('pv-president-seance').value.trim();
+  const secretaire = document.getElementById('pv-secretaire-seance').value.trim();
+  const odj        = document.getElementById('pv-odj').value.trim();
+  const resolutions = document.getElementById('pv-resolutions').value.trim();
+
+  if (!jour || !mois || !annee) { alert('Veuillez indiquer la date de l\'AG.'); return; }
+
+  const dateFormatee   = `${jour}/${mois}/${annee}`;
+  const heureDebut     = hDebut ? `${hDebut}h${mDebut}` : '…';
+  const heureFin       = hFin   ? `${hFin}h${mFin}`     : '…';
+
+  document.getElementById('pv-out-intro').textContent   = `En date du ${dateFormatee}, à ${heureDebut}, au ${lieu || '…'}.`;
+  document.getElementById('pv-out-presents').textContent   = presents || '—';
+  document.getElementById('pv-out-representes').textContent = representes || '—';
+  document.getElementById('pv-out-bureau').textContent  = `L'assemblée est présidée par ${president || '…'}, assisté(e) de ${secretaire || '…'}.`;
+  document.getElementById('pv-out-levee').textContent   = `La séance est levée à ${heureFin}.`;
+  document.getElementById('pv-out-president').textContent  = president;
+  document.getElementById('pv-out-secretaire').textContent = secretaire;
+
+  const listeOdj = document.getElementById('pv-out-odj');
+  listeOdj.innerHTML = '';
+  (odj || '').split('\n').filter(Boolean).forEach(function(point) {
+    const li = document.createElement('li');
+    li.textContent = point.replace(/^\d+[\.\-\)]\s*/, '');
+    listeOdj.appendChild(li);
+  });
+
+  const divRes = document.getElementById('pv-out-resolutions');
+  divRes.innerHTML = '';
+  (resolutions || '').split('\n').filter(Boolean).forEach(function(ligne) {
+    const p = document.createElement('p');
+    p.textContent = ligne;
+    divRes.appendChild(p);
+  });
+
+  const btn   = this.querySelector('[type="submit"]');
+  const label = btn.innerHTML;
+  fermerModalePV();
+  captureEtTelecharger('doc-pv', `PV-AG-${annee}.png`, btn, label);
+});
+
+/* =====================================================
+   DOCUMENT 6 — COURRIER LIBRE
+   ===================================================== */
+
+const courrierFond   = document.getElementById('courrier-fond');
+const modaleCourrier = document.getElementById('modale-courrier');
+let elementAvantCourrier = null;
+let trapCourrier = null;
+
+function ouvrirModaleCourrier() {
+  elementAvantCourrier = document.activeElement;
+  courrierFond.hidden  = false;
+  requestAnimationFrame(function() { modaleCourrier.focus(); });
+  trapCourrier = creerFocusTrap('modale-courrier', fermerModaleCourrier);
+  document.addEventListener('keydown', trapCourrier);
+}
+
+function fermerModaleCourrier() {
+  courrierFond.hidden = true;
+  document.removeEventListener('keydown', trapCourrier);
+  if (elementAvantCourrier) elementAvantCourrier.focus();
+}
+
+document.getElementById('btn-courrier').addEventListener('click', ouvrirModaleCourrier);
+document.getElementById('btn-fermer-courrier').addEventListener('click', fermerModaleCourrier);
+document.getElementById('btn-annuler-courrier').addEventListener('click', fermerModaleCourrier);
+document.getElementById('courrier-fond').addEventListener('click', function(ev) {
+  if (ev.target === courrierFond) fermerModaleCourrier();
+});
+
+document.getElementById('formulaire-courrier').addEventListener('submit', function(ev) {
+  ev.preventDefault();
+  const destinataire = document.getElementById('courrier-destinataire').value.trim();
+  const objet        = document.getElementById('courrier-objet').value.trim();
+  const corps        = document.getElementById('courrier-corps').value.trim();
+  const qualite      = document.getElementById('courrier-signataire').value;
+
+  if (!objet || !corps) { alert('L\'objet et le corps du courrier sont obligatoires.'); return; }
+
+  const today = new Date();
+  const dateStr = `${today.getDate()} ${MOIS_NOMS[today.getMonth()]} ${today.getFullYear()}`;
+
+  document.getElementById('courrier-out-lieu-date').textContent = `Saint-Pierre-des-Corps, le ${dateStr}`;
+  document.getElementById('courrier-out-objet').textContent     = objet;
+  document.getElementById('courrier-out-sig-qualite').textContent = qualite;
+  document.getElementById('courrier-out-sig-nom').textContent   = NOMS_SIGNATAIRES[qualite] || '';
+
+  const divDest = document.getElementById('courrier-out-destinataire');
+  divDest.innerHTML = '';
+  if (destinataire) {
+    destinataire.split('\n').forEach(function(ligne) {
+      const p = document.createElement('p');
+      p.textContent = ligne;
+      divDest.appendChild(p);
+    });
+  }
+
+  const divCorps = document.getElementById('courrier-out-corps');
+  divCorps.innerHTML = '';
+  corps.split('\n').forEach(function(ligne) {
+    const p = document.createElement('p');
+    p.textContent = ligne || ' ';
+    divCorps.appendChild(p);
+  });
+
+  const dateFichier = `${String(today.getDate()).padStart(2,'0')}-${String(today.getMonth()+1).padStart(2,'0')}-${today.getFullYear()}`;
+  const btn   = this.querySelector('[type="submit"]');
+  const label = btn.innerHTML;
+  fermerModaleCourrier();
+  captureEtTelecharger('doc-courrier', `courrier-HSI37-${dateFichier}.png`, btn, label);
+});
+
+/* ---------- PAPIER À EN-TÊTE ---------- */
+document.getElementById("btn-papier-entete").addEventListener("click", function() {
+  const btn = this;
+  btn.disabled = true;
+  const texteOriginal = btn.innerHTML;
+  btn.textContent = "Chargement…";
+
+  fetch("docs/modeles/papier-entete-HSI37.docx")
+    .then(function(r) {
+      if (!r.ok) throw new Error("Fichier introuvable");
+      return r.blob();
+    })
+    .then(function(blob) {
+      const url  = URL.createObjectURL(blob);
+      const lien = document.createElement("a");
+      lien.href     = url;
+      lien.download = "papier-entete-HSI37.docx";
+      document.body.appendChild(lien);
+      lien.click();
+      setTimeout(function() {
+        document.body.removeChild(lien);
+        URL.revokeObjectURL(url);
+      }, 200);
+    })
+    .catch(function() {
+      alert("Impossible de télécharger le fichier. Veuillez contacter l'administrateur.");
+    })
+    .finally(function() {
+      btn.disabled = false;
+      btn.innerHTML = texteOriginal;
+    });
 });
 
 /* ---------- INITIALISATION ---------- */
