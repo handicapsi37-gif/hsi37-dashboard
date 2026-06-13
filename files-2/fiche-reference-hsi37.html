@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fiche de référence — Dashboard HSI37</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bleu: #2D82C4;
+    --bleu-clair: #5AA9E6;
+    --bleu-fonce: #1F4E79;
+    --orange: #F28C28;
+    --gris-texte: #333333;
+    --gris-secondaire: #666666;
+    --fond-clair: #F8F9FA;
+    --blanc: #FFFFFF;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    color: var(--gris-texte);
+    background: var(--fond-clair);
+    padding: 32px 24px;
+    max-width: 860px;
+    margin: auto;
+  }
+
+  header {
+    background: var(--bleu-fonce);
+    color: var(--blanc);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 28px;
+  }
+
+  header h1 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.6rem;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+  }
+
+  header p {
+    font-size: 0.9rem;
+    opacity: 0.85;
+  }
+
+  .alerte {
+    background: #fff3cd;
+    border-left: 5px solid var(--orange);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin-bottom: 28px;
+    font-size: 0.95rem;
+  }
+
+  .alerte strong { color: var(--orange); }
+
+  section {
+    background: var(--blanc);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 24px;
+    border-top: 4px solid var(--bleu);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+
+  section h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.2rem;
+    color: var(--bleu-fonce);
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  section h2 .num {
+    background: var(--bleu);
+    color: white;
+    border-radius: 50%;
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  h3 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1rem;
+    color: var(--bleu);
+    margin: 18px 0 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  p { margin-bottom: 10px; line-height: 1.6; }
+
+  code {
+    background: #e8f0f8;
+    color: var(--bleu-fonce);
+    font-family: 'Courier New', monospace;
+    font-size: 0.95rem;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .bloc-commandes {
+    background: #1e2a38;
+    color: #c8e6ff;
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 10px 0 16px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.92rem;
+    line-height: 2;
+  }
+
+  .bloc-commandes .commentaire {
+    color: #7aab6e;
+    font-style: italic;
+  }
+
+  .bloc-commandes .attention {
+    color: #ffb347;
+    font-weight: 700;
+  }
+
+  .grille-outils {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 14px;
+    margin-top: 12px;
+  }
+
+  .outil {
+    background: var(--fond-clair);
+    border-radius: 10px;
+    padding: 14px;
+    border: 1px solid #dde5ef;
+  }
+
+  .outil .nom {
+    font-family: 'Oswald', sans-serif;
+    color: var(--bleu-fonce);
+    font-size: 1rem;
+    margin-bottom: 6px;
+  }
+
+  .outil .description {
+    font-size: 0.85rem;
+    color: var(--gris-secondaire);
+    line-height: 1.5;
+  }
+
+  .outil .jamais {
+    font-size: 0.8rem;
+    color: #c0392b;
+    margin-top: 6px;
+    font-weight: 600;
+  }
+
+  .etape {
+    display: flex;
+    gap: 14px;
+    margin-bottom: 14px;
+    align-items: flex-start;
+  }
+
+  .etape .pastille {
+    background: var(--bleu);
+    color: white;
+    border-radius: 50%;
+    width: 26px;
+    height: 26px;
+    min-width: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.85rem;
+    font-weight: 700;
+    margin-top: 2px;
+  }
+
+  .etape .contenu { flex: 1; }
+  .etape .contenu strong { color: var(--bleu-fonce); }
+
+  .blocage {
+    background: var(--fond-clair);
+    border-radius: 8px;
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    border-left: 4px solid var(--bleu-clair);
+  }
+
+  .blocage .symptome {
+    font-weight: 700;
+    color: var(--bleu-fonce);
+    margin-bottom: 4px;
+  }
+
+  .blocage .solution {
+    font-size: 0.92rem;
+    color: var(--gris-texte);
+  }
+
+  .lexique-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+    font-size: 0.92rem;
+  }
+
+  .lexique-table th {
+    background: var(--bleu-fonce);
+    color: white;
+    padding: 10px 14px;
+    text-align: left;
+    font-family: 'Oswald', sans-serif;
+    font-weight: 500;
+  }
+
+  .lexique-table td {
+    padding: 10px 14px;
+    border-bottom: 1px solid #e0e8f0;
+    vertical-align: top;
+  }
+
+  .lexique-table tr:nth-child(even) td { background: var(--fond-clair); }
+
+  .regle-or {
+    background: var(--bleu-fonce);
+    color: white;
+    border-radius: 12px;
+    padding: 20px 28px;
+    margin-top: 8px;
+  }
+
+  .regle-or h2 {
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+    color: white;
+  }
+
+  .regle-or ol {
+    padding-left: 20px;
+    line-height: 2;
+  }
+
+  .regle-or li { font-size: 0.95rem; }
+
+  footer {
+    text-align: center;
+    font-size: 0.8rem;
+    color: var(--gris-secondaire);
+    margin-top: 28px;
+  }
+
+  @media (max-width: 600px) {
+    .grille-outils { grid-template-columns: 1fr; }
+    body { padding: 16px; }
+  }
+
+  @media print {
+    body { background: white; }
+    section { box-shadow: none; border: 1px solid #dde5ef; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📋 FICHE DE RÉFÉRENCE — DASHBOARD HSI37</h1>
+  <p>À garder à portée de main · Mise à jour juin 2026</p>
+</header>
+
+<div class="alerte">
+  ⚠️ <strong>Règle de sécurité absolue :</strong> Avant chaque sauvegarde, vérifier que <code>config.js</code> n'apparaît PAS dans la liste. Ce fichier contient tes clés secrètes — il ne doit jamais partir en ligne.
+</div>
+
+<!-- SECTION 1 -->
+<section>
+  <h2><span class="num">1</span> LES 3 OUTILS — NE PAS LES CONFONDRE</h2>
+
+  <div class="grille-outils">
+    <div class="outil">
+      <div class="nom">🖥️ Terminal</div>
+      <div class="description">La fenêtre noire avec <code>%</code> à la fin. C'est lui qui tourne vraiment sur ton Mac. Tu y tapes les commandes Git et tu y lances le serveur.</div>
+      <div class="jamais">→ Ouvrir avec Spotlight : ⌘ + Espace → "Terminal"</div>
+    </div>
+    <div class="outil">
+      <div class="nom">💬 Claude Code</div>
+      <div class="description">La fenêtre où tu discutes en français pour faire écrire du code. Tu la lances en tapant <code>claude</code> dans le Terminal.</div>
+      <div class="jamais">🚫 Jamais de commandes Git ici. Jamais de serveur ici.</div>
+    </div>
+    <div class="outil">
+      <div class="nom">🌐 Navigateur</div>
+      <div class="description">Safari ou Chrome. Sert uniquement à <em>voir</em> le dashboard. Adresse : <code>localhost:8002/index.html</code></div>
+      <div class="jamais">→ Forcer le rechargement : ⌘ + Maj + R</div>
+    </div>
+  </div>
+
+  <p style="margin-top:16px; font-size:0.9rem; color:var(--gris-secondaire);">
+    💡 Astuce : garde <strong>deux fenêtres Terminal ouvertes</strong> — une pour le serveur (python3), une pour Git / Claude Code. Menu Terminal → Shell → Nouvelle fenêtre, ou <code>⌘ + N</code>.
+  </p>
+</section>
+
+<!-- SECTION 2 -->
+<section>
+  <h2><span class="num">2</span> DÉMARRER UNE SESSION DE TRAVAIL</h2>
+
+  <div class="etape">
+    <div class="pastille">1</div>
+    <div class="contenu">
+      <strong>Aller dans le dossier du projet</strong><br>
+      <div class="bloc-commandes">cd ~/hsi37-dashboard</div>
+      <span style="font-size:0.85rem; color:var(--gris-secondaire);">cd = "change directory" (changer de dossier). ~ = ton dossier personnel.</span>
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">2</div>
+    <div class="contenu">
+      <strong>Vérifier qu'on est au bon endroit</strong><br>
+      <div class="bloc-commandes">ls</div>
+      <span style="font-size:0.85rem; color:var(--gris-secondaire);">Tu dois voir : <code>index.html</code>, <code>app.js</code>, <code>styles.css</code>, <code>config.js</code></span>
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">3</div>
+    <div class="contenu">
+      <strong>Lancer le serveur local (pour voir le site)</strong><br>
+      <div class="bloc-commandes">python3 -m http.server 8002</div>
+      <span style="font-size:0.85rem; color:var(--gris-secondaire);">⚠️ Laisser cette fenêtre Terminal <strong>ouverte</strong> — le serveur tourne tant qu'elle est ouverte. Si message "Address already in use" (port occupé) → essaie 8003, 8004…</span>
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">4</div>
+    <div class="contenu">
+      <strong>Ouvrir le dashboard dans le navigateur</strong><br>
+      <div class="bloc-commandes">localhost:8002/index.html</div>
+      <span style="font-size:0.85rem; color:var(--gris-secondaire);">Colle cette adresse dans la barre du navigateur (pas dans Google).</span>
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">5</div>
+    <div class="contenu">
+      <strong>Lancer Claude Code (dans une 2ème fenêtre Terminal)</strong><br>
+      <div class="bloc-commandes">cd ~/hsi37-dashboard<br>claude</div>
+      <span style="font-size:0.85rem; color:var(--gris-secondaire);">Si demandé "trust this folder" → taper <code>1</code> (oui). Pour quitter : <code>/exit</code> ou Ctrl + C deux fois.</span>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 -->
+<section>
+  <h2><span class="num">3</span> SAUVEGARDER ET ENVOYER EN LIGNE — LA SÉQUENCE GIT</h2>
+
+  <p style="margin-bottom:16px;">À faire <strong>après chaque étape qui fonctionne</strong>. Toujours dans le dossier du projet.</p>
+
+  <div class="bloc-commandes">
+    <span class="commentaire"># Étape 0 — Toujours commencer ici</span><br>
+    cd ~/hsi37-dashboard<br><br>
+    <span class="commentaire"># Étape 1 — Voir ce qui a changé</span><br>
+    git status<br>
+    <span class="attention">⚠ VÉRIFIER : config.js NE DOIT PAS apparaître dans la liste</span><br><br>
+    <span class="commentaire"># Étape 2 — Préparer les fichiers</span><br>
+    git add .<br>
+    <span class="commentaire"># Le point (.) = tous les fichiers modifiés, sauf ceux ignorés comme config.js</span><br><br>
+    <span class="commentaire"># Étape 3 — Créer la sauvegarde avec un message clair</span><br>
+    git commit -m "Description de ce que tu as fait"<br>
+    <span class="commentaire"># Pas d'accents dans le message. Ex : git commit -m "Ajout membre Dupont"</span><br><br>
+    <span class="commentaire"># Étape 4 — Envoyer en ligne</span><br>
+    git push origin main<br>
+    <span class="commentaire"># Les changements sont visibles en ligne en moins d'une minute</span>
+  </div>
+
+  <h3>Voir les 5 dernières sauvegardes</h3>
+  <div class="bloc-commandes">git log --oneline -5</div>
+
+  <h3>⏪ Annuler des modifications non encore sauvegardées</h3>
+  <div class="bloc-commandes">git restore .</div>
+  <p style="font-size:0.85rem; color:#c0392b;">⚠️ Attention : efface tout ce qui n'a pas encore été "commité" (sauvegardé). À utiliser seulement si tu as cassé quelque chose. En cas de doute → ne rien faire et demander.</p>
+</section>
+
+<!-- SECTION 4 -->
+<section>
+  <h2><span class="num">4</span> RÉSOLUTION DE BLOCAGES</h2>
+
+  <div class="blocage">
+    <div class="symptome">🔴 Le Terminal affiche <code>quote&gt;</code> ou <code>dquote&gt;</code> en boucle</div>
+    <div class="solution">Tu as collé du texte avec un guillemet mal fermé. → Appuie sur <strong>Ctrl + C</strong> pour revenir à l'invite normale.</div>
+  </div>
+
+  <div class="blocage">
+    <div class="symptome">🔴 "command not found" (commande introuvable)</div>
+    <div class="solution">Commande mal tapée ou outil absent. Vérifie l'orthographe exacte.</div>
+  </div>
+
+  <div class="blocage">
+    <div class="symptome">🔴 "Address already in use" (port déjà utilisé)</div>
+    <div class="solution">Le port 8002 est occupé. Essaie : <code>python3 -m http.server 8003</code> puis va sur <code>localhost:8003/index.html</code></div>
+  </div>
+
+  <div class="blocage">
+    <div class="symptome">🔴 La page ne s'affiche pas dans le navigateur</div>
+    <div class="solution">Le serveur python3 n'est pas lancé. Relancer l'étape 3 de la routine de démarrage.</div>
+  </div>
+
+  <div class="blocage">
+    <div class="symptome">🔴 Une commande tourne sans fin</div>
+    <div class="solution">Appuie sur <strong>Ctrl + C</strong> pour l'arrêter.</div>
+  </div>
+
+  <div class="blocage">
+    <div class="symptome">🔴 Terminal complètement bloqué</div>
+    <div class="solution">Ferme la fenêtre et relance une nouvelle fenêtre Terminal.</div>
+  </div>
+</section>
+
+<!-- SECTION 5 -->
+<section>
+  <h2><span class="num">5</span> LEXIQUE EXPRESS</h2>
+
+  <table class="lexique-table">
+    <thead>
+      <tr><th>Mot</th><th>Ce que ça veut dire</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>cd</code></td><td>Change Directory = se déplacer dans un dossier</td></tr>
+      <tr><td><code>ls</code></td><td>List = lister les fichiers du dossier courant</td></tr>
+      <tr><td><code>~</code></td><td>Ton dossier personnel sur le Mac</td></tr>
+      <tr><td><strong>commit</strong></td><td>Une photo/sauvegarde de ton projet à un instant T</td></tr>
+      <tr><td><strong>push</strong></td><td>Envoyer tes sauvegardes sur internet (GitHub)</td></tr>
+      <tr><td><strong>git status</strong></td><td>Voir quels fichiers ont changé depuis la dernière sauvegarde</td></tr>
+      <tr><td><strong>git add .</strong></td><td>Préparer tous les fichiers modifiés pour la prochaine sauvegarde</td></tr>
+      <tr><td><strong>port</strong></td><td>Numéro de "porte" utilisé par le serveur local (8001, 8002…)</td></tr>
+      <tr><td><strong>localhost</strong></td><td>Ton ordinateur lui-même, vu comme un site web</td></tr>
+      <tr><td><strong>config.js</strong></td><td>Fichier contenant tes clés secrètes Supabase — ne jamais envoyer en ligne</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ADRESSES UTILES -->
+<section>
+  <h2><span class="num">6</span> ADRESSES UTILES</h2>
+
+  <table class="lexique-table">
+    <thead>
+      <tr><th>Quoi</th><th>Adresse / Commande</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Dossier du projet</td><td><code>~/hsi37-dashboard</code></td></tr>
+      <tr><td>Dashboard en local (sur ton Mac)</td><td><code>localhost:8002/index.html</code></td></tr>
+      <tr><td>Base de données</td><td>Supabase — projet hsi37-dashboard, région Paris</td></tr>
+      <tr><td>Clés de connexion</td><td><code>config.js</code> — NE JAMAIS partager</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SECTION SUPABASE -->
+<section>
+  <h2><span class="num">7</span> SUPABASE — LA BASE DE DONNÉES</h2>
+
+  <p>Supabase = l'endroit où sont stockés les adhérents du dashboard. Ce n'est pas sur ton Mac, c'est en ligne.</p>
+
+  <table class="lexique-table" style="margin-top:12px;">
+    <thead>
+      <tr><th>Quoi</th><th>Détail</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Accès</td><td><a href="https://supabase.com" target="_blank" style="color:var(--bleu-fonce);">supabase.com</a> → Se connecter → Projet <strong>hsi37-dashboard</strong></td></tr>
+      <tr><td>Région</td><td>Paris</td></tr>
+      <tr><td>Clés secrètes</td><td>Dans <code>config.js</code> sur ton Mac — NE JAMAIS copier-coller en chat</td></tr>
+      <tr><td>Table des adhérents</td><td>Menu gauche → <strong>Table Editor</strong> → table <code>members</code></td></tr>
+      <tr><td>Voir les connexions</td><td>Menu gauche → <strong>Authentication</strong> → Users</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:14px; font-size:0.88rem; color:var(--gris-secondaire);">💡 Supabase est indépendant de Git. Modifier un adhérent dans Supabase ne nécessite pas de git push. Git sert pour le <em>code</em> (app.js, index.html…), pas pour les données.</p>
+
+  <h3>Modifier un mot de passe utilisateur</h3>
+  <div class="etape">
+    <div class="pastille">1</div>
+    <div class="contenu">Aller sur <a href="https://supabase.com" target="_blank" style="color:var(--bleu-fonce);">supabase.com</a> → ton projet → menu gauche <strong>Authentication</strong> → <strong>Users</strong></div>
+  </div>
+  <div class="etape">
+    <div class="pastille">2</div>
+    <div class="contenu">Trouver l'utilisateur → cliquer sur les <strong>3 points</strong> à droite de la ligne</div>
+  </div>
+  <div class="etape">
+    <div class="pastille">3</div>
+    <div class="contenu">Cliquer <strong>Send password recovery</strong> → un email de réinitialisation part automatiquement à l'utilisateur</div>
+  </div>
+  <p style="font-size:0.85rem; color:var(--gris-secondaire); margin-top:4px;">OU pour forcer toi-même un nouveau mot de passe : cliquer sur l'utilisateur → <strong>Update password</strong> → saisir → <strong>Save</strong>.</p>
+</section>
+
+<!-- SECTION CLOUDFLARE -->
+<section>
+  <h2><span class="num">8</span> CLOUDFLARE — VÉRIFIER LE DÉPLOIEMENT EN LIGNE</h2>
+
+  <p>Cloudflare Pages = l'hébergeur qui met le site en ligne. Dès que tu fais un <code>git push</code>, Cloudflare détecte le changement et met le site à jour automatiquement.</p>
+
+  <h3>Vérifier que le déploiement a réussi</h3>
+  <div class="etape">
+    <div class="pastille">1</div>
+    <div class="contenu">Aller sur <a href="https://dash.cloudflare.com" target="_blank" style="color:var(--bleu-fonce);">dash.cloudflare.com</a></div>
+  </div>
+  <div class="etape">
+    <div class="pastille">2</div>
+    <div class="contenu">Menu gauche → <strong>Workers &amp; Pages</strong> → ton projet</div>
+  </div>
+  <div class="etape">
+    <div class="pastille">3</div>
+    <div class="contenu">Onglet <strong>Deployments</strong> → le dernier déploiement doit afficher <strong style="color:green;">Success</strong> (vert)</div>
+  </div>
+
+  <table class="lexique-table" style="margin-top:16px;">
+    <thead><tr><th>Quoi</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td>Accès</td><td><a href="https://dash.cloudflare.com" target="_blank" style="color:var(--bleu-fonce);">dash.cloudflare.com</a></td></tr>
+      <tr><td>Délai après push</td><td>1 à 2 minutes</td></tr>
+      <tr><td>Après vérification</td><td>Faire <code>⌘ + Maj + R</code> sur le site pour vider le cache</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- SECTION GITHUB -->
+<section>
+  <h2><span class="num">9</span> GITHUB — LE COFFRE-FORT DU CODE</h2>
+
+  <p>GitHub = l'endroit en ligne où le code est stocké. Cloudflare va y lire les fichiers pour mettre le site en ligne. Tu n'y touches presque jamais directement.</p>
+
+  <table class="lexique-table" style="margin-top:12px;">
+    <thead><tr><th>Quoi</th><th>Détail</th></tr></thead>
+    <tbody>
+      <tr><td>Accès</td><td><a href="https://github.com" target="_blank" style="color:var(--bleu-fonce);">github.com</a></td></tr>
+      <tr><td>Identifiant</td><td>oceandriftlodge-ops</td></tr>
+      <tr><td>Branche principale</td><td><code>main</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Voir l'historique des envois</h3>
+  <div class="bloc-commandes">git log --oneline</div>
+  <p style="font-size:0.85rem; color:var(--gris-secondaire);">Affiche la liste des commits. Appuie sur <code>q</code> pour quitter.</p>
+
+  <h3>Vérifier sur quelle branche tu es</h3>
+  <div class="bloc-commandes">git branch</div>
+  <p style="font-size:0.85rem; color:var(--gris-secondaire);">Doit afficher <code>* main</code>. Si ce n'est pas le cas, demande de l'aide avant de continuer.</p>
+
+  <div class="alerte" style="margin-top:16px;">
+    ⚠️ <strong>Ne jamais coller un token GitHub (ghp_…) dans un chat.</strong> Si ça arrive → aller immédiatement sur GitHub → Settings → Developer settings → Personal access tokens → révoquer le token exposé.
+  </div>
+</section>
+
+<!-- SECTION CACHE -->
+<section>
+  <h2><span class="num">10</span> VIDER LE CACHE DU NAVIGATEUR</h2>
+
+  <p>Le cache (= ancienne version de la page gardée en mémoire par le navigateur) peut faire croire qu'une modification n'a pas fonctionné. À faire systématiquement après chaque modification.</p>
+
+  <table class="lexique-table" style="margin-top:12px;">
+    <thead>
+      <tr><th>Action</th><th>Raccourci</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Recharger <strong>sans cache</strong> (le plus utile)</td><td><code>⌘ + Maj + R</code></td></tr>
+      <tr><td>Recharger normalement</td><td><code>⌘ + R</code></td></tr>
+      <tr><td>Vider tout le cache (Chrome)</td><td><code>⌘ + Maj + Suppr</code> → cocher "Images et fichiers en cache" → Effacer</td></tr>
+    </tbody>
+  </table>
+
+  <p style="margin-top:12px; font-size:0.88rem; color:var(--gris-secondaire);">💡 Règle simple : après chaque <code>git push</code>, attendre 1 minute puis faire <code>⌘ + Maj + R</code> sur la page pour voir les changements.</p>
+</section>
+
+<!-- SECTION TOUCHES MAC -->
+<section>
+  <h2><span class="num">11</span> TOUCHES MAC ESSENTIELLES POUR CE PROJET</h2>
+
+  <h3>Dans le Terminal</h3>
+  <table class="lexique-table">
+    <thead>
+      <tr><th>Raccourci</th><th>Ce que ça fait</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>Ctrl + C</code></td><td>Arrêter une commande en cours / débloquer le Terminal</td></tr>
+      <tr><td><code>⌘ + N</code></td><td>Ouvrir une nouvelle fenêtre Terminal</td></tr>
+      <tr><td>Flèche ↑</td><td>Rappeler la dernière commande tapée (très pratique)</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Dans le navigateur</h3>
+  <table class="lexique-table">
+    <thead>
+      <tr><th>Raccourci</th><th>Ce que ça fait</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>⌘ + Maj + R</code></td><td>Recharger sans cache — à faire après chaque modification</td></tr>
+      <tr><td><code>⌘ + R</code></td><td>Recharger normalement</td></tr>
+      <tr><td><code>⌘ + T</code></td><td>Ouvrir un nouvel onglet</td></tr>
+      <tr><td><code>⌘ + W</code></td><td>Fermer l'onglet en cours</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Partout sur le Mac</h3>
+  <table class="lexique-table">
+    <thead>
+      <tr><th>Raccourci</th><th>Ce que ça fait</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><code>⌘ + Espace</code></td><td>Spotlight — chercher et ouvrir n'importe quelle app (ex: Terminal)</td></tr>
+      <tr><td><code>⌘ + Z</code></td><td>Annuler la dernière action</td></tr>
+      <tr><td><code>⌘ + C</code></td><td>Copier</td></tr>
+      <tr><td><code>⌘ + V</code></td><td>Coller</td></tr>
+      <tr><td><code>⌥ + ⌘ + Échap</code></td><td>Forcer à quitter une application bloquée</td></tr>
+      <tr><td><code>⌘ + Maj + 4</code></td><td>Capture d'écran d'une zone (utile pour signaler un bug)</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- RÈGLE D'OR -->
+<div class="regle-or">
+  <h2>⭐ RÈGLE D'OR — DANS CET ORDRE, TOUJOURS</h2>
+  <ol>
+    <li><strong>git status</strong> → vérifier que config.js est absent</li>
+    <li><strong>git add .</strong> → préparer les fichiers</li>
+    <li><strong>git commit -m "..."</strong> → sauvegarder</li>
+    <li><strong>git push origin main</strong> → envoyer en ligne</li>
+    <li>Serveur (python3) et Git → dans le vrai <strong>Terminal</strong> · Prompts → dans <strong>Claude Code</strong></li>
+  </ol>
+</div>
+
+<footer>
+  <p>HSI37 — Handicap Solidarité pour l'Inclusion 37 · Fiche générée juin 2026</p>
+</footer>
+
+</body>
+</html>

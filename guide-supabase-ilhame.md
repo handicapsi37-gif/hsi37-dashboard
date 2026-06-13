@@ -1,0 +1,82 @@
+# Guide Supabase — Usage quotidien HSI37
+*Document personnel — Ilhame*
+
+---
+
+## C'est quoi Supabase ?
+
+C'est la base de données (le "fichier Excel géant") qui stocke tous les adhérents et donateurs du dashboard. Tu y accèdes sur **supabase.com** avec ton compte email.
+
+Projet concerné : **hsi37-dashboard**
+
+---
+
+## 1. Se connecter
+
+1. Va sur https://supabase.com
+2. Clique **Sign In**
+3. Entre ton email + mot de passe
+4. Clique sur le projet **hsi37-dashboard**
+
+---
+
+## 2. Voir les données (en cas de doute ou vérification)
+
+1. Menu gauche → **Table Editor**
+2. Clique sur **adherents** ou **donateurs**
+3. Tu vois toutes les lignes — tu peux lire mais évite de modifier directement ici (fais-le depuis le dashboard)
+
+---
+
+## 3. Changer le mot de passe d'un compte bureau
+
+À faire quand quelqu'un du bureau a oublié son mot de passe.
+
+1. Menu gauche → **Authentication**
+2. Clique **Users**
+3. Trouve la personne dans la liste (par email)
+4. Clique sur les **3 points** à droite de sa ligne
+5. Clique **Send password recovery** → ça lui envoie un email de réinitialisation
+
+> ⚠️ Pour que ça marche, la personne doit avoir accès à son email et pouvoir cliquer le lien reçu.
+
+---
+
+## 4. Si l'email de réinitialisation ne part pas (solution manuelle)
+
+Si la personne n'a pas reçu l'email ou n'y a pas accès :
+
+1. Menu gauche → **Authentication** → **Users**
+2. Clique sur l'email de la personne (ouvre sa fiche)
+3. Cherche le champ **Password** 
+4. Tape un nouveau mot de passe provisoire
+5. Clique **Save**
+6. Communique le nouveau mot de passe à la personne par téléphone (jamais par email en clair)
+7. Dis-lui de le changer dès sa première connexion
+
+---
+
+## 5. Vérifier que la sécurité est active (RLS)
+
+1. Menu gauche → **Authentication** → **Policies**
+2. Tu dois voir les tables **adherents** et **donateurs** avec chacune 4 politiques listées
+3. Le bouton **Disable RLS** visible = RLS actif (c'est bon)
+
+---
+
+## 6. Ce qu'il ne faut JAMAIS faire sur Supabase
+
+- ❌ Ne jamais supprimer une politique RLS sans en comprendre les conséquences
+- ❌ Ne jamais partager les clés qui sont dans ton config.js (SUPABASE_URL et SUPABASE_KEY)
+- ❌ Ne jamais coller ces clés dans un chat, un email ou GitHub
+- ❌ Ne pas modifier les données directement dans Table Editor sauf urgence
+
+---
+
+## 7. En cas de problème inconnu
+
+Avant de toucher quoi que ce soit : fais une capture d'écran de ce que tu vois et contacte Ilhame (toi-même via Claude Code 😄) ou ouvre une nouvelle conversation Claude en décrivant le problème.
+
+---
+
+*Dernière mise à jour : juin 2026*

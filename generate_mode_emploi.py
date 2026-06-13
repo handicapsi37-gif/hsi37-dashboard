@@ -249,7 +249,7 @@ def construire_contenu(s):
     for etape in [
         "Ouvrez votre navigateur internet (Safari sur Mac, ou Chrome).",
         "Dans la barre d'adresse en haut, tapez l'adresse du Dashboard : "
-        "<b>[adresse à compléter après mise en ligne]</b>",
+        "<b>https://hsi37-dashboard.pages.dev</b>",
         "Appuyez sur la touche <b>Entrée</b>. La page de connexion s'affiche.",
         "Saisissez votre <b>adresse e-mail</b> dans le premier champ.",
         "Saisissez votre <b>mot de passe</b> dans le second champ.",
