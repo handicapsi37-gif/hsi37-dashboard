@@ -2209,7 +2209,7 @@ document.getElementById("btn-telecharger-recu-adh").addEventListener("click", fu
   const doc         = document.getElementById("recu-adherent-document");
   const imgLogo     = document.getElementById("recu-adh-logo");
   const idAdherent  = (adherentRecuEnCours && adherentRecuEnCours.id_adherent) || "recu";
-  const nomFichier  = `recu-adhesion-${idAdherent}.png`;
+  const nomFichier  = `recu-adhesion-${idAdherent}.pdf`;
   const btn         = this;
 
   btn.disabled = true;
@@ -2223,10 +2223,16 @@ document.getElementById("btn-telecharger-recu-adh").addEventListener("click", fu
   }).then(function() {
     return html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
   }).then(function(canvas) {
-    const lien = document.createElement("a");
-    lien.download = nomFichier;
-    lien.href     = canvas.toDataURL("image/png");
-    lien.click();
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg  = 210;
+    const mmHaut  = Math.round((canvas.height / canvas.width) * mmLarg);
+    const pdf     = new window.jspdf.jsPDF({
+      orientation: mmHaut >= mmLarg ? "portrait" : "landscape",
+      unit: "mm",
+      format: [mmLarg, mmHaut]
+    });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    pdf.save(nomFichier);
   }).finally(function() {
     imgLogo.src = srcOriginal;
     btn.disabled = false;
@@ -2361,7 +2367,7 @@ document.getElementById("btn-telecharger-recu-don").addEventListener("click", fu
   const doc        = document.getElementById("recu-donateur-document");
   const imgLogo    = document.getElementById("recu-don-logo");
   const idDonateur = (donateurRecuEnCours && donateurRecuEnCours.id_donateur) || "recu-don";
-  const nomFichier = `recu-don-${idDonateur}.png`;
+  const nomFichier = `recu-don-${idDonateur}.pdf`;
   const btn        = this;
 
   btn.disabled = true;
@@ -2375,10 +2381,16 @@ document.getElementById("btn-telecharger-recu-don").addEventListener("click", fu
   }).then(function() {
     return html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
   }).then(function(canvas) {
-    const lien = document.createElement("a");
-    lien.download = nomFichier;
-    lien.href     = canvas.toDataURL("image/png");
-    lien.click();
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg  = 210;
+    const mmHaut  = Math.round((canvas.height / canvas.width) * mmLarg);
+    const pdf     = new window.jspdf.jsPDF({
+      orientation: mmHaut >= mmLarg ? "portrait" : "landscape",
+      unit: "mm",
+      format: [mmLarg, mmHaut]
+    });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    pdf.save(nomFichier);
   }).finally(function() {
     imgLogo.src = srcOriginal;
     btn.disabled = false;
