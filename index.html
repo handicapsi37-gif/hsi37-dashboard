@@ -158,6 +158,22 @@
           <p class="hub-tuile__desc">Signatures Gmail du bureau</p>
         </button>
 
+        <!-- Tuile Aide — télécharge le mode d'emploi PDF -->
+        <button class="hub-tuile" id="tuile-aide" type="button"
+                aria-label="Télécharger le mode d'emploi du Dashboard">
+          <div class="hub-tuile__icone" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="36" height="36"
+                 fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="12"/>
+              <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <h3 class="hub-tuile__titre">Aide</h3>
+          <p class="hub-tuile__desc">Guide d'utilisation du Dashboard</p>
+        </button>
+
       </div>
     </section>
 
@@ -312,7 +328,37 @@
       </div>
 
       <div class="section-hub-page__corps">
+
+        <div id="message-succes-docs" class="message-succes" role="status" aria-live="polite" hidden></div>
+        <div id="message-erreur-docs" class="message-erreur" role="alert" aria-live="assertive" hidden></div>
+
         <div class="docs-grille">
+
+          <!-- Mode d'emploi PDF -->
+          <div class="doc-carte">
+            <div class="doc-carte__icone" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"
+                   fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+              </svg>
+            </div>
+            <div class="doc-carte__info">
+              <h3 class="doc-carte__titre">Mode d'emploi</h3>
+              <p class="doc-carte__desc">Guide complet d'utilisation du Dashboard — PDF à télécharger</p>
+            </div>
+            <a href="docs/mode-emploi-HSI37.pdf" download="mode-emploi-HSI37.pdf"
+               class="btn btn--secondaire" aria-label="Télécharger le mode d'emploi PDF">
+              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+              Télécharger
+            </a>
+          </div>
 
           <!-- Bulletin d'adhésion (déplacé depuis la barre d'actions adhérents) -->
           <div class="doc-carte">
@@ -460,6 +506,32 @@
             <button class="btn btn--primaire" id="btn-courrier"
                     aria-haspopup="dialog" aria-controls="modale-courrier">
               Nouveau courrier
+            </button>
+          </div>
+
+          <!-- Export CSV des données — adhérents et donateurs -->
+          <div class="doc-carte">
+            <div class="doc-carte__icone" aria-hidden="true">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"
+                   fill="none" stroke="currentColor" stroke-width="1.8"
+                   stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+              </svg>
+            </div>
+            <div class="doc-carte__info">
+              <h3 class="doc-carte__titre">Exporter les données</h3>
+              <p class="doc-carte__desc">Listes complètes adhérents et donateurs en CSV — compatible Excel français</p>
+            </div>
+            <button class="btn btn--secondaire" id="btn-exporter-donnees"
+                    aria-label="Exporter les données en CSV">
+              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                   viewBox="0 0 24 24" width="16" height="16">
+                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              </svg>
+              Exporter
             </button>
           </div>
 
@@ -712,6 +784,8 @@
           </button>
         </div>
 
+        <p class="formulaire__mention-rgpd">Les informations recueillies sont nécessaires à la gestion des adhésions et des dons. Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Contact&nbsp;: handicapsi37@gmail.com</p>
+
       </form>
     </div>
   </div>
@@ -928,6 +1002,8 @@
             Enregistrer
           </button>
         </div>
+
+        <p class="formulaire__mention-rgpd">Les informations recueillies sont nécessaires à la gestion des adhésions et des dons. Conformément au RGPD, vous disposez d'un droit d'accès, de rectification et de suppression de vos données. Contact&nbsp;: handicapsi37@gmail.com</p>
 
       </form>
     </div>
@@ -1991,7 +2067,74 @@
   <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
   <footer class="pied-de-page" role="contentinfo" hidden>
     <p>© 2026 HSI37 — Handicap Solidarité pour l'Inclusion 37 &bull; Saint-Pierre-des-Corps</p>
+    <p>
+      <button type="button" class="pied-rgpd-lien" id="btn-ouvrir-rgpd"
+              aria-haspopup="dialog" aria-controls="modale-rgpd">
+        Politique de confidentialité
+      </button>
+    </p>
   </footer>
+
+  <!-- ========== MODALE POLITIQUE DE CONFIDENTIALITÉ (RGPD) ========== -->
+  <div class="modale-fond" id="modale-rgpd-fond" role="presentation" hidden>
+    <div class="modale modale--rgpd"
+         id="modale-rgpd"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="rgpd-titre"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="rgpd-titre">Politique de confidentialité</h2>
+        <button class="modale__fermer" id="btn-fermer-rgpd" type="button"
+                aria-label="Fermer la politique de confidentialité">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="18" height="18" fill="none"
+               stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+            <line x1="18" y1="6" x2="6" y2="18"/>
+            <line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modale__corps--rgpd">
+
+        <h3>Responsable du traitement</h3>
+        <p>Association Handicap Solidarité pour l'Inclusion 37 (HSI37)<br>
+           17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps<br>
+           <a href="mailto:handicapsi37@gmail.com">handicapsi37@gmail.com</a> — 07 43 29 58 30</p>
+
+        <h3>Finalité du traitement</h3>
+        <p>Les données personnelles collectées (nom, prénom, email, téléphone, adresse) sont utilisées exclusivement pour la gestion des adhésions, des dons et la communication interne de l'association.</p>
+
+        <h3>Données collectées</h3>
+        <p>Identité (civilité, nom, prénom), coordonnées (email, téléphone, adresse), informations d'adhésion (date, montant, type de membre) et de don (type, montant, description du matériel). Aucune donnée de santé n'est collectée ni stockée.</p>
+
+        <h3>Base légale</h3>
+        <p>Intérêt légitime de l'association pour la gestion de ses membres et donateurs (article 6.1.f du RGPD).</p>
+
+        <h3>Durée de conservation</h3>
+        <p>Les données sont conservées pendant la durée de l'adhésion et 3 ans après la dernière cotisation, conformément aux statuts de l'association.</p>
+
+        <h3>Hébergement des données</h3>
+        <p>Les données sont hébergées chez Supabase, serveur situé en Union Européenne (Paris, France).</p>
+
+        <h3>Vos droits</h3>
+        <p>Conformément au Règlement Général sur la Protection des Données (RGPD), vous disposez des droits suivants&nbsp;:</p>
+        <ul>
+          <li>Droit d'accès à vos données personnelles</li>
+          <li>Droit de rectification de vos données</li>
+          <li>Droit de suppression de vos données</li>
+          <li>Droit d'opposition au traitement</li>
+          <li>Droit à la portabilité de vos données</li>
+        </ul>
+        <p>Pour exercer ces droits, contactez-nous à&nbsp;: <a href="mailto:handicapsi37@gmail.com">handicapsi37@gmail.com</a></p>
+        <p>En cas de litige, vous pouvez adresser une réclamation à la CNIL (Commission Nationale de l'Informatique et des Libertés)&nbsp;:
+           <a href="https://www.cnil.fr" target="_blank" rel="noopener noreferrer">www.cnil.fr</a></p>
+
+      </div>
+    </div>
+  </div>
 
   <!-- Librairie Supabase (CDN jsDelivr) — doit être chargée avant config.js et app.js -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>

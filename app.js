@@ -3,6 +3,12 @@
    Phase 2.5 : Modification et suppression d'adhérents
    ===================================================== */
 
+/* =====================================================
+   SÉCURITÉ : les tables Supabase ont le RLS activé.
+   Seuls les utilisateurs authentifiés (authenticated) peuvent lire/écrire.
+   La clé utilisée est la clé publishable (publique), PAS la clé service_role.
+   ===================================================== */
+
 /* ---------- CONFIGURATION DES TYPES DE MEMBRES ---------- */
 
 const typesMembres = {
@@ -2397,6 +2403,12 @@ document.getElementById("tuile-documents").addEventListener("click", function() 
 document.getElementById("tuile-signatures").addEventListener("click", function() {
   allerVers("signatures");
 });
+document.getElementById("tuile-aide").addEventListener("click", function() {
+  const lien = document.createElement("a");
+  lien.href = "docs/mode-emploi-HSI37.pdf";
+  lien.download = "mode-emploi-HSI37.pdf";
+  lien.click();
+});
 document.getElementById("btn-retour-accueil").addEventListener("click", function() {
   afficherHub();
 });
@@ -2971,6 +2983,134 @@ document.getElementById("btn-papier-entete").addEventListener("click", function(
       btn.disabled = false;
       btn.innerHTML = texteOriginal;
     });
+});
+
+/* =====================================================
+   MODALE POLITIQUE DE CONFIDENTIALITÉ (RGPD)
+   ===================================================== */
+
+let elementAvantModaleRgpd = null;
+
+function ouvrirModaleRgpd() {
+  const fond   = document.getElementById("modale-rgpd-fond");
+  const modale = document.getElementById("modale-rgpd");
+  elementAvantModaleRgpd = document.activeElement;
+  fond.hidden = false;
+  modale.focus();
+  document.addEventListener("keydown", gererToucheRgpd);
+}
+
+function fermerModaleRgpd() {
+  document.getElementById("modale-rgpd-fond").hidden = true;
+  document.removeEventListener("keydown", gererToucheRgpd);
+  if (elementAvantModaleRgpd) elementAvantModaleRgpd.focus();
+}
+
+function gererToucheRgpd(evenement) {
+  if (evenement.key === "Escape") {
+    fermerModaleRgpd();
+    return;
+  }
+  if (evenement.key === "Tab") {
+    const modale   = document.getElementById("modale-rgpd");
+    const elements = modale.querySelectorAll(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    const premier = elements[0];
+    const dernier = elements[elements.length - 1];
+    if (evenement.shiftKey) {
+      if (document.activeElement === premier) { evenement.preventDefault(); dernier.focus(); }
+    } else {
+      if (document.activeElement === dernier)  { evenement.preventDefault(); premier.focus(); }
+    }
+  }
+}
+
+document.getElementById("btn-ouvrir-rgpd").addEventListener("click", ouvrirModaleRgpd);
+document.getElementById("btn-fermer-rgpd").addEventListener("click", fermerModaleRgpd);
+document.getElementById("modale-rgpd-fond").addEventListener("click", function(e) {
+  if (e.target === this) fermerModaleRgpd();
+});
+
+/* =====================================================
+   EXPORT CSV DES DONNÉES
+   ===================================================== */
+
+function afficherMessageSuccesDoc(texte) {
+  const zone = document.getElementById("message-succes-docs");
+  zone.textContent = texte;
+  zone.hidden = false;
+  setTimeout(function() { zone.hidden = true; zone.textContent = ""; }, 5000);
+}
+
+function afficherMessageErreurDoc(texte) {
+  const zone = document.getElementById("message-erreur-docs");
+  zone.textContent = texte;
+  zone.hidden = false;
+  setTimeout(function() { zone.hidden = true; zone.textContent = ""; }, 7000);
+}
+
+/* Génère un CSV avec BOM UTF-8 et séparateur point-virgule (compatible Excel français) */
+function genererCSV(donnees, colonnes) {
+  const bom    = '﻿';
+  const entete = colonnes.join(';');
+  const lignes = donnees.map(function(ligne) {
+    return colonnes.map(function(col) {
+      const val = ligne[col] !== null && ligne[col] !== undefined ? String(ligne[col]) : '';
+      if (val.includes(';') || val.includes('"') || val.includes('\n')) {
+        return '"' + val.replace(/"/g, '""') + '"';
+      }
+      return val;
+    }).join(';');
+  });
+  return bom + entete + '\n' + lignes.join('\n');
+}
+
+function telechargerFichier(contenu, nomFichier) {
+  const blob = new Blob([contenu], { type: 'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const lien = document.createElement('a');
+  lien.href     = url;
+  lien.download = nomFichier;
+  document.body.appendChild(lien);
+  lien.click();
+  setTimeout(function() { document.body.removeChild(lien); URL.revokeObjectURL(url); }, 200);
+}
+
+document.getElementById("btn-exporter-donnees").addEventListener("click", async function() {
+  const btn          = this;
+  btn.disabled       = true;
+  const texteOriginal = btn.innerHTML;
+  btn.textContent    = 'Export en cours…';
+
+  try {
+    const [resAdh, resDon] = await Promise.all([
+      clientSupabase.from('adherents').select('*').order('nom', { ascending: true }),
+      clientSupabase.from('donateurs').select('*').order('nom', { ascending: true })
+    ]);
+
+    if (resAdh.error) throw new Error('Adhérents : ' + resAdh.error.message);
+    if (resDon.error) throw new Error('Donateurs : ' + resDon.error.message);
+
+    const d       = new Date();
+    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+
+    const colAdh = resAdh.data.length > 0 ? Object.keys(resAdh.data[0]) : [];
+    const colDon = resDon.data.length > 0 ? Object.keys(resDon.data[0]) : [];
+
+    telechargerFichier(genererCSV(resAdh.data, colAdh), `export-adherents-${dateStr}.csv`);
+    /* Délai court pour éviter le blocage du second téléchargement par le navigateur */
+    setTimeout(function() {
+      telechargerFichier(genererCSV(resDon.data, colDon), `export-donateurs-${dateStr}.csv`);
+    }, 400);
+
+    afficherMessageSuccesDoc('Données exportées avec succès.');
+  } catch (erreur) {
+    afficherMessageErreurDoc('Export échoué : ' + erreur.message);
+  } finally {
+    btn.disabled    = false;
+    btn.innerHTML   = texteOriginal;
+  }
 });
 
 /* ---------- INITIALISATION ---------- */

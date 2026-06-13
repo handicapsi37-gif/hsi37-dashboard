@@ -2374,3 +2374,73 @@ body {
     flex-wrap: wrap;
   }
 }
+
+/* =====================================================
+   PHASE 3 — RGPD & EXPORT
+   ===================================================== */
+
+/* Lien politique de confidentialité dans le pied de page */
+.pied-rgpd-lien {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.65);
+  cursor: pointer;
+  font-size: 0.82rem;
+  font-family: inherit;
+  text-decoration: underline;
+  padding: 0;
+  margin-top: 0.3rem;
+  display: inline-block;
+}
+.pied-rgpd-lien:hover,
+.pied-rgpd-lien:focus-visible {
+  color: var(--blanc);
+  outline: 2px solid var(--corail);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Mention RGPD sous le bouton Enregistrer dans les formulaires */
+.formulaire__mention-rgpd {
+  font-size: 0.78rem;
+  color: var(--gris-moyen);
+  margin-top: 0.75rem;
+  line-height: 1.55;
+  border-top: 1px solid var(--gris-clair);
+  padding-top: 0.75rem;
+}
+
+/* Modale RGPD — plus large que la modale formulaire standard */
+.modale--rgpd {
+  max-width: 700px;
+}
+
+/* Corps de la modale RGPD */
+.modale__corps--rgpd {
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  line-height: 1.75;
+  color: var(--encre);
+}
+.modale__corps--rgpd h3 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--bleu-hsi);
+  margin-top: 1.25rem;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.modale__corps--rgpd p {
+  margin: 0 0 0.5rem;
+}
+.modale__corps--rgpd ul {
+  margin: 0.25rem 0 0.75rem 1.5rem;
+  padding: 0;
+}
+.modale__corps--rgpd li {
+  margin-bottom: 0.2rem;
+}
+.modale__corps--rgpd a {
+  color: var(--bleu-hsi);
+}
