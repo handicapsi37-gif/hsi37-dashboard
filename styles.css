@@ -2400,14 +2400,16 @@ body {
   border-radius: 2px;
 }
 
-/* Mention RGPD sous le bouton Enregistrer dans les formulaires */
-.formulaire__mention-rgpd {
-  font-size: 0.78rem;
-  color: var(--gris-moyen);
-  margin-top: 0.75rem;
-  line-height: 1.55;
-  border-top: 1px solid var(--gris-clair);
-  padding-top: 0.75rem;
+/* Mention RGPD juste avant le bouton Enregistrer dans les formulaires */
+.mention-rgpd-form {
+  font-size: 0.8rem;
+  color: #666666;
+  background: #F8F9FA;
+  border-left: 3px solid #F28C28;
+  padding: 8px;
+  margin-bottom: 0.75rem;
+  line-height: 1.5;
+  border-radius: 0 3px 3px 0;
 }
 
 /* Modale RGPD — plus large que la modale formulaire standard */
@@ -2443,4 +2445,42 @@ body {
 }
 .modale__corps--rgpd a {
   color: var(--bleu-hsi);
+}
+
+/* ---------- SECTION DONNÉES PERSONNELLES (HUB) ---------- */
+
+.rgpd-grille {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+
+.rgpd-bloc {
+  background: var(--blanc);
+  border-radius: var(--rayon);
+  border: 1.5px solid var(--gris-clair);
+  border-left: 4px solid var(--bleu-hsi);
+  padding: 1.25rem 1.5rem;
+}
+
+.rgpd-bloc h3 {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--bleu-hsi);
+  margin: 0 0 0.5rem;
+}
+
+.rgpd-bloc p {
+  font-size: 0.9rem;
+  color: var(--encre);
+  line-height: 1.65;
+  margin: 0;
+}
+
+@media (max-width: 640px) {
+  .rgpd-grille {
+    grid-template-columns: 1fr;
+  }
 }

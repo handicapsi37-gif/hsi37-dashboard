@@ -942,6 +942,7 @@ const navOnglets        = document.getElementById("nav-onglets");
 const btnRetourAccueil  = document.getElementById("btn-retour-accueil");
 const sectionDocuments  = document.getElementById("section-documents");
 const sectionSignatures = document.getElementById("section-signatures");
+const sectionRgpd       = document.getElementById("section-rgpd");
 
 /* Affiche le hub : masque tout sauf le hub */
 function afficherHub() {
@@ -951,6 +952,7 @@ function afficherHub() {
   document.getElementById("panneau-donateurs").hidden = true;
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
+  sectionRgpd.hidden       = true;
   btnRetourAccueil.hidden  = true;
 }
 
@@ -960,6 +962,7 @@ function allerVers(vue) {
   btnRetourAccueil.hidden  = false;
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
+  sectionRgpd.hidden       = true;
 
   if (vue === "adherents") {
     navOnglets.hidden = false;
@@ -979,6 +982,11 @@ function allerVers(vue) {
     document.getElementById("panneau-adherents").hidden = true;
     document.getElementById("panneau-donateurs").hidden = true;
     sectionSignatures.hidden = false;
+  } else if (vue === "rgpd") {
+    navOnglets.hidden = true;
+    document.getElementById("panneau-adherents").hidden = true;
+    document.getElementById("panneau-donateurs").hidden = true;
+    sectionRgpd.hidden = false;
   }
 }
 
@@ -2408,6 +2416,9 @@ document.getElementById("tuile-aide").addEventListener("click", function() {
   lien.href = "docs/mode-emploi-HSI37.pdf";
   lien.download = "mode-emploi-HSI37.pdf";
   lien.click();
+});
+document.getElementById("tuile-rgpd").addEventListener("click", function() {
+  allerVers("rgpd");
 });
 document.getElementById("btn-retour-accueil").addEventListener("click", function() {
   afficherHub();
