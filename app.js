@@ -368,9 +368,16 @@ const champsChequesAdherents = new Map();
 function majChampsConditionnelsAdherent() {
   const mode = document.getElementById("champ-mode-paiement").value;
   document.getElementById("groupe-cheque-adh").hidden = (mode !== "Chèque");
+
+  const type        = document.getElementById("champ-type").value;
+  const valDon      = parseFloat(document.getElementById("champ-montant-don").value) || 0;
+  const typeDonneur = (type === "Membre actif" || type === "Membre bienfaiteur");
+  /* Afficher si type compatible, ou si une valeur > 0 existe déjà (mode modification) */
+  document.getElementById("groupe-don-adherent").hidden = !typeDonneur && valDon <= 0;
 }
 
 document.getElementById("champ-mode-paiement").addEventListener("change", majChampsConditionnelsAdherent);
+document.getElementById("champ-type").addEventListener("change", majChampsConditionnelsAdherent);
 
 /**
  * Efface les erreurs de validation du formulaire.
@@ -446,6 +453,9 @@ function ouvrirModaleModification(adherent) {
       ? adherent.montant_cotisation
       : "";
   document.getElementById("champ-mode-paiement").value = adherent.mode_paiement || "";
+  document.getElementById("champ-montant-don").value =
+    (adherent.montant_don !== null && adherent.montant_don !== undefined)
+      ? adherent.montant_don : "";
 
   const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
   document.getElementById("champ-numero-cheque").value = chequeAdh.numero_cheque || "";
@@ -693,6 +703,8 @@ formulaire.addEventListener("submit", async function(evenement) {
   const typeMembre        = document.getElementById("champ-type").value;
   const montantBrut       = document.getElementById("champ-montant").value.trim();
   const montantCotisation = montantBrut ? parseFloat(montantBrut.replace(",", ".")) : null;
+  const montantDonBrut    = document.getElementById("champ-montant-don").value.trim();
+  const montantDon        = montantDonBrut ? parseFloat(montantDonBrut.replace(",", ".")) : null;
   const civilite          = document.getElementById("champ-civilite").value || null;
   const modePaiement      = document.getElementById("champ-mode-paiement").value || null;
   const numeroCheque      = document.getElementById("champ-numero-cheque").value.trim() || null;
@@ -710,6 +722,7 @@ formulaire.addEventListener("submit", async function(evenement) {
         adresse,
         date_adhesion:      dateAdhesion,
         montant_cotisation: montantCotisation,
+        montant_don:        montantDon,
         type_membre:        typeMembre,
         civilite,
         mode_paiement:      modePaiement
@@ -755,6 +768,7 @@ formulaire.addEventListener("submit", async function(evenement) {
       adresse,
       date_adhesion:      dateAdhesion,
       montant_cotisation: montantCotisation,
+      montant_don:        montantDon,
       type_membre:        typeMembre,
       mode_paiement:      modePaiement,
       saison
@@ -2051,15 +2065,36 @@ function majTexteRecuAdh() {
   if (!adherentRecuEnCours) return;
   const a          = adherentRecuEnCours;
   const signataire = document.getElementById("select-signataire-adh").value;
-  const saison     = a.saison || "—";
-  const montant    = (a.montant_cotisation !== null && a.montant_cotisation !== undefined)
+  const saison = a.saison || "—";
+
+  const cotis = (a.montant_cotisation != null)
     ? Number(a.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
     : "—";
+  const donVal = (a.montant_don != null && Number(a.montant_don) > 0)
+    ? Number(a.montant_don)
+    : null;
+  const donStr = donVal
+    ? donVal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+    : null;
+  const totalStr = (donVal && a.montant_cotisation != null)
+    ? (Number(a.montant_cotisation) + donVal).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+    : null;
+  const montantCert = totalStr || cotis;
+
+  /* Lignes montant dans le reçu */
+  document.getElementById("recu-adh-montant-cotisation").textContent = cotis;
+  document.getElementById("recu-adh-don-ligne").hidden   = !donStr;
+  document.getElementById("recu-adh-total-ligne").hidden = !totalStr;
+  if (donStr) {
+    document.getElementById("recu-adh-montant-don").textContent   = donStr;
+    document.getElementById("recu-adh-montant-total").textContent = totalStr;
+  }
+
   const donneurHtml = formaterNomRecu(a.civilite || "", a.prenom || "", a.nom || "", "");
   document.getElementById("recu-adh-certification").innerHTML =
     `${signataire} de l’association <strong>Handicap Solidarité pour l’Inclusion 37</strong> ` +
-    `certifie avoir reçu la somme de <strong>${montant}</strong> ` +
-    `au titre de l'adhésion annuelle de la saison <strong>${saison}</strong> ` +
+    `certifie avoir reçu la somme de <strong>${montantCert}</strong> ` +
+    `au titre de l\'adhésion annuelle de la saison <strong>${saison}</strong> ` +
     `${donneurHtml}.`;
 }
 

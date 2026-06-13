@@ -789,6 +789,13 @@
                    placeholder="Ex : 20" min="0" step="0.01" />
           </div>
 
+          <!-- Don facultatif : visible pour Membre actif / bienfaiteur, ou si valeur > 0 en modification -->
+          <div id="groupe-don-adherent" class="champ-groupe" hidden>
+            <label for="champ-montant-don" class="champ-label">Don facultatif (€)</label>
+            <input type="number" id="champ-montant-don" class="champ-input"
+                   placeholder="Ex : 10" min="0" step="0.01" />
+          </div>
+
           <div class="champ-groupe champ-groupe--large">
             <label for="champ-type" class="champ-label">Type de membre <span aria-hidden="true">*</span></label>
             <!-- Les valeurs correspondent exactement aux libellés stockés dans Supabase -->
@@ -1244,6 +1251,9 @@
               <div>Cotisation payée le&nbsp;: <strong id="recu-adh-date">—</strong></div>
               <div id="recu-adh-mode-ligne" hidden>par <strong id="recu-adh-mode">—</strong></div>
               <div id="recu-adh-cheque-ligne" hidden>Chèque n°&nbsp;<strong id="recu-adh-num-cheque">—</strong><span id="recu-adh-banque-sep"></span></div>
+              <div id="recu-adh-cotisation-ligne">Cotisation&nbsp;: <strong id="recu-adh-montant-cotisation">—</strong></div>
+              <div id="recu-adh-don-ligne" hidden>Don associé&nbsp;: <strong id="recu-adh-montant-don">—</strong></div>
+              <div id="recu-adh-total-ligne" hidden>Total&nbsp;: <strong id="recu-adh-montant-total">—</strong></div>
             </div>
             <p class="recu__fait-a" id="recu-adh-fait-a"></p>
             <div class="recu__signature">
