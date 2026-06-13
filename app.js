@@ -1124,6 +1124,18 @@ function ouvrirModaleCarte(adherent) {
   document.getElementById("carte-saison").textContent =
     adherent.saison || "—";
 
+  /* Génération du QR code pointant vers hsi37.fr */
+  const zoneQr = document.getElementById("carte-qr");
+  zoneQr.innerHTML = "";
+  new QRCode(zoneQr, {
+    text:         "https://hsi37.fr",
+    width:        60,
+    height:       60,
+    colorDark:    "#000000",
+    colorLight:   "#ffffff",
+    correctLevel: QRCode.CorrectLevel.M
+  });
+
   carteFond.hidden = false;
   requestAnimationFrame(function() { modaleCarte.focus(); });
   document.addEventListener("keydown", gererToucheCarte);
@@ -1134,6 +1146,7 @@ function ouvrirModaleCarte(adherent) {
  */
 function fermerModaleCarte() {
   carteFond.hidden = true;
+  document.getElementById("carte-qr").innerHTML = "";
   document.removeEventListener("keydown", gererToucheCarte);
   if (elementAvantCarte) elementAvantCarte.focus();
 }
@@ -2096,6 +2109,11 @@ function majTexteRecuAdh() {
     `certifie avoir reçu la somme de <strong>${montantCert}</strong> ` +
     `au titre de l\'adhésion annuelle de la saison <strong>${saison}</strong> ` +
     `${donneurHtml}.`;
+
+  /* Bloc signature */
+  const nomAdh = NOMS_SIGNATAIRES[signataire] || "";
+  document.getElementById("recu-adh-sig-qualite").textContent = signataire;
+  document.getElementById("recu-adh-sig-nom").textContent     = nomAdh;
 }
 
 document.getElementById("select-signataire-adh").addEventListener("change", majTexteRecuAdh);
@@ -2244,6 +2262,11 @@ function majTexteRecuDon() {
       `certifie avoir reçu un don ${donneurHtml}.`;
   }
   document.getElementById("recu-don-certification").innerHTML = certif;
+
+  /* Bloc signature */
+  const nomDon = NOMS_SIGNATAIRES[signataire] || "";
+  document.getElementById("recu-don-sig-qualite").textContent = signataire;
+  document.getElementById("recu-don-sig-nom").textContent     = nomDon;
 }
 document.getElementById("select-signataire-don").addEventListener("change", majTexteRecuDon);
 

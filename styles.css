@@ -1193,11 +1193,33 @@ body {
   font-family: 'Open Sans', sans-serif;
   font-size: 0.63rem;
   color: #6b7a8f;
-  text-align: center;
   padding-top: 10px;
   border-top: 1px solid #e8ecf0;
   letter-spacing: 0.01em;
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.carte__pied-adresse {
+  flex: 1;
+  text-align: left;
+}
+
+/* QR code 60×60 — canvas généré par QRCode.js */
+.carte__qr {
+  flex-shrink: 0;
+  width: 60px;
+  height: 60px;
+  background: #ffffff;
+}
+.carte__qr canvas,
+.carte__qr img {
+  display: block;
+  width: 60px !important;
+  height: 60px !important;
 }
 
 /* Bande orange en bas */
@@ -1431,6 +1453,19 @@ body {
 .recu__sig-zone {
   border-bottom: 1px solid var(--encre);
   height: 56px;
+}
+
+.recu__sig-qualite {
+  font-size: 0.80rem;
+  color: var(--gris-moyen);
+  margin-bottom: 0.4rem;
+}
+
+.recu__sig-nom {
+  font-size: 0.80rem;
+  font-weight: 600;
+  color: var(--bleu-fonce);
+  margin-top: 0.3rem;
 }
 
 /* Pied de page du reçu */

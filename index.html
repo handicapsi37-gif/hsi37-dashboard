@@ -1170,7 +1170,8 @@
               </div>
             </div>
             <div class="carte__pied">
-              17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps &nbsp;|&nbsp; handicapsi37@gmail.com &nbsp;|&nbsp; hsi37.fr
+              <span class="carte__pied-adresse">17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps &nbsp;|&nbsp; handicapsi37@gmail.com &nbsp;|&nbsp; hsi37.fr</span>
+              <div id="carte-qr" class="carte__qr"></div>
             </div>
           </div>
           <div class="carte__bandeau-bas"></div>
@@ -1258,8 +1259,9 @@
             <p class="recu__fait-a" id="recu-adh-fait-a"></p>
             <div class="recu__signature">
               <div class="recu__sig-bloc">
-                <p class="recu__sig-label">Date et signature :</p>
+                <p class="recu__sig-qualite" id="recu-adh-sig-qualite"></p>
                 <div class="recu__sig-zone"></div>
+                <p class="recu__sig-nom" id="recu-adh-sig-nom"></p>
               </div>
             </div>
           </div>
@@ -1347,8 +1349,9 @@
             <p class="recu__fait-a" id="recu-don-fait-a"></p>
             <div class="recu__signature">
               <div class="recu__sig-bloc">
-                <p class="recu__sig-label">Date et signature :</p>
+                <p class="recu__sig-qualite" id="recu-don-sig-qualite"></p>
                 <div class="recu__sig-zone"></div>
+                <p class="recu__sig-nom" id="recu-don-sig-nom"></p>
               </div>
             </div>
           </div>
@@ -2220,6 +2223,8 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <!-- html2canvas — capture un élément HTML en image téléchargeable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <!-- QRCode.js — génération de QR codes inline (canvas) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <!-- Clés de configuration (SUPABASE_URL, SUPABASE_KEY) -->
   <script src="config.js"></script>
   <script src="app.js"></script>
