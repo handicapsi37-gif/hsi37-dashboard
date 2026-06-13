@@ -889,6 +889,49 @@ body {
   margin-top: 0.25rem;
 }
 
+/* Lien "Mot de passe oublié ?" */
+.connexion-oubli {
+  text-align: center;
+  margin-top: 0.75rem;
+}
+
+.connexion-oubli__lien {
+  background: none;
+  border: none;
+  color: var(--bleu-hsi);
+  font-size: 0.875rem;
+  cursor: pointer;
+  padding: 0;
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.2s;
+}
+
+.connexion-oubli__lien:hover,
+.connexion-oubli__lien:focus-visible {
+  text-decoration-color: var(--bleu-hsi);
+}
+
+/* Bloc de réinitialisation du mot de passe */
+.bloc-oubli {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--gris-bord);
+}
+
+/* Message de confirmation envoi email */
+.oubli-succes {
+  background-color: var(--vert-fond);
+  color: var(--vert-statut);
+  border: 1px solid var(--vert-statut);
+  border-radius: var(--rayon);
+  padding: 0.6rem 0.9rem;
+  font-size: 0.9rem;
+}
+
 /* ---------- MESSAGES DE VALIDATION ET DE SUCCÈS ---------- */
 
 /* Message d'erreur affiché sous un champ invalide */

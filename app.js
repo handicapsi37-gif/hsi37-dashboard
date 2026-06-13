@@ -950,6 +950,66 @@ const formulaireConnexion = document.getElementById("formulaire-connexion");
 const zoneErreur          = document.getElementById("connexion-erreur");
 const btnDeconnexion      = document.getElementById("btn-deconnexion");
 
+/* ---- Mot de passe oublié ---- */
+const btnOubliMdp        = document.getElementById("btn-oubli-mdp");
+const blocOubli          = document.getElementById("bloc-oubli");
+const oubliEmailInput    = document.getElementById("oubli-email");
+const oubliErreur        = document.getElementById("oubli-erreur");
+const oubliSucces        = document.getElementById("oubli-succes");
+const btnEnvoyerReset    = document.getElementById("btn-envoyer-reset");
+const btnRetourConnexion = document.getElementById("btn-retour-connexion");
+const divOubli           = document.querySelector(".connexion-oubli");
+
+btnOubliMdp.addEventListener("click", () => {
+  formulaireConnexion.hidden = true;
+  divOubli.hidden            = true;
+  blocOubli.hidden           = false;
+  document.getElementById("connexion-titre").textContent = "Mot de passe oublié";
+  oubliEmailInput.focus();
+});
+
+btnRetourConnexion.addEventListener("click", () => {
+  blocOubli.hidden           = true;
+  formulaireConnexion.hidden = false;
+  divOubli.hidden            = false;
+  document.getElementById("connexion-titre").textContent = "Connexion";
+  oubliErreur.hidden         = true;
+  oubliSucces.hidden         = true;
+  oubliEmailInput.value      = "";
+});
+
+btnEnvoyerReset.addEventListener("click", async () => {
+  const email = oubliEmailInput.value.trim();
+  oubliErreur.hidden = true;
+  oubliSucces.hidden = true;
+
+  if (!email) {
+    oubliErreur.textContent = "Veuillez saisir votre adresse e-mail.";
+    oubliErreur.hidden = false;
+    oubliEmailInput.focus();
+    return;
+  }
+
+  btnEnvoyerReset.disabled    = true;
+  btnEnvoyerReset.textContent = "Envoi en cours…";
+
+  const { error } = await clientSupabase.auth.resetPasswordForEmail(email, {
+    redirectTo: "https://hsi37-dashboard.pages.dev/reset-password.html"
+  });
+
+  btnEnvoyerReset.disabled    = false;
+  btnEnvoyerReset.textContent = "Envoyer le lien";
+
+  if (error) {
+    oubliErreur.textContent = "Erreur : " + error.message;
+    oubliErreur.hidden = false;
+  } else {
+    oubliSucces.textContent = `Un e-mail a été envoyé à ${email}. Vérifiez également vos spams.`;
+    oubliSucces.hidden = false;
+    oubliEmailInput.value = "";
+  }
+});
+
 /* ---- Éléments hub ---- */
 const hubAccueil        = document.getElementById("hub-accueil");
 const navOnglets        = document.getElementById("nav-onglets");
