@@ -1041,6 +1041,7 @@ const btnRetourAccueil  = document.getElementById("btn-retour-accueil");
 const sectionDocuments  = document.getElementById("section-documents");
 const sectionSignatures = document.getElementById("section-signatures");
 const sectionRgpd       = document.getElementById("section-rgpd");
+const sectionProfil     = document.getElementById("section-profil");
 
 /* Affiche le hub : masque tout sauf le hub */
 function afficherHub() {
@@ -1051,6 +1052,7 @@ function afficherHub() {
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
+  if (sectionProfil) sectionProfil.hidden = true;
   btnRetourAccueil.hidden  = true;
 }
 
@@ -1061,6 +1063,7 @@ function allerVers(vue) {
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
+  if (sectionProfil) sectionProfil.hidden = true;
 
   if (vue === "adherents") {
     navOnglets.hidden = false;
@@ -3302,6 +3305,60 @@ function telechargerFichier(contenu, nomFichier) {
   document.body.appendChild(lien);
   lien.click();
   setTimeout(function() { document.body.removeChild(lien); URL.revokeObjectURL(url); }, 200);
+}
+
+// --- Profil utilisateur ---
+const btnProfil = document.getElementById("btn-profil");
+if (btnProfil) {
+  btnProfil.addEventListener("click", function() {
+    hubAccueil.hidden = true;
+    navOnglets.hidden = true;
+    document.getElementById("panneau-adherents").hidden = true;
+    document.getElementById("panneau-donateurs").hidden = true;
+    sectionDocuments.hidden = true;
+    sectionSignatures.hidden = true;
+    sectionRgpd.hidden = true;
+    btnRetourAccueil.hidden = false;
+
+    sectionProfil.hidden = false;
+
+    const session = clientSupabase.auth.getSession();
+    session.then(function(res) {
+      const email = res?.data?.session?.user?.email || "—";
+      document.getElementById("profil-email").textContent = email;
+    });
+  });
+}
+
+const btnSauvegarderProfil = document.getElementById("btn-sauvegarder-profil");
+if (btnSauvegarderProfil) {
+  btnSauvegarderProfil.addEventListener("click", async function() {
+    const mdp = document.getElementById("profil-mdp-nouveau").value;
+    const confirm = document.getElementById("profil-mdp-confirm").value;
+    const msg = document.getElementById("profil-message");
+
+    if (!mdp || mdp.length < 8) {
+      msg.textContent = "Le mot de passe doit contenir au moins 8 caractères.";
+      msg.className = "profil__message profil__message--err";
+      return;
+    }
+    if (mdp !== confirm) {
+      msg.textContent = "Les deux mots de passe ne correspondent pas.";
+      msg.className = "profil__message profil__message--err";
+      return;
+    }
+
+    const { error } = await clientSupabase.auth.updateUser({ password: mdp });
+    if (error) {
+      msg.textContent = "Erreur : " + error.message;
+      msg.className = "profil__message profil__message--err";
+    } else {
+      msg.textContent = "✅ Mot de passe mis à jour avec succès.";
+      msg.className = "profil__message profil__message--ok";
+      document.getElementById("profil-mdp-nouveau").value = "";
+      document.getElementById("profil-mdp-confirm").value = "";
+    }
+  });
 }
 
 // --- Stats hub ---

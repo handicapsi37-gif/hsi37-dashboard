@@ -102,6 +102,9 @@
         </svg>
         Accueil
       </button>
+      <button class="btn btn--secondaire" id="btn-profil" type="button" aria-label="Mon profil">
+        👤 Mon profil
+      </button>
       <!-- Bouton de déconnexion — géré par app.js (signOut Supabase) -->
       <button class="btn btn--deconnexion" id="btn-deconnexion" type="button">
         Se déconnecter
@@ -717,6 +720,27 @@
         </div>
       </div>
 
+    </section>
+
+    <!-- ========== SECTION PROFIL ========== -->
+    <section id="section-profil" hidden aria-label="Mon profil">
+      <div class="section-hub-page__entete">
+        <h2>Mon profil</h2>
+      </div>
+      <div class="section-profil">
+        <p style="font-size:0.85rem;color:var(--encre);opacity:0.6;margin-bottom:0.3rem;">Compte connecté</p>
+        <div class="profil__email" id="profil-email">—</div>
+
+        <h3 style="font-size:1rem;margin-bottom:0.5rem;color:var(--bleu-hsi);">Changer le mot de passe</h3>
+        <label class="profil__label" for="profil-mdp-nouveau">Nouveau mot de passe</label>
+        <input class="profil__input" type="password" id="profil-mdp-nouveau" autocomplete="new-password" minlength="8">
+        <label class="profil__label" for="profil-mdp-confirm">Confirmer le mot de passe</label>
+        <input class="profil__input" type="password" id="profil-mdp-confirm" autocomplete="new-password" minlength="8">
+        <div class="profil__message" id="profil-message" aria-live="polite"></div>
+        <button class="btn btn--primaire" id="btn-sauvegarder-profil" type="button" style="margin-top:1.2rem;">
+          Enregistrer le nouveau mot de passe
+        </button>
+      </div>
     </section>
 
   </main>

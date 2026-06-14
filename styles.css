@@ -2623,3 +2623,52 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Profil utilisateur --- */
+.section-profil {
+  max-width: 480px;
+  margin: 2rem auto;
+  background: #fff;
+  border: 1.5px solid #dde8f5;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(30,121,191,0.08);
+}
+.profil__email {
+  font-size: 1rem;
+  color: var(--encre);
+  background: var(--gris-fond);
+  border-radius: 6px;
+  padding: 0.6rem 0.9rem;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+.profil__label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--encre);
+  margin-bottom: 0.3rem;
+  margin-top: 1rem;
+}
+.profil__input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1.5px solid #c5d3e0;
+  border-radius: 6px;
+  font-size: 0.95rem;
+  color: var(--encre);
+  box-sizing: border-box;
+}
+.profil__input:focus {
+  outline: 2px solid var(--bleu-hsi);
+  border-color: var(--bleu-hsi);
+}
+.profil__message {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+  min-height: 1.4rem;
+}
+.profil__message--ok  { color: #16a766; font-weight: 600; }
+.profil__message--err { color: #d63a47; font-weight: 600; }
+
