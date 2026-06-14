@@ -367,6 +367,7 @@ async function chargerAdherents() {
 
   donneesAdherents = data;
   appliquerFiltreAdherents();
+  mettreAJourStats();
 }
 
 /* =====================================================
@@ -1527,6 +1528,7 @@ async function chargerDonateurs() {
 
   donneesDonateurs = data;
   appliquerFiltreDonateurs();
+  mettreAJourStats();
 }
 
 /* =====================================================
@@ -3300,6 +3302,36 @@ function telechargerFichier(contenu, nomFichier) {
   document.body.appendChild(lien);
   lien.click();
   setTimeout(function() { document.body.removeChild(lien); URL.revokeObjectURL(url); }, 200);
+}
+
+// --- Stats hub ---
+function mettreAJourStats() {
+  var total = donneesAdherents.length;
+  var aJour = donneesAdherents.filter(function(a) { return calculerStatut(a.saison) === "a-jour"; }).length;
+  var expires = total - aJour;
+  var totalCotis = donneesAdherents.reduce(function(acc, a) {
+    return acc + (Number(a.montant_cotisation) || 0);
+  }, 0);
+
+  var elTotal = document.getElementById("val-total-adherents");
+  var elJour = document.getElementById("val-adherents-jour");
+  var elExpires = document.getElementById("val-adherents-expires");
+  var elCotis = document.getElementById("val-cotisations");
+  if (elTotal) elTotal.textContent = total;
+  if (elJour) elJour.textContent = aJour;
+  if (elExpires) elExpires.textContent = expires;
+  if (elCotis) elCotis.textContent = totalCotis.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+
+  var totalDon = donneesDonateurs.length;
+  var totalDons = donneesDonateurs.reduce(function(acc, d) {
+    var estMat = (d.type_don || "").toLowerCase().includes("mat");
+    return acc + (estMat ? 0 : (Number(d.montant_don) || 0));
+  }, 0);
+
+  var elTotalDon = document.getElementById("val-total-donateurs");
+  var elDons = document.getElementById("val-dons");
+  if (elTotalDon) elTotalDon.textContent = totalDon;
+  if (elDons) elDons.textContent = totalDons.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 }
 
 // --- Export CSV ---

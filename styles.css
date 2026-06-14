@@ -1915,6 +1915,36 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
    HUB D'ACCUEIL
    ===================================================== */
 
+/* --- Cartes stats hub --- */
+.hub__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.stat-carte {
+  background: #fff;
+  border: 1.5px solid #dde8f5;
+  border-radius: 10px;
+  padding: 1.1rem 1rem;
+  text-align: center;
+  box-shadow: 0 2px 6px rgba(30,121,191,0.07);
+}
+.stat-carte__chiffre {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--bleu-hsi);
+  line-height: 1.1;
+}
+.stat-carte__label {
+  font-size: 0.82rem;
+  color: var(--encre);
+  margin-top: 0.3rem;
+  opacity: 0.75;
+}
+.stat-carte--vert .stat-carte__chiffre { color: #16a766; }
+.stat-carte--rouge .stat-carte__chiffre { color: #d63a47; }
+
 .hub-accueil {
   max-width: 820px;
   margin: 0 auto;
