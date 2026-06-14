@@ -737,6 +737,7 @@ formulaire.addEventListener("submit", async function(evenement) {
   console.log("Valeur don lue :", montantDon, typeof montantDon);
   if (adherentEnCours) {
     /* ---- MODE MODIFICATION : UPDATE Supabase ---- */
+    console.log("Mode modification — montantDon :", montantDon, typeof montantDon);
     const { error } = await clientSupabase
       .from("adherents")
       .update({
