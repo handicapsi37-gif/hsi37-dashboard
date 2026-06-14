@@ -3528,6 +3528,8 @@ document.addEventListener("DOMContentLoaded", function() {
     triAdherents.colonne = col;
     theadAdh.querySelectorAll("th[data-colonne]").forEach(function(t){ delete t.dataset.sens; });
     th.dataset.sens = triAdherents.sens;
+    var selAdh = document.getElementById("tri-adherents");
+    if (selAdh) selAdh.value = "";
     appliquerFiltreAdherents();
   });
 
@@ -3539,6 +3541,36 @@ document.addEventListener("DOMContentLoaded", function() {
     triDonateurs.colonne = col;
     theadDon.querySelectorAll("th[data-colonne]").forEach(function(t){ delete t.dataset.sens; });
     th.dataset.sens = triDonateurs.sens;
+    var selDon = document.getElementById("tri-donateurs");
+    if (selDon) selDon.value = "";
+    appliquerFiltreDonateurs();
+  });
+
+  var selectTriAdh = document.getElementById("tri-adherents");
+  if (selectTriAdh) selectTriAdh.addEventListener("change", function() {
+    var val = this.value;
+    if (!val) {
+      triAdherents.colonne = null; triAdherents.sens = "asc";
+    } else {
+      var sep = val.lastIndexOf("-");
+      triAdherents.colonne = val.slice(0, sep);
+      triAdherents.sens    = val.slice(sep + 1);
+    }
+    if (theadAdh) theadAdh.querySelectorAll("th[data-colonne]").forEach(function(t){ delete t.dataset.sens; });
+    appliquerFiltreAdherents();
+  });
+
+  var selectTriDon = document.getElementById("tri-donateurs");
+  if (selectTriDon) selectTriDon.addEventListener("change", function() {
+    var val = this.value;
+    if (!val) {
+      triDonateurs.colonne = null; triDonateurs.sens = "asc";
+    } else {
+      var sep = val.lastIndexOf("-");
+      triDonateurs.colonne = val.slice(0, sep);
+      triDonateurs.sens    = val.slice(sep + 1);
+    }
+    if (theadDon) theadDon.querySelectorAll("th[data-colonne]").forEach(function(t){ delete t.dataset.sens; });
     appliquerFiltreDonateurs();
   });
 });

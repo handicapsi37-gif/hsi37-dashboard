@@ -274,6 +274,16 @@
             <label for="recherche-adherents">🔍 Rechercher</label>
             <input type="search" id="recherche-adherents" placeholder="Nom, prénom, email…" autocomplete="off">
           </div>
+          <select id="tri-adherents" class="champ-input champ-select" aria-label="Trier les adhérents par…">
+            <option value="">⇅ Trier par…</option>
+            <option value="nom-asc">Nom (A→Z)</option>
+            <option value="nom-desc">Nom (Z→A)</option>
+            <option value="date_adhesion-desc">Date d'adhésion (récente→ancienne)</option>
+            <option value="date_adhesion-asc">Date d'adhésion (ancienne→récente)</option>
+            <option value="montant_cotisation-asc">Montant (croissant)</option>
+            <option value="montant_cotisation-desc">Montant (décroissant)</option>
+            <option value="statut-asc">Statut</option>
+          </select>
         </div>
 
       <div class="barre-actions__droite">
@@ -330,6 +340,15 @@
             <label for="recherche-donateurs">🔍 Rechercher</label>
             <input type="search" id="recherche-donateurs" placeholder="Nom, prénom, organisme…" autocomplete="off">
           </div>
+          <select id="tri-donateurs" class="champ-input champ-select" aria-label="Trier les donateurs par…">
+            <option value="">⇅ Trier par…</option>
+            <option value="nom-asc">Nom (A→Z)</option>
+            <option value="nom-desc">Nom (Z→A)</option>
+            <option value="date_don-desc">Date du don (récente→ancienne)</option>
+            <option value="montant_don-asc">Montant (croissant)</option>
+            <option value="montant_don-desc">Montant (décroissant)</option>
+            <option value="type_don-asc">Type de don</option>
+          </select>
         </div>
         <div class="barre-actions__droite">
           <button class="bouton-export" id="btn-export-donateurs" type="button">⬇ Exporter CSV</button>
