@@ -306,15 +306,9 @@ function remplirTableau(adherents) {
   adherents.forEach(function(adherent) {
     const ligne = document.createElement("tr");
 
-    const montantCotis = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
+    const montant = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? Number(adherent.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
-    const donVal = (adherent.montant_don !== null && adherent.montant_don !== undefined)
-      ? Number(adherent.montant_don)
-      : 0;
-    const montant = (donVal > 0)
-      ? montantCotis + " + don " + donVal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
-      : montantCotis;
 
     ligne.innerHTML = `
       <td class="col-id">${adherent.id_adherent || "—"}</td>
@@ -821,6 +815,39 @@ formulaire.addEventListener("submit", async function(evenement) {
       const nouvelAdherentEnCache = donneesAdherents.find(function(a) { return a.id_adherent === idAdherent; });
       if (nouvelAdherentEnCache) {
         champsChequesAdherents.set(String(nouvelAdherentEnCache.id), { numero_cheque: numeroCheque, banque: banqueAdh });
+      }
+    }
+
+    if (montantDon && montantDon > 0) {
+      let idDonateur;
+      try {
+        idDonateur = await genererIdDonateur(saison);
+      } catch (_) {
+        afficherMessageErreur(`Adhérent ajouté (${idAdherent}), mais l'enregistrement du don a échoué — veuillez le saisir manuellement dans le panneau Donateurs.`);
+        return;
+      }
+
+      const { error: errorDon } = await clientSupabase.from("donateurs").insert([{
+        id_donateur:     idDonateur,
+        nom,
+        prenom,
+        civilite,
+        organisme:       null,
+        email,
+        telephone,
+        adresse,
+        type_don:        "Don financier",
+        montant_don:     montantDon,
+        date_don:        dateAdhesion,
+        mode_paiement:   modePaiement,
+        description_don: null,
+        numero_cheque:   null,
+        banque_cheque:   null
+      }]);
+
+      if (errorDon) {
+        afficherMessageErreur(`Adhérent ajouté (${idAdherent}), mais l'enregistrement du don a échoué — veuillez le saisir manuellement dans le panneau Donateurs.`);
+        return;
       }
     }
 
