@@ -269,6 +269,24 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   background-color: var(--gris-fond);
 }
 
+/* --- Bouton export CSV --- */
+.bouton-export {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  background: var(--bleu-hsi);
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 0.75rem;
+}
+.bouton-export:hover { background: var(--bleu-fonce); }
+.bouton-export:focus { outline: 2px solid var(--bleu-fonce); outline-offset: 2px; }
+
 /* Boutons d'action dans le tableau (icônes modifier / supprimer) */
 .btn-icone {
   background: none;

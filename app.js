@@ -3302,6 +3302,54 @@ function telechargerFichier(contenu, nomFichier) {
   setTimeout(function() { document.body.removeChild(lien); URL.revokeObjectURL(url); }, 200);
 }
 
+// --- Export CSV ---
+function exporterCSV(donnees, colonnes, nomsColonnes, nomFichier) {
+  var lignes = [nomsColonnes.join(";")];
+  donnees.forEach(function(row) {
+    var valeurs = colonnes.map(function(col) {
+      var v = col === "statut" ? calculerStatut(row.saison) : (row[col] !== null && row[col] !== undefined ? row[col] : "");
+      return '"' + String(v).replace(/"/g, '""') + '"';
+    });
+    lignes.push(valeurs.join(";"));
+  });
+  var contenu = "﻿" + lignes.join("\r\n");
+  var blob = new Blob([contenu], { type: "text/csv;charset=utf-8;" });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement("a");
+  a.href = url;
+  a.download = nomFichier;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+document.addEventListener("DOMContentLoaded", function() {
+  var btnAdh = document.getElementById("btn-export-adherents");
+  if (btnAdh) {
+    btnAdh.addEventListener("click", function() {
+      var annee = new Date().getFullYear();
+      exporterCSV(
+        donneesAdherents,
+        ["id_adherent","nom","prenom","email","telephone","type_membre","date_adhesion","montant_cotisation","mode_paiement","statut","saison"],
+        ["ID","Nom","Prénom","Email","Téléphone","Type de membre","Date d'adhésion","Montant","Mode de paiement","Statut","Saison"],
+        "adherents_HSI37_" + annee + ".csv"
+      );
+    });
+  }
+
+  var btnDon = document.getElementById("btn-export-donateurs");
+  if (btnDon) {
+    btnDon.addEventListener("click", function() {
+      var annee = new Date().getFullYear();
+      exporterCSV(
+        donneesDonateurs,
+        ["id_donateur","nom","prenom","organisme","email","type_don","montant_don","description_don","date_don","mode_paiement"],
+        ["ID","Nom","Prénom","Organisme","Email","Type de don","Montant","Description","Date du don","Mode de paiement"],
+        "donateurs_HSI37_" + annee + ".csv"
+      );
+    });
+  }
+});
+
 document.getElementById("btn-exporter-donnees").addEventListener("click", async function() {
   const btn          = this;
   btn.disabled       = true;

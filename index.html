@@ -245,6 +245,7 @@
         </div>
 
       <div class="barre-actions__droite">
+        <button class="bouton-export" id="btn-export-adherents" type="button">⬇ Exporter CSV</button>
         <button class="btn btn--primaire" id="btn-ajouter"
                 aria-haspopup="dialog" aria-controls="modale-adherent">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
@@ -298,15 +299,18 @@
             <input type="search" id="recherche-donateurs" placeholder="Nom, prénom, organisme…" autocomplete="off">
           </div>
         </div>
-        <button class="btn btn--primaire" id="btn-ajouter-don"
-                aria-haspopup="dialog" aria-controls="modale-donateur">
-          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-               viewBox="0 0 24 24" width="16" height="16">
-            <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
-                  stroke-linecap="round"/>
-          </svg>
-          Ajouter un donateur
-        </button>
+        <div class="barre-actions__droite">
+          <button class="bouton-export" id="btn-export-donateurs" type="button">⬇ Exporter CSV</button>
+          <button class="btn btn--primaire" id="btn-ajouter-don"
+                  aria-haspopup="dialog" aria-controls="modale-donateur">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" width="16" height="16">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
+                    stroke-linecap="round"/>
+            </svg>
+            Ajouter un donateur
+          </button>
+        </div>
       </section>
 
       <div id="message-succes-don" class="message-succes" role="status" aria-live="polite" hidden></div>
@@ -544,7 +548,7 @@
               <h3 class="doc-carte__titre">Exporter les données</h3>
               <p class="doc-carte__desc">Listes complètes adhérents et donateurs en CSV — compatible Excel français</p>
             </div>
-            <button class="btn btn--secondaire" id="btn-exporter-donnees"
+            <button class="bouton-export" id="btn-exporter-donnees"
                     aria-label="Exporter les données en CSV">
               <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                    viewBox="0 0 24 24" width="16" height="16">
