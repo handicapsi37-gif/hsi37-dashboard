@@ -9,6 +9,30 @@
    La clé utilisée est la clé publishable (publique), PAS la clé service_role.
    ===================================================== */
 
+/* ---------- ENVOI DES REÇUS PAR MAIL — via Edge Function Supabase ---------- */
+
+async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDestinataire) {
+  const base64 = await new Promise(function(resolve, reject) {
+    const reader = new FileReader();
+    reader.onload  = function() { resolve(reader.result.split(',')[1]); };
+    reader.onerror = reject;
+    reader.readAsDataURL(pdfBlob);
+  });
+
+  const { error } = await clientSupabase.functions.invoke('envoyer-recu', {
+    body: {
+      emailDestinataire,
+      nomDestinataire,
+      sujet:         "Votre reçu HSI37",
+      contenuHTML:   `<p>Bonjour${nomDestinataire ? ' ' + nomDestinataire : ''},</p><p>Veuillez trouver ci-joint votre reçu.</p><p>Cordialement,<br>HSI37</p>`,
+      pdfBase64:     base64,
+      nomFichierPDF: nomFichier,
+    },
+  });
+
+  if (error) throw new Error(error.message || "Erreur Edge Function");
+}
+
 /* ---------- CONFIGURATION DES TYPES DE MEMBRES ---------- */
 
 const typesMembres = {
@@ -2206,6 +2230,7 @@ document.getElementById("btn-fermer-recu-adh-bas").addEventListener("click", fer
 recuAdhFond.addEventListener("click", function(ev) { if (ev.target === recuAdhFond) fermerModaleRecuAdh(); });
 
 document.getElementById("btn-telecharger-recu-adh").addEventListener("click", function() {
+  if (!adherentRecuEnCours && adherentEnCours) adherentRecuEnCours = adherentEnCours;
   const doc         = document.getElementById("recu-adherent-document");
   const imgLogo     = document.getElementById("recu-adh-logo");
   const idAdherent  = (adherentRecuEnCours && adherentRecuEnCours.id_adherent) || "recu";
@@ -2232,7 +2257,35 @@ document.getElementById("btn-telecharger-recu-adh").addEventListener("click", fu
       format: [mmLarg, mmHaut]
     });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob   = pdf.output("blob");
     pdf.save(nomFichier);
+
+    const emailDest = (adherentRecuEnCours && adherentRecuEnCours.email) || "";
+    const nomDest   = [(adherentRecuEnCours.prenom || ""), (adherentRecuEnCours.nom || "")]
+                        .filter(Boolean).join(" ");
+    const actionsEl = document.getElementById("modale-recu-adh").querySelector(".recu-modale__actions");
+    const msgEl     = document.createElement("p");
+    msgEl.style.cssText = "font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:4px;margin-bottom:0.5rem;text-align:center;border:1px solid;";
+    actionsEl.insertAdjacentElement("beforebegin", msgEl);
+
+    if (!emailDest) {
+      Object.assign(msgEl.style, { background:"#fff0e0", color:"#a84800", borderColor:"#a84800" });
+      msgEl.textContent = "Aucun e-mail renseigné pour cet adhérent.";
+      setTimeout(function() { msgEl.remove(); }, 5000);
+    } else {
+      Object.assign(msgEl.style, { background:"#f0f6ff", color:"#1a5276", borderColor:"#1a5276" });
+      msgEl.textContent = "Envoi du reçu par e-mail…";
+      envoyerRecuParMail(pdfBlob, nomFichier, emailDest, nomDest)
+        .then(function() {
+          Object.assign(msgEl.style, { background:"#e6f5ec", color:"#1e7d45", borderColor:"#1e7d45" });
+          msgEl.textContent = "Reçu envoyé par mail à " + emailDest;
+        })
+        .catch(function(err) {
+          Object.assign(msgEl.style, { background:"#fee2e2", color:"#b91c1c", borderColor:"#b91c1c" });
+          msgEl.textContent = "Erreur d'envoi : " + err.message;
+        })
+        .finally(function() { setTimeout(function() { msgEl.remove(); }, 7000); });
+    }
   }).finally(function() {
     imgLogo.src = srcOriginal;
     btn.disabled = false;
@@ -2390,7 +2443,36 @@ document.getElementById("btn-telecharger-recu-don").addEventListener("click", fu
       format: [mmLarg, mmHaut]
     });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob   = pdf.output("blob");
     pdf.save(nomFichier);
+
+    const emailDest = (donateurRecuEnCours && donateurRecuEnCours.email) || "";
+    const nomDest   = [(donateurRecuEnCours.prenom || ""), (donateurRecuEnCours.nom || ""),
+                       (donateurRecuEnCours.organisme || "")]
+                        .filter(Boolean).join(" ") || "Donateur";
+    const actionsEl = document.getElementById("modale-recu-don").querySelector(".recu-modale__actions");
+    const msgEl     = document.createElement("p");
+    msgEl.style.cssText = "font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:4px;margin-bottom:0.5rem;text-align:center;border:1px solid;";
+    actionsEl.insertAdjacentElement("beforebegin", msgEl);
+
+    if (!emailDest) {
+      Object.assign(msgEl.style, { background:"#fff0e0", color:"#a84800", borderColor:"#a84800" });
+      msgEl.textContent = "Aucun e-mail renseigné pour ce donateur.";
+      setTimeout(function() { msgEl.remove(); }, 5000);
+    } else {
+      Object.assign(msgEl.style, { background:"#f0f6ff", color:"#1a5276", borderColor:"#1a5276" });
+      msgEl.textContent = "Envoi du reçu par e-mail…";
+      envoyerRecuParMail(pdfBlob, nomFichier, emailDest, nomDest)
+        .then(function() {
+          Object.assign(msgEl.style, { background:"#e6f5ec", color:"#1e7d45", borderColor:"#1e7d45" });
+          msgEl.textContent = "Reçu envoyé par mail à " + emailDest;
+        })
+        .catch(function(err) {
+          Object.assign(msgEl.style, { background:"#fee2e2", color:"#b91c1c", borderColor:"#b91c1c" });
+          msgEl.textContent = "Erreur d'envoi : " + err.message;
+        })
+        .finally(function() { setTimeout(function() { msgEl.remove(); }, 7000); });
+    }
   }).finally(function() {
     imgLogo.src = srcOriginal;
     btn.disabled = false;
