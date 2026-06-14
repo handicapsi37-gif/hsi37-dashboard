@@ -487,6 +487,38 @@ def construire_contenu(s):
         s['corps'],
     ))
 
+    story.append(Spacer(1, 12))
+    story.append(Paragraph("6.8  Ajouter un adhérent avec don", s['sous_section']))
+    story.append(Paragraph(
+        "Un adhérent peut aussi être donateur. Si la personne verse une cotisation "
+        "ET effectue un don (financier ou matériel) au moment de son adhésion, "
+        "les deux saisies se font séparément :",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "① Ajoutez d'abord l'adhérent normalement via l'onglet <b>Adhérents</b> "
+        "(nom, prénom, cotisation, date d'adhésion, etc.).",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "② Allez ensuite dans l'onglet <b>Donateurs</b> et ajoutez <b>manuellement</b> "
+        "une fiche donateur pour cette même personne, en renseignant son don "
+        "(montant, date, type). Ce rajout ne se fait pas automatiquement.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "Le don apparaît alors dans la liste des donateurs. "
+        "Les deux fiches (adhérent et donateur) sont indépendantes : "
+        "modifier l'une ne modifie pas l'autre.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "<i>Astuce : vous pouvez générer un reçu de don depuis l'onglet Donateurs "
+        "et un reçu d'adhésion depuis l'onglet Adhérents — les deux documents "
+        "peuvent être envoyés à la même personne.</i>",
+        s['corps'],
+    ))
+
     story.append(PageBreak())
 
     # ── SECTION 7 — DOCUMENTS ─────────────────────────────────────
