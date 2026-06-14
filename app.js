@@ -109,7 +109,6 @@ function calculerStatut(saison) {
   const annee = new Date().getFullYear();
   const s = parseInt(saison, 10);
   if (isNaN(s) || s >= annee) return "ajour";
-  if (s === annee - 1) return "arenouveler";
   return "enretard";
 }
 
