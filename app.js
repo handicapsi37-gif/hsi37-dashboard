@@ -306,9 +306,15 @@ function remplirTableau(adherents) {
   adherents.forEach(function(adherent) {
     const ligne = document.createElement("tr");
 
-    const montant = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
+    const montantCotis = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? Number(adherent.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
+    const donVal = (adherent.montant_don !== null && adherent.montant_don !== undefined)
+      ? Number(adherent.montant_don)
+      : 0;
+    const montant = (donVal > 0)
+      ? montantCotis + " + don " + donVal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+      : montantCotis;
 
     ligne.innerHTML = `
       <td class="col-id">${adherent.id_adherent || "—"}</td>
