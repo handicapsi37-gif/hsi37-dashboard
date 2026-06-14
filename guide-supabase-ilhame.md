@@ -110,9 +110,48 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 
 > ⚠️ Ne jamais ajouter ou supprimer une colonne sans en parler d'abord — cela peut casser le dashboard.
 
+### Modifier une colonne : passer en "Allow Nullable"
+
+Certaines colonnes ne sont pas obligatoires (exemple : `organisme` — un donateur peut être une personne, pas forcément une structure). Si Supabase bloque l'enregistrement parce qu'un champ est vide, il faut passer cette colonne en **Allow Nullable** (autoriser les valeurs vides).
+
+**Exemple concret : colonne `organisme` de la table `donateurs`**
+
+1. Aller sur [supabase.com](https://supabase.com) → se connecter → ouvrir le projet `hsi37-dashboard`
+2. Menu gauche → **Table Editor** → cliquer sur la table `donateurs`
+3. Cliquer sur l'icône **crayon** (modifier) à droite de la colonne `organisme`
+4. Cocher la case **Is Nullable** (autoriser valeur vide)
+5. Cliquer sur **Save** (enregistrer)
+
+> ⚠️ Ne modifier qu'une colonne à la fois, et toujours vérifier que le dashboard fonctionne après.
+
 ---
 
-## 8. En cas de problème inconnu
+## 8. Edge Function : envoyer-recu
+
+Une **Edge Function** (fonction serveur — code qui s'exécute côté Supabase, pas dans le navigateur) nommée `envoyer-recu` est utilisée par le dashboard pour envoyer les reçus par e-mail.
+
+### Ce que fait cette fonction
+- Elle reçoit les données d'un reçu (adhésion ou don) depuis le dashboard
+- Elle génère le PDF du reçu
+- Elle l'envoie par e-mail au destinataire
+
+### Expéditeur des e-mails
+Tous les e-mails envoyés par cette fonction partent de l'adresse :
+**handicapsi37@gmail.com**
+
+C'est l'adresse qui apparaît dans la boîte de réception du destinataire.
+
+### Où la trouver sur Supabase
+1. Aller sur [supabase.com](https://supabase.com) → se connecter → ouvrir le projet `hsi37-dashboard`
+2. Menu gauche → **Edge Functions**
+3. La fonction `envoyer-recu` apparaît dans la liste
+
+### ⚠️ Ne jamais supprimer cette fonction
+Sans elle, l'envoi de reçus par e-mail ne fonctionne plus. En cas de problème d'envoi, contacter Ilhame ou relire la documentation technique avant toute modification.
+
+---
+
+## 9. En cas de problème inconnu
 
 Avant de toucher quoi que ce soit : fais une capture d'écran de ce que tu vois et contacte Ilhame (toi-même via Claude Code 😄) ou ouvre une nouvelle conversation Claude en décrivant le problème.
 
