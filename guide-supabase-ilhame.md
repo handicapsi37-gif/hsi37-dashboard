@@ -73,10 +73,49 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 
 ---
 
-## 7. En cas de problème inconnu
+## 7. Gestion des colonnes Supabase
+
+### Structure de la table `adherents`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | uuid | Identifiant technique (généré automatiquement) |
+| id_adherent | text | Identifiant lisible HSI-2026-0001 |
+| nom | text | Nom de famille |
+| prenom | text | Prénom |
+| email | text | Adresse e-mail |
+| telephone | text | Numéro de téléphone |
+| adresse | text | Adresse postale |
+| date_adhesion | date | Date d'adhésion |
+| montant_cotisation | numeric | Montant payé en € |
+| mode_paiement | text | virement / chèque / espèces |
+| type_membre | text | Membre actif, bienfaiteur, etc. |
+| saison | text | Année de l'adhésion (ex. 2026) |
+
+### Structure de la table `donateurs`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | uuid | Identifiant technique (généré automatiquement) |
+| id_donateur | text | Identifiant lisible HSI-2026-0001 |
+| nom | text | Nom de famille |
+| prenom | text | Prénom |
+| organisme | text | Nom de l'organisme (si don d'une structure) |
+| email | text | Adresse e-mail |
+| type_don | text | Don financier / Don matériel |
+| montant_don | numeric | Montant en € (vide si don matériel) |
+| description_don | text | Description du matériel donné |
+| date_don | date | Date du don |
+| mode_paiement | text | virement / chèque / espèces |
+
+> ⚠️ Ne jamais ajouter ou supprimer une colonne sans en parler d'abord — cela peut casser le dashboard.
+
+---
+
+## 8. En cas de problème inconnu
 
 Avant de toucher quoi que ce soit : fais une capture d'écran de ce que tu vois et contacte Ilhame (toi-même via Claude Code 😄) ou ouvre une nouvelle conversation Claude en décrivant le problème.
 
 ---
 
-*Dernière mise à jour : juin 2026*
+*Dernière mise à jour : juin 2026 — V2 complète*
