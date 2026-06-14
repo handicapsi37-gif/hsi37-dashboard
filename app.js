@@ -1455,7 +1455,7 @@ function remplirTableauDonateurs(donateurs) {
   if (!donateurs || donateurs.length === 0) {
     corps.innerHTML = `
       <tr>
-        <td colspan="9" class="tableau-message">
+        <td colspan="10" class="tableau-message">
           Aucun donateur enregistré pour l'instant.
         </td>
       </tr>
@@ -1487,6 +1487,7 @@ function remplirTableauDonateurs(donateurs) {
       <td class="col-id">${don.id_donateur || "—"}</td>
       <td class="col-nom">${nomAffiche}</td>
       <td>${prenomOrgAffiche}</td>
+      <td>${don.email || "—"}</td>
       <td>${don.type_don || "—"}</td>
       <td>${montant}</td>
       <td>${don.description_don || "—"}</td>
@@ -1505,7 +1506,7 @@ async function chargerDonateurs() {
   const corps = document.getElementById("corps-tableau-donateurs");
   if (corps) {
     corps.innerHTML = `
-      <tr><td colspan="9" class="tableau-message">Chargement en cours…</td></tr>
+      <tr><td colspan="10" class="tableau-message">Chargement en cours…</td></tr>
     `;
   }
 
@@ -1515,7 +1516,7 @@ async function chargerDonateurs() {
     if (corps) {
       corps.innerHTML = `
         <tr>
-          <td colspan="9" class="tableau-message tableau-message--erreur" role="alert">
+          <td colspan="10" class="tableau-message tableau-message--erreur" role="alert">
             Impossible de charger les donateurs. Vérifiez votre connexion et réessayez.
           </td>
         </tr>
