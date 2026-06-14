@@ -153,6 +153,19 @@ body {
   flex: 1;
 }
 
+/* --- Barre de recherche (nouveau design) --- */
+.barre-recherche { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.75rem; }
+.barre-recherche label { font-weight: 600; color: var(--encre); white-space: nowrap; }
+.barre-recherche input { padding: 0.45rem 0.75rem; border: 1.5px solid #c5d3e0; border-radius: 6px; font-size: 0.95rem; width: 280px; color: var(--encre); }
+.barre-recherche input:focus { outline: 2px solid var(--bleu-hsi); border-color: var(--bleu-hsi); }
+
+/* --- Tri colonnes --- */
+th[data-colonne] { cursor: pointer; user-select: none; }
+th[data-colonne]:hover { background: #dde8f5; }
+th[data-colonne]::after { content: " ⇅"; font-size: 0.8em; opacity: 0.5; }
+th[data-colonne][data-sens="asc"]::after  { content: " ▲"; opacity: 1; }
+th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
+
 /* Champ de recherche avec icône intégrée */
 .champ-recherche {
   position: relative;

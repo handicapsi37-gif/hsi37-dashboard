@@ -91,6 +91,8 @@ const statutsConfig = {
 /* ---------- CACHE DES DONNÉES SUPABASE ---------- */
 /* Conserve les objets complets pour pré-remplir la modale sans requête supplémentaire */
 let donneesAdherents = [];
+var filtreAdherents  = "";
+var triAdherents     = { colonne: null, sens: "asc" };
 
 /* ---------- ÉTAT DE LA MODALE ---------- */
 /* null = mode ajout ; objet adherent = mode modification */
@@ -288,9 +290,6 @@ function remplirTableau(adherents) {
   const corps = document.getElementById("corps-tableau");
   if (!corps) return;
 
-  /* Mettre à jour le cache local utilisé par les boutons d'action */
-  donneesAdherents = adherents || [];
-
   corps.innerHTML = "";
 
   if (!adherents || adherents.length === 0) {
@@ -366,7 +365,8 @@ async function chargerAdherents() {
     return;
   }
 
-  remplirTableau(data);
+  donneesAdherents = data;
+  appliquerFiltreAdherents();
 }
 
 /* =====================================================
@@ -1373,6 +1373,8 @@ document.getElementById("onglet-donateurs").addEventListener("click", function()
    ===================================================== */
 
 let donneesDonateurs      = [];
+var filtreDonateurs       = "";
+var triDonateurs          = { colonne: null, sens: "asc" };
 let donateurEnCours       = null;
 let elementAvantModaleDon = null;
 
@@ -1448,7 +1450,6 @@ function remplirTableauDonateurs(donateurs) {
   const corps = document.getElementById("corps-tableau-donateurs");
   if (!corps) return;
 
-  donneesDonateurs = donateurs || [];
   corps.innerHTML  = "";
 
   if (!donateurs || donateurs.length === 0) {
@@ -1524,7 +1525,8 @@ async function chargerDonateurs() {
     return;
   }
 
-  remplirTableauDonateurs(data);
+  donneesDonateurs = data;
+  appliquerFiltreDonateurs();
 }
 
 /* =====================================================
@@ -3336,9 +3338,70 @@ document.getElementById("btn-exporter-donnees").addEventListener("click", async 
   }
 });
 
+function appliquerFiltreAdherents() {
+  var f = filtreAdherents.toLowerCase();
+  var liste = donneesAdherents.filter(function(a) {
+    return (a.nom||"").toLowerCase().includes(f) || (a.prenom||"").toLowerCase().includes(f) || (a.email||"").toLowerCase().includes(f) || (a.telephone||"").toLowerCase().includes(f) || (a.type_membre||"").toLowerCase().includes(f);
+  });
+  if (triAdherents.colonne) {
+    var col = triAdherents.colonne; var sens = triAdherents.sens;
+    liste.sort(function(a,b) {
+      var va = col==="statut" ? calculerStatut(a.saison) : (a[col]||"");
+      var vb = col==="statut" ? calculerStatut(b.saison) : (b[col]||"");
+      if (col==="montant_cotisation") { va=Number(va)||0; vb=Number(vb)||0; }
+      return sens==="asc" ? (va<vb?-1:va>vb?1:0) : (va>vb?-1:va<vb?1:0);
+    });
+  }
+  remplirTableau(liste);
+}
+
+function appliquerFiltreDonateurs() {
+  var f = filtreDonateurs.toLowerCase();
+  var liste = donneesDonateurs.filter(function(d) {
+    return (d.nom||"").toLowerCase().includes(f) || (d.prenom||"").toLowerCase().includes(f) || (d.organisme||"").toLowerCase().includes(f) || (d.email||"").toLowerCase().includes(f) || (d.type_don||"").toLowerCase().includes(f);
+  });
+  if (triDonateurs.colonne) {
+    var col = triDonateurs.colonne; var sens = triDonateurs.sens;
+    liste.sort(function(a,b) {
+      var va = a[col]||""; var vb = b[col]||"";
+      if (col==="montant_don") { va=Number(va)||0; vb=Number(vb)||0; }
+      return sens==="asc" ? (va<vb?-1:va>vb?1:0) : (va>vb?-1:va<vb?1:0);
+    });
+  }
+  remplirTableauDonateurs(liste);
+}
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();
   initialiserSelectsDateDon();
   verifierSession();
+
+  var inputAdh = document.getElementById("recherche-adherents");
+  if (inputAdh) inputAdh.addEventListener("input", function() { filtreAdherents=this.value; appliquerFiltreAdherents(); });
+
+  var inputDon = document.getElementById("recherche-donateurs");
+  if (inputDon) inputDon.addEventListener("input", function() { filtreDonateurs=this.value; appliquerFiltreDonateurs(); });
+
+  var theadAdh = document.querySelector("#tableau-adherents thead");
+  if (theadAdh) theadAdh.addEventListener("click", function(e) {
+    var th = e.target.closest("th[data-colonne]"); if (!th) return;
+    var col = th.dataset.colonne;
+    triAdherents.sens = triAdherents.colonne===col ? (triAdherents.sens==="asc"?"desc":"asc") : "asc";
+    triAdherents.colonne = col;
+    theadAdh.querySelectorAll("th[data-colonne]").forEach(function(t){ delete t.dataset.sens; });
+    th.dataset.sens = triAdherents.sens;
+    appliquerFiltreAdherents();
+  });
+
+  var theadDon = document.querySelector("#tableau-donateurs thead");
+  if (theadDon) theadDon.addEventListener("click", function(e) {
+    var th = e.target.closest("th[data-colonne]"); if (!th) return;
+    var col = th.dataset.colonne;
+    triDonateurs.sens = triDonateurs.colonne===col ? (triDonateurs.sens==="asc"?"desc":"asc") : "asc";
+    triDonateurs.colonne = col;
+    theadDon.querySelectorAll("th[data-colonne]").forEach(function(t){ delete t.dataset.sens; });
+    th.dataset.sens = triDonateurs.sens;
+    appliquerFiltreDonateurs();
+  });
 });
