@@ -734,10 +734,8 @@ formulaire.addEventListener("submit", async function(evenement) {
   const numeroCheque      = document.getElementById("champ-numero-cheque").value.trim() || null;
   const banqueAdh         = document.getElementById("champ-banque-adh").value.trim() || null;
 
-  console.log("Valeur don lue :", montantDon, typeof montantDon);
   if (adherentEnCours) {
     /* ---- MODE MODIFICATION : UPDATE Supabase ---- */
-    console.log("Mode modification — montantDon :", montantDon, typeof montantDon);
     const { error } = await clientSupabase
       .from("adherents")
       .update({
@@ -821,7 +819,6 @@ formulaire.addEventListener("submit", async function(evenement) {
     }
 
     if (montantDon && montantDon > 0) {
-      console.log("Don détecté :", montantDon);
       let idDonateur;
       try {
         idDonateur = await genererIdDonateur(saison);
@@ -848,7 +845,6 @@ formulaire.addEventListener("submit", async function(evenement) {
         banque_cheque:   null
       }]);
 
-      console.log("Résultat insert don :", dataDon, errorDon);
       if (errorDon) {
         afficherMessageErreur(`Adhérent ajouté (${idAdherent}), mais l'enregistrement du don a échoué — veuillez le saisir manuellement dans le panneau Donateurs.`);
         return;
@@ -2354,7 +2350,6 @@ let elementAvantRecuDon = null;
 let donateurRecuEnCours = null;
 
 function ouvrirModaleRecuDonateur(donateur) {
-  console.log("[RECU-DON] type_don =", JSON.stringify(donateur.type_don));
   elementAvantRecuDon = document.activeElement;
   donateurRecuEnCours = donateur;
 
