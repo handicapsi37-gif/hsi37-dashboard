@@ -23,8 +23,8 @@
 - **Front :** HTML + CSS + JavaScript vanilla (pas de framework).
 - **Base de données :** Supabase (projet hsi37-dashboard, hébergé à Paris, RGPD).
 - **Authentification :** Supabase Auth, email + mot de passe, 5 comptes bureau, inscription libre désactivée.
-- **Hébergement actuel :** local uniquement (serveur python3, localhost:8001 ou 8002).
-- **Hébergement prévu :** Cloudflare Pages ou Netlify (gratuit).
+- **Hébergement actuel :** Cloudflare Pages — hsi37-dashboard.pages.dev ✅ En ligne
+- **Hébergement local (développement) :** serveur python3, localhost:8001 ou 8002
 - **Versioning :** Git local, config.js exclu via .gitignore (clés Supabase protégées).
 - **Charte graphique :** SKILL.md dans .skills/charte-graphique-hsi37/
 - **Coût récurrent :** 0 € (hors domaine hsi37.fr déjà payé).
@@ -228,14 +228,14 @@
 
 ### Phase 3 — Finitions
 - Vérification accessibilité de bout en bout
-- Mention RGPD (information des adhérents sur leurs données)
-- Export des données en fichier de sauvegarde
+- ~~Mention RGPD (information des adhérents sur leurs données)~~ ✅ Fait
+- ~~Export des données en fichier de sauvegarde~~ ✅ Fait (CSV adhérents + donateurs)
 - Vérification solidité RLS avant exposition publique
 
 ### Mise en ligne
-- Hébergement sur Cloudflare Pages ou Netlify (gratuit)
-- Obtenir une adresse internet (ex: hsi37-dashboard.pages.dev)
-- Configurer l'URL de redirection Supabase pour la production
+- ~~Hébergement sur Cloudflare Pages ou Netlify (gratuit)~~ ✅ Fait — Cloudflare Pages (hsi37-dashboard.pages.dev)
+- ~~Obtenir une adresse internet~~ ✅ Fait — hsi37-dashboard.pages.dev
+- ~~Configurer l'URL de redirection Supabase pour la production~~ ✅ Fait
 - Communiquer adresse + identifiants au bureau
 - Compléter l'adresse dans le mode d'emploi
 
