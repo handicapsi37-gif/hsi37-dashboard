@@ -258,11 +258,34 @@ def construire_contenu(s):
         story.append(fleche(etape, s['liste']))
 
     story.append(espacement(0.3))
+
+    # ── SECTION 1.1 — MOT DE PASSE OUBLIÉ ───────────────────────
+    story.append(espacement(0.4))
+    story.append(Paragraph("1.1  Mot de passe oublié", s['sous_section']))
+    story.append(espacement(0.15))
     story.append(Paragraph(
-        "Si vous avez oublié votre mot de passe, contactez Ilhame : "
-        "handicapsi37@gmail.com ou 07 43 29 58 30.",
+        "Si vous avez oublié votre mot de passe, vous pouvez le réinitialiser "
+        "directement depuis la page de connexion :",
+        s['corps'],
+    ))
+    story.append(espacement(0.15))
+    for etape in [
+        "Sur la page de connexion, cliquez sur le lien <b>« Mot de passe oublié ? »</b>.",
+        "Saisissez votre <b>adresse e-mail</b> dans le champ qui s'affiche.",
+        "Cliquez sur <b>« Envoyer le lien »</b>.",
+        "Ouvrez votre boîte mail. Vous recevrez un e-mail de réinitialisation sous quelques minutes.",
+        "Cliquez sur le lien dans l'e-mail. Une page s'ouvre pour saisir votre nouveau mot de passe.",
+        "Saisissez votre <b>nouveau mot de passe</b> (8 caractères minimum) et confirmez-le.",
+        "Cliquez sur <b>« Enregistrer »</b>. Vous pouvez maintenant vous connecter avec ce nouveau mot de passe.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+    story.append(espacement(0.2))
+    story.append(Paragraph(
+        "⚠️  Vérifiez vos spams si l'e-mail n'arrive pas dans les 5 minutes. "
+        "En cas de problème, contactez Ilhame : handicapsi37@gmail.com.",
         s['note'],
     ))
+    story.append(espacement(0.4))
 
     # ── SECTION 2 — PAGE D'ACCUEIL ────────────────────────────────
     story.append(Paragraph("2. La page d'accueil", s['section']))
@@ -467,7 +490,51 @@ def construire_contenu(s):
     story.append(PageBreak())
 
     # ── SECTION 7 — DOCUMENTS ─────────────────────────────────────
-    story.append(Paragraph("7. Les documents de l'association", s['section']))
+    # ── SECTION 7 — EXPORTER LES DONNÉES ─────────────────────────
+    story.append(Paragraph("7. Exporter les données", s['section']))
+    story.append(filet_bleu())
+    story.append(Paragraph(
+        "Le Dashboard permet d'exporter la liste des adhérents et la liste des donateurs "
+        "en fichier CSV (fichier tableur — lisible par Excel ou LibreOffice). "
+        "Cette fonction est importante pour deux raisons :",
+        s['corps'],
+    ))
+    story.append(espacement(0.15))
+    for raison in [
+        "<b>Sauvegarde</b> — conserver une copie locale de vos données en cas de problème technique.",
+        "<b>RGPD</b> (Règlement Général sur la Protection des Données — loi européenne sur la vie privée) "
+        "— vous devez pouvoir fournir les données d'un adhérent sur demande.",
+    ]:
+        story.append(fleche(raison, s['liste']))
+    story.append(espacement(0.25))
+    story.append(Paragraph("7.1  Exporter la liste des adhérents", s['sous_section']))
+    story.append(espacement(0.15))
+    for etape in [
+        "Depuis la page d'accueil, cliquez sur la tuile <b>« Adhérents »</b>.",
+        "Au-dessus du tableau, cliquez sur le bouton <b>« ⬇ Exporter CSV »</b>.",
+        "Un fichier nommé <b>adherents_HSI37_2026.csv</b> se télécharge automatiquement.",
+        "Ouvrez ce fichier avec Excel ou LibreOffice pour consulter ou archiver les données.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+    story.append(espacement(0.25))
+    story.append(Paragraph("7.2  Exporter la liste des donateurs", s['sous_section']))
+    story.append(espacement(0.15))
+    for etape in [
+        "Depuis la page d'accueil, cliquez sur la tuile <b>« Donateurs »</b>.",
+        "Au-dessus du tableau, cliquez sur le bouton <b>« ⬇ Exporter CSV »</b>.",
+        "Un fichier nommé <b>donateurs_HSI37_2026.csv</b> se télécharge automatiquement.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+    story.append(espacement(0.2))
+    story.append(Paragraph(
+        "💡  Conseil : faites un export chaque mois et sauvegardez les fichiers "
+        "dans un dossier Google Drive de l'association.",
+        s['note'],
+    ))
+    story.append(espacement(0.4))
+
+    # ── SECTION 8 — LES DOCUMENTS DE L'ASSOCIATION ───────────────
+    story.append(Paragraph("8. Les documents de l'association", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -509,8 +576,8 @@ def construire_contenu(s):
         story.append(Paragraph(desc_doc, s['corps']))
         story.append(espacement(0.1))
 
-    # ── SECTION 8 — ENVOYER PAR MAIL ──────────────────────────────
-    story.append(Paragraph("8. Envoyer un document par mail", s['section']))
+    # ── SECTION 9 — ENVOYER PAR MAIL ──────────────────────────────
+    story.append(Paragraph("9. Envoyer un document par mail", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -530,8 +597,8 @@ def construire_contenu(s):
 
     story.append(PageBreak())
 
-    # ── SECTION 9 — SE DÉCONNECTER ────────────────────────────────
-    story.append(Paragraph("9. Se déconnecter", s['section']))
+    # ── SECTION 10 — SE DÉCONNECTER ───────────────────────────────
+    story.append(Paragraph("10. Se déconnecter", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -547,8 +614,8 @@ def construire_contenu(s):
     ]:
         story.append(fleche(etape, s['liste']))
 
-    # ── SECTION 10 — EN CAS DE PROBLÈME ──────────────────────────
-    story.append(Paragraph("10. En cas de problème", s['section']))
+    # ── SECTION 11 — EN CAS DE PROBLÈME ──────────────────────────
+    story.append(Paragraph("11. En cas de problème", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
