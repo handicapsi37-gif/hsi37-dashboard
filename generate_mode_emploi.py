@@ -430,6 +430,18 @@ def construire_contenu(s):
         "Le fichier se trouve dans votre dossier <b>Téléchargements</b>.",
     ]:
         story.append(fleche(etape, s['liste']))
+    story.append(Paragraph(
+        "→ Pour envoyer le reçu directement par mail : cliquez sur le bouton "
+        "<b>« Envoyer par mail »</b> dans la même fenêtre. "
+        "Le reçu est envoyé automatiquement à l'adresse e-mail de l'adhérent, "
+        "sans aucune manipulation supplémentaire.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "<i>Remarque : l'adresse mail doit être renseignée dans la fiche de l'adhérent "
+        "pour que l'envoi fonctionne.</i>",
+        s['corps'],
+    ))
 
     # ── SECTION 6 — DONATEURS ─────────────────────────────────────
     story.append(Paragraph("6. Gérer les donateurs", s['section']))
@@ -480,9 +492,21 @@ def construire_contenu(s):
 
     story.append(Paragraph("6.7  Générer un reçu de don", s['sous_section']))
     story.append(Paragraph(
-        "Cliquez sur l'icône reçu de la ligne du donateur, "
-        "choisissez un signataire, puis téléchargez. "
-        "Même fonctionnement que le reçu d'adhésion.",
+        "Cliquez sur l'icône reçu sur la ligne du donateur, "
+        "choisissez un signataire (président, trésorière ou secrétaire), "
+        "puis cliquez sur <b>« Télécharger »</b> pour obtenir le PDF.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "→ Pour envoyer le reçu directement par mail : cliquez sur le bouton "
+        "<b>« Envoyer par mail »</b>. "
+        "Le reçu est envoyé automatiquement à l'adresse e-mail du donateur, "
+        "sans aucune manipulation supplémentaire.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "<i>Remarque : l'adresse mail doit être renseignée dans la fiche du donateur "
+        "pour que l'envoi fonctionne.</i>",
         s['corps'],
     ))
 
