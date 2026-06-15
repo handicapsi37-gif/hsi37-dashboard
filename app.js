@@ -2740,46 +2740,41 @@ document.getElementById("btn-mail-bulletin").addEventListener("click", async fun
 
   const qualite = document.getElementById("bulletin-signataire").value || "La trésorière";
   const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
-  const signatureHTML = `
-    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
-    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
-      <tr>
-        <td style="padding-right:16px;vertical-align:top;">
-          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
-               alt="Logo HSI37" width="80" style="display:block;">
-        </td>
-        <td style="vertical-align:top;">
-          <strong style="font-size:14px;">${nomSign}</strong><br>
-          <span style="color:#1e79bf;font-weight:600;">${qualite} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
-          📱 07 43 29 58 30<br>
-          ✉ handicapsi37@gmail.com<br>
-          🌐 www.hsi37.fr
-        </td>
-      </tr>
-    </table>
-  `;
 
-  const contenuHTML = `
-    <p>Bonjour,</p>
-    <p>Veuillez trouver ci-joint le bulletin d'adhésion de l'association HSI37 pour la saison ${anneeEnCours()}.</p>
-    <p>Nous vous invitons à le compléter et à nous le retourner avec votre règlement.</p>
-    ${signatureHTML}
-  `;
+  const avecDon = false;
+  const idDoc = avecDon ? "doc-bulletin-don" : "doc-bulletin-standard";
+  const doc = document.getElementById(idDoc);
+  if (!doc) {
+    alert("Veuillez d'abord générer le bulletin (bouton Télécharger).");
+    return;
+  }
 
   const btn = this;
   btn.disabled = true;
-  btn.textContent = "Envoi en cours…";
+  btn.textContent = "Génération…";
+
+  const imgLogo = doc.querySelector("img.doc-a4__logo");
+  const srcOriginal = imgLogo ? imgLogo.src : null;
 
   try {
-    const { error } = await clientSupabase.functions.invoke("envoyer-recu", {
-      body: {
-        emailDestinataire: email,
-        nomDestinataire: "",
-        sujet: `Bulletin d'adhésion HSI37 — Saison ${anneeEnCours()}`,
-        contenuHTML,
-      }
-    });
-    if (error) throw error;
+    if (imgLogo) {
+      const dataUrl = await chargerImageCommeDataUrl("assets/hsi37-redim-demi.png");
+      imgLogo.src = dataUrl;
+      await new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+    }
+
+    const canvas = await html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg = 210;
+    const mmHaut = (canvas.height / canvas.width) * mmLarg;
+    const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob = pdf.output("blob");
+    const nomFichier = `bulletin-adhesion-HSI37-${anneeEnCours()}.pdf`;
+
+    btn.textContent = "Envoi en cours…";
+    await envoyerRecuParMail(pdfBlob, nomFichier, email, "", qualite, nomSign);
+
     btn.textContent = "✅ Mail envoyé";
     document.getElementById("bulletin-email-dest").value = "";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
@@ -2787,6 +2782,8 @@ document.getElementById("btn-mail-bulletin").addEventListener("click", async fun
     console.error("Erreur envoi bulletin :", err);
     btn.textContent = "❌ Échec envoi";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } finally {
+    if (imgLogo && srcOriginal) imgLogo.src = srcOriginal;
   }
 });
 
@@ -3512,47 +3509,40 @@ document.getElementById("btn-mail-courrier").addEventListener("click", async fun
 
   const qualite = document.getElementById("courrier-signataire").value || "La trésorière";
   const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
-  const signatureHTML = `
-    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
-    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
-      <tr>
-        <td style="padding-right:16px;vertical-align:top;">
-          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
-               alt="Logo HSI37" width="80" style="display:block;">
-        </td>
-        <td style="vertical-align:top;">
-          <strong style="font-size:14px;">${nomSign}</strong><br>
-          <span style="color:#1e79bf;font-weight:600;">${qualite} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
-          📱 07 43 29 58 30<br>
-          ✉ handicapsi37@gmail.com<br>
-          🌐 www.hsi37.fr
-        </td>
-      </tr>
-    </table>
-  `;
 
-  const objet = document.getElementById("courrier-objet").value.trim() || "Courrier HSI37";
-  const contenuHTML = `
-    <p>Bonjour,</p>
-    <p>Veuillez trouver ci-joint un courrier de l'association HSI37.</p>
-    <p><strong>Objet :</strong> ${objet}</p>
-    ${signatureHTML}
-  `;
+  const doc = document.getElementById("doc-courrier");
+  if (!doc) {
+    alert("Veuillez d'abord générer le courrier (bouton Générer et télécharger).");
+    return;
+  }
 
   const btn = this;
   btn.disabled = true;
-  btn.textContent = "Envoi en cours…";
+  btn.textContent = "Génération…";
+
+  const imgLogo = doc.querySelector("img.doc-a4__logo");
+  const srcOriginal = imgLogo ? imgLogo.src : null;
 
   try {
-    const { error } = await clientSupabase.functions.invoke("envoyer-recu", {
-      body: {
-        emailDestinataire: email,
-        nomDestinataire: "",
-        sujet: objet,
-        contenuHTML,
-      }
-    });
-    if (error) throw error;
+    if (imgLogo) {
+      const dataUrl = await chargerImageCommeDataUrl("assets/hsi37-redim-demi.png");
+      imgLogo.src = dataUrl;
+      await new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+    }
+
+    const canvas = await html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg = 210;
+    const mmHaut = (canvas.height / canvas.width) * mmLarg;
+    const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob = pdf.output("blob");
+    const objet = document.getElementById("courrier-objet") ? document.getElementById("courrier-objet").value.trim() : "";
+    const nomFichier = `courrier-HSI37-${anneeEnCours()}.pdf`;
+
+    btn.textContent = "Envoi en cours…";
+    await envoyerRecuParMail(pdfBlob, nomFichier, email, "", qualite, nomSign);
+
     btn.textContent = "✅ Mail envoyé";
     document.getElementById("courrier-email-dest").value = "";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
@@ -3560,6 +3550,8 @@ document.getElementById("btn-mail-courrier").addEventListener("click", async fun
     console.error("Erreur envoi courrier :", err);
     btn.textContent = "❌ Échec envoi";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } finally {
+    if (imgLogo && srcOriginal) imgLogo.src = srcOriginal;
   }
 });
 
