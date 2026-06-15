@@ -2731,60 +2731,72 @@ document.getElementById("btn-bulletin-don").addEventListener("click", function()
   genererBulletin(true);
 });
 
-document.getElementById("btn-mail-bulletin").addEventListener("click", async function() {
+document.getElementById("btn-mail-bulletin-standard").addEventListener("click", async function() {
   const email = document.getElementById("bulletin-email-dest").value.trim();
-  if (!email) {
-    alert("Veuillez saisir une adresse e-mail destinataire.");
-    return;
-  }
-
+  if (!email) { alert("Veuillez saisir une adresse e-mail destinataire."); return; }
   const qualite = document.getElementById("bulletin-signataire").value || "La trésorière";
   const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
-
-  const avecDon = false;
-  const idDoc = avecDon ? "doc-bulletin-don" : "doc-bulletin-standard";
-  const doc = document.getElementById(idDoc);
-  if (!doc) {
-    alert("Veuillez d'abord générer le bulletin (bouton Télécharger).");
-    return;
-  }
-
+  const doc = document.getElementById("doc-bulletin-standard");
+  if (!doc || doc.hidden) { alert("Veuillez d'abord télécharger le bulletin standard."); return; }
   const btn = this;
-  btn.disabled = true;
-  btn.textContent = "Génération…";
-
+  btn.disabled = true; btn.textContent = "Génération…";
   const imgLogo = doc.querySelector("img.doc-a4__logo");
   const srcOriginal = imgLogo ? imgLogo.src : null;
-
   try {
     if (imgLogo) {
       const dataUrl = await chargerImageCommeDataUrl("assets/hsi37-redim-demi.png");
       imgLogo.src = dataUrl;
       await new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
     }
-
     const canvas = await html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
     const imgData = canvas.toDataURL("image/jpeg", 0.95);
-    const mmLarg = 210;
-    const mmHaut = (canvas.height / canvas.width) * mmLarg;
+    const mmLarg = 210; const mmHaut = (canvas.height / canvas.width) * mmLarg;
     const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
     const pdfBlob = pdf.output("blob");
-    const nomFichier = `bulletin-adhesion-HSI37-${anneeEnCours()}.pdf`;
-
     btn.textContent = "Envoi en cours…";
-    await envoyerRecuParMail(pdfBlob, nomFichier, email, "", qualite, nomSign);
-
+    await envoyerRecuParMail(pdfBlob, `bulletin-standard-HSI37-${anneeEnCours()}.pdf`, email, "", qualite, nomSign);
     btn.textContent = "✅ Mail envoyé";
-    document.getElementById("bulletin-email-dest").value = "";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
   } catch(err) {
-    console.error("Erreur envoi bulletin :", err);
+    console.error("Erreur envoi bulletin standard :", err);
     btn.textContent = "❌ Échec envoi";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
-  } finally {
-    if (imgLogo && srcOriginal) imgLogo.src = srcOriginal;
-  }
+  } finally { if (imgLogo && srcOriginal) imgLogo.src = srcOriginal; }
+});
+
+document.getElementById("btn-mail-bulletin-don").addEventListener("click", async function() {
+  const email = document.getElementById("bulletin-email-dest").value.trim();
+  if (!email) { alert("Veuillez saisir une adresse e-mail destinataire."); return; }
+  const qualite = document.getElementById("bulletin-signataire").value || "La trésorière";
+  const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
+  const doc = document.getElementById("doc-bulletin-don");
+  if (!doc || doc.hidden) { alert("Veuillez d'abord télécharger le bulletin avec don."); return; }
+  const btn = this;
+  btn.disabled = true; btn.textContent = "Génération…";
+  const imgLogo = doc.querySelector("img.doc-a4__logo");
+  const srcOriginal = imgLogo ? imgLogo.src : null;
+  try {
+    if (imgLogo) {
+      const dataUrl = await chargerImageCommeDataUrl("assets/hsi37-redim-demi.png");
+      imgLogo.src = dataUrl;
+      await new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+    }
+    const canvas = await html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg = 210; const mmHaut = (canvas.height / canvas.width) * mmLarg;
+    const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob = pdf.output("blob");
+    btn.textContent = "Envoi en cours…";
+    await envoyerRecuParMail(pdfBlob, `bulletin-don-HSI37-${anneeEnCours()}.pdf`, email, "", qualite, nomSign);
+    btn.textContent = "✅ Mail envoyé";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } catch(err) {
+    console.error("Erreur envoi bulletin don :", err);
+    btn.textContent = "❌ Échec envoi";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } finally { if (imgLogo && srcOriginal) imgLogo.src = srcOriginal; }
 });
 
 /* =====================================================
