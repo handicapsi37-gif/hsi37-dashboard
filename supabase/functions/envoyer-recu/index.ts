@@ -29,7 +29,7 @@ serve(async (req: Request) => {
         to:          [{ email: emailDestinataire, name: nomDestinataire }],
         subject:     sujet,
         htmlContent: contenuHTML,
-        attachment:  [{ name: nomFichierPDF, content: pdfBase64 }],
+        ...(pdfBase64 ? { attachment: [{ name: nomFichierPDF, content: pdfBase64 }] } : {}),
       }),
     });
 
