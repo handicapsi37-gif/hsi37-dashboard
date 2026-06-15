@@ -1510,9 +1510,6 @@
               </svg>
               Télécharger
             </button>
-            <button type="button" class="btn btn--secondaire bulletin-choix__btn" id="btn-mail-bulletin-standard">
-              ✉ Envoyer par mail
-            </button>
           </div>
 
           <div class="bulletin-choix__option">
@@ -1535,32 +1532,13 @@
               </svg>
               Télécharger
             </button>
-            <button type="button" class="btn btn--secondaire bulletin-choix__btn" id="btn-mail-bulletin-don">
-              ✉ Envoyer par mail
-            </button>
           </div>
 
         </div>
       </div>
 
-      <div class="modale__actions" style="flex-direction:column;gap:12px;">
-        <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
-          <label for="bulletin-signataire" style="font-size:13px;color:#1a2433;font-weight:600;">Signataire :</label>
-          <select id="bulletin-signataire" style="border:1px solid #ccc;border-radius:4px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;">
-            <option value="Le président">Le président — BELHAJ Mohammed</option>
-            <option value="La trésorière" selected>La trésorière — BELHAJ Oum Keltoum</option>
-            <option value="La secrétaire">La secrétaire — BELHAJ Nawel</option>
-          </select>
-          <label for="bulletin-email-dest" style="font-size:13px;color:#1a2433;font-weight:600;">
-            Envoyer par mail à :
-          </label>
-          <input type="email" id="bulletin-email-dest" placeholder="adresse@email.com"
-                 style="border:1px solid #ccc;border-radius:4px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;">
-        </div>
-        <div style="display:flex;gap:8px;justify-content:flex-end;">
-          <button type="button" class="btn btn--secondaire" id="btn-fermer-bulletin-bas">Fermer</button>
-          <button type="button" class="btn btn--secondaire" id="btn-mail-bulletin">✉ Envoyer par mail</button>
-        </div>
+      <div class="modale__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-fermer-bulletin-bas">Fermer</button>
       </div>
 
     </div>
@@ -2054,32 +2032,16 @@
 
         </div>
 
-        <div class="modale__actions" style="flex-direction:column;gap:12px;">
-          <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
-            <label for="pv-signataire" style="font-size:13px;color:#1a2433;font-weight:600;">Signataire :</label>
-            <select id="pv-signataire" style="border:1px solid #ccc;border-radius:4px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;">
-              <option value="Le président">Le président — BELHAJ Mohammed</option>
-              <option value="La trésorière" selected>La trésorière — BELHAJ Oum Keltoum</option>
-              <option value="La secrétaire">La secrétaire — BELHAJ Nawel</option>
-            </select>
-            <label for="pv-email-dest" style="font-size:13px;color:#1a2433;font-weight:600;">
-              Envoyer par mail à :
-            </label>
-            <input type="email" id="pv-email-dest" placeholder="adresse@email.com"
-                   style="border:1px solid #ccc;border-radius:4px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;">
-          </div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button type="button" class="btn btn--secondaire" id="btn-annuler-pv">Annuler</button>
-            <button type="button" class="btn btn--secondaire" id="btn-mail-pv">✉ Envoyer par mail</button>
-            <button type="submit" class="btn btn--primaire">
-              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-                   viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
-                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-              Générer et télécharger
-            </button>
-          </div>
+        <div class="modale__actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-pv">Annuler</button>
+          <button type="submit" class="btn btn--primaire">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" width="16" height="16">
+              <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+            Générer et télécharger
+          </button>
         </div>
       </form>
 
@@ -2137,32 +2099,16 @@
 
         </div>
 
-        <div class="modale__actions" style="flex-direction:column;gap:12px;">
-          <div style="display:flex;flex-direction:column;gap:6px;width:100%;">
-            <label for="courrier-signataire" style="font-size:13px;color:#1a2433;font-weight:600;">Signataire :</label>
-            <select id="courrier-signataire" style="border:1px solid #ccc;border-radius:4px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;">
-              <option value="Le président">Le président — BELHAJ Mohammed</option>
-              <option value="La trésorière" selected>La trésorière — BELHAJ Oum Keltoum</option>
-              <option value="La secrétaire">La secrétaire — BELHAJ Nawel</option>
-            </select>
-            <label for="courrier-email-dest" style="font-size:13px;color:#1a2433;font-weight:600;">
-              Envoyer par mail à :
-            </label>
-            <input type="email" id="courrier-email-dest" placeholder="adresse@email.com"
-                   style="border:1px solid #ccc;border-radius:4px;padding:8px;font-size:13px;width:100%;box-sizing:border-box;">
-          </div>
-          <div style="display:flex;gap:8px;justify-content:flex-end;">
-            <button type="button" class="btn btn--secondaire" id="btn-annuler-courrier">Annuler</button>
-            <button type="button" class="btn btn--secondaire" id="btn-mail-courrier">✉ Envoyer par mail</button>
-            <button type="submit" class="btn btn--primaire">
-              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-                   viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
-                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-              Générer et télécharger
-            </button>
-          </div>
+        <div class="modale__actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-courrier">Annuler</button>
+          <button type="submit" class="btn btn--primaire">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" width="16" height="16">
+              <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+            Générer et télécharger
+          </button>
         </div>
       </form>
 
