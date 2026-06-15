@@ -2928,16 +2928,45 @@ document.getElementById('relance-fond').addEventListener('click', function(ev) {
   if (ev.target === relanceFond) fermerModaleRelance();
 });
 
-document.getElementById('btn-mail-relance').addEventListener('click', function() {
+document.getElementById('btn-mail-relance').addEventListener('click', async function() {
   if (!adherentRelance) return;
-  const email  = adherentRelance.email || '';
-  const annee  = anneeEnCours();
-  const sujet  = encodeURIComponent(`Renouvellement adhésion HSI37 — Saison ${annee}`);
+  const email = adherentRelance.email || '';
+  if (!email) {
+    alert('Aucune adresse e-mail renseignée pour cet adhérent.');
+    return;
+  }
+  const annee = anneeEnCours();
   const saisonDerniere = adherentRelance.saison || (annee - 1);
-  const corps  = encodeURIComponent(
-    `Madame, Monsieur,\n\nNous vous informons que votre adhésion à l'association Handicap Solidarité pour l'Inclusion 37 pour la saison ${saisonDerniere} est arrivée à échéance.\n\nNous vous invitons à renouveler votre adhésion pour la saison ${annee} au montant de 20,00 €.\n\nVous pouvez régler par : espèces, virement (IBAN : FR76 1027 8374 …. …. …. 116), chèque à l'ordre de l'Association Handicap Solidarité pour l'Inclusion 37, carte bancaire, PayPal ou HelloAsso.\n\nNous vous remercions pour votre soutien et restons à votre disposition.\n\nCordialement,\nHSI37`
-  );
-  window.open(`mailto:${email}?subject=${sujet}&body=${corps}`);
+  const nom = `${adherentRelance.prenom || ''} ${adherentRelance.nom || ''}`.trim();
+  const sujet = `Renouvellement adhésion HSI37 — Saison ${annee}`;
+  const contenuHTML = `
+    <p>Madame, Monsieur,</p>
+    <p>Nous vous informons que votre adhésion à l'association <strong>Handicap Solidarité pour l'Inclusion 37</strong> pour la saison <strong>${saisonDerniere}</strong> est arrivée à échéance.</p>
+    <p>Nous vous invitons à renouveler votre adhésion pour la saison <strong>${annee}</strong> au montant de <strong>20,00 €</strong>.</p>
+    <p>Vous pouvez régler par : espèces, virement (IBAN : FR76 1027 8374 …. …. …. 116), chèque à l'ordre de l'Association Handicap Solidarité pour l'Inclusion 37, carte bancaire, PayPal ou HelloAsso.</p>
+    <p>Nous vous remercions pour votre soutien et restons à votre disposition.</p>
+    <p>Cordialement,<br>HSI37</p>
+  `;
+  const btn = document.getElementById('btn-mail-relance');
+  btn.disabled = true;
+  btn.textContent = 'Envoi en cours…';
+  try {
+    const { data, error } = await clientSupabase.functions.invoke('envoyer-recu', {
+      body: {
+        emailDestinataire: email,
+        nomDestinataire: nom,
+        sujet: sujet,
+        contenuHTML: contenuHTML
+      }
+    });
+    if (error) throw error;
+    btn.textContent = '✅ Mail envoyé';
+    setTimeout(() => { btn.disabled = false; btn.textContent = '✉ Envoyer par mail'; }, 3000);
+  } catch (err) {
+    console.error('Erreur envoi relance :', err);
+    btn.textContent = '❌ Échec envoi';
+    setTimeout(() => { btn.disabled = false; btn.textContent = '✉ Envoyer par mail'; }, 3000);
+  }
 });
 
 document.getElementById('btn-telecharger-relance').addEventListener('click', function() {
