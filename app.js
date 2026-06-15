@@ -3140,15 +3140,42 @@ document.getElementById('convocation-fond').addEventListener('click', function(e
   if (ev.target === convocationFond) fermerModaleConvocation();
 });
 
-document.getElementById('btn-mail-convocation').addEventListener('click', function() {
-  const annee  = document.getElementById('conv-annee').value || anneeEnCours();
-  const sujet  = encodeURIComponent(`Convocation Assemblée Générale HSI37 — ${annee}`);
-  const odj    = document.getElementById('conv-odj').value || '';
-  const date   = [document.getElementById('conv-jour').value, document.getElementById('conv-mois').value, document.getElementById('conv-annee').value].filter(Boolean).join('/') || '…';
-  const heure  = (document.getElementById('conv-heure').value || '…') + 'h' + (document.getElementById('conv-minutes').value || '00');
-  const lieu   = document.getElementById('conv-lieu').value || '…';
-  const corps  = encodeURIComponent(`Cher(e) adhérent(e),\n\nVous êtes convoqué(e) à l'Assemblée Générale Ordinaire de l'association Handicap Solidarité pour l'Inclusion 37.\n\nDate : ${date}\nHeure : ${heure}\nLieu : ${lieu}\n\nOrdre du jour :\n${odj}\n\nNous comptons sur votre présence.\n\nCordialement,\nHSI37`);
-  window.open(`mailto:?subject=${sujet}&body=${corps}`);
+document.getElementById('btn-mail-convocation').addEventListener('click', async function() {
+  const { data, error } = await clientSupabase
+    .from('adherents')
+    .select('email, prenom, nom')
+    .not('email', 'is', null)
+    .neq('email', '');
+
+  if (error || !data || data.length === 0) {
+    alert('Impossible de récupérer les adhérents ou aucun email enregistré.');
+    return;
+  }
+
+  const emails = data.map(a => a.email).join(', ');
+  const texte  = `Emails de tous les adhérents (${data.length}) :\n\n${emails}`;
+
+  const zone = document.createElement('div');
+  zone.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:2px solid #1e79bf;border-radius:8px;padding:24px;max-width:600px;width:90%;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.2);";
+  zone.innerHTML = `
+    <h3 style="color:#1e79bf;margin:0 0 12px;">📋 Emails adhérents (${data.length})</h3>
+    <p style="color:#1a2433;font-size:13px;margin:0 0 8px;">Copiez les adresses ci-dessous et collez-les dans le champ "Cci" de Gmail :</p>
+    <textarea readonly style="width:100%;height:120px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:8px;box-sizing:border-box;">${emails}</textarea>
+    <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
+      <button id="btn-copier-emails" style="background:#1e79bf;color:#fff;border:none;border-radius:4px;padding:8px 16px;cursor:pointer;">📋 Copier</button>
+      <button id="btn-fermer-emails" style="background:#f4f6f8;color:#1a2433;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">Fermer</button>
+    </div>
+  `;
+  document.body.appendChild(zone);
+
+  document.getElementById('btn-copier-emails').addEventListener('click', function() {
+    navigator.clipboard.writeText(emails).then(function() {
+      document.getElementById('btn-copier-emails').textContent = '✅ Copié !';
+    });
+  });
+  document.getElementById('btn-fermer-emails').addEventListener('click', function() {
+    zone.remove();
+  });
 });
 
 document.getElementById('formulaire-convocation').addEventListener('submit', function(ev) {
