@@ -434,20 +434,12 @@ def construire_contenu(s):
     for etape in [
         "Dans le tableau des adhérents, repérez la ligne de l'adhérent.",
         "Cliquez sur l'icône <b>reçu</b> sur sa ligne.",
-        "Une fenêtre s'ouvre. Choisissez le <b>signataire</b> : "
-        "président, trésorière ou secrétaire.",
+        "Une fenêtre s'ouvre. Choisissez le <b>signataire</b> : président, trésorière ou secrétaire.",
         "Le reçu s'affiche à l'écran, pré-rempli avec toutes les informations.",
-        "Cliquez sur <b>« Télécharger le reçu »</b>.",
-        "Le fichier se trouve dans votre dossier <b>Téléchargements</b>.",
+        "Cliquez sur <b>« Télécharger »</b> pour enregistrer le PDF dans votre dossier Téléchargements.",
+        "Ou cliquez sur <b>« ✉ Envoyer par mail »</b> pour envoyer le reçu directement à l'adhérent.",
     ]:
         story.append(fleche(etape, s['liste']))
-    story.append(Paragraph(
-        "En cliquant sur <b>« Télécharger le reçu »</b>, le PDF est téléchargé "
-        "dans votre dossier Téléchargements <b>et</b> envoyé automatiquement "
-        "par mail à l'adhérent en même temps. "
-        "Aucune manipulation supplémentaire n'est nécessaire.",
-        s['corps'],
-    ))
     story.append(Paragraph(
         "<i>Remarque : l'adresse mail doit être renseignée dans la fiche de l'adhérent "
         "pour que l'envoi fonctionne.</i>",
@@ -515,17 +507,15 @@ def construire_contenu(s):
     story.append(Paragraph("6.7  Générer un reçu de don", s['sous_section']))
     story.append(Paragraph(
         "Cliquez sur l'icône reçu sur la ligne du donateur, "
-        "choisissez un signataire (président, trésorière ou secrétaire), "
-        "puis cliquez sur <b>« Télécharger »</b> pour obtenir le PDF.",
+        "choisissez un signataire (président, trésorière ou secrétaire).",
         s['corps'],
     ))
-    story.append(Paragraph(
-        "En cliquant sur <b>« Télécharger le reçu »</b>, le PDF est téléchargé "
-        "dans votre dossier Téléchargements <b>et</b> envoyé automatiquement "
-        "par mail au donateur en même temps. "
-        "Aucune manipulation supplémentaire n'est nécessaire.",
-        s['corps'],
-    ))
+    story.append(espacement(0.15))
+    for etape in [
+        "Cliquez sur <b>« Télécharger »</b> pour enregistrer le PDF dans votre dossier Téléchargements.",
+        "Ou cliquez sur <b>« ✉ Envoyer par mail »</b> pour envoyer le reçu directement au donateur.",
+    ]:
+        story.append(fleche(etape, s['liste']))
     story.append(Paragraph(
         "<i>Remarque : l'adresse mail doit être renseignée dans la fiche du donateur "
         "pour que l'envoi fonctionne.</i>",
