@@ -2731,6 +2731,65 @@ document.getElementById("btn-bulletin-don").addEventListener("click", function()
   genererBulletin(true);
 });
 
+document.getElementById("btn-mail-bulletin").addEventListener("click", async function() {
+  const email = document.getElementById("bulletin-email-dest").value.trim();
+  if (!email) {
+    alert("Veuillez saisir une adresse e-mail destinataire.");
+    return;
+  }
+
+  const qualite = document.getElementById("bulletin-signataire").value || "La trésorière";
+  const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
+  const signatureHTML = `
+    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+      <tr>
+        <td style="padding-right:16px;vertical-align:top;">
+          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
+               alt="Logo HSI37" width="80" style="display:block;">
+        </td>
+        <td style="vertical-align:top;">
+          <strong style="font-size:14px;">${nomSign}</strong><br>
+          <span style="color:#1e79bf;font-weight:600;">${qualite} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          📱 07 43 29 58 30<br>
+          ✉ handicapsi37@gmail.com<br>
+          🌐 www.hsi37.fr
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const contenuHTML = `
+    <p>Bonjour,</p>
+    <p>Veuillez trouver ci-joint le bulletin d'adhésion de l'association HSI37 pour la saison ${anneeEnCours()}.</p>
+    <p>Nous vous invitons à le compléter et à nous le retourner avec votre règlement.</p>
+    ${signatureHTML}
+  `;
+
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+
+  try {
+    const { error } = await clientSupabase.functions.invoke("envoyer-recu", {
+      body: {
+        emailDestinataire: email,
+        nomDestinataire: "",
+        sujet: `Bulletin d'adhésion HSI37 — Saison ${anneeEnCours()}`,
+        contenuHTML,
+      }
+    });
+    if (error) throw error;
+    btn.textContent = "✅ Mail envoyé";
+    document.getElementById("bulletin-email-dest").value = "";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } catch(err) {
+    console.error("Erreur envoi bulletin :", err);
+    btn.textContent = "❌ Échec envoi";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }
+});
+
 /* =====================================================
    HUB — LISTENERS TUILES ET RETOUR ACCUEIL
    ===================================================== */
@@ -3313,6 +3372,65 @@ document.getElementById('formulaire-pv').addEventListener('submit', function(ev)
   captureEtTelecharger('doc-pv', `PV-AG-${annee}.png`, btn, label);
 });
 
+document.getElementById("btn-mail-pv").addEventListener("click", async function() {
+  const email = document.getElementById("pv-email-dest").value.trim();
+  if (!email) {
+    alert("Veuillez saisir une adresse e-mail destinataire.");
+    return;
+  }
+
+  const annee  = document.getElementById("pv-annee").value || anneeEnCours();
+  const qualite = document.getElementById("pv-signataire").value || "La trésorière";
+  const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
+  const signatureHTML = `
+    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+      <tr>
+        <td style="padding-right:16px;vertical-align:top;">
+          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
+               alt="Logo HSI37" width="80" style="display:block;">
+        </td>
+        <td style="vertical-align:top;">
+          <strong style="font-size:14px;">${nomSign}</strong><br>
+          <span style="color:#1e79bf;font-weight:600;">${qualite} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          📱 07 43 29 58 30<br>
+          ✉ handicapsi37@gmail.com<br>
+          🌐 www.hsi37.fr
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const contenuHTML = `
+    <p>Bonjour,</p>
+    <p>Veuillez trouver ci-joint le procès-verbal de l'Assemblée Générale de l'association HSI37 — ${annee}.</p>
+    ${signatureHTML}
+  `;
+
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+
+  try {
+    const { error } = await clientSupabase.functions.invoke("envoyer-recu", {
+      body: {
+        emailDestinataire: email,
+        nomDestinataire: "",
+        sujet: `Procès-verbal AG HSI37 — ${annee}`,
+        contenuHTML,
+      }
+    });
+    if (error) throw error;
+    btn.textContent = "✅ Mail envoyé";
+    document.getElementById("pv-email-dest").value = "";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } catch(err) {
+    console.error("Erreur envoi PV :", err);
+    btn.textContent = "❌ Échec envoi";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }
+});
+
 /* =====================================================
    DOCUMENT 6 — COURRIER LIBRE
    ===================================================== */
@@ -3383,6 +3501,66 @@ document.getElementById('formulaire-courrier').addEventListener('submit', functi
   const label = btn.innerHTML;
   fermerModaleCourrier();
   captureEtTelecharger('doc-courrier', `courrier-HSI37-${dateFichier}.png`, btn, label);
+});
+
+document.getElementById("btn-mail-courrier").addEventListener("click", async function() {
+  const email = document.getElementById("courrier-email-dest").value.trim();
+  if (!email) {
+    alert("Veuillez saisir une adresse e-mail destinataire.");
+    return;
+  }
+
+  const qualite = document.getElementById("courrier-signataire").value || "La trésorière";
+  const nomSign = NOMS_SIGNATAIRES[qualite] || "BELHAJ Oum Keltoum";
+  const signatureHTML = `
+    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+      <tr>
+        <td style="padding-right:16px;vertical-align:top;">
+          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
+               alt="Logo HSI37" width="80" style="display:block;">
+        </td>
+        <td style="vertical-align:top;">
+          <strong style="font-size:14px;">${nomSign}</strong><br>
+          <span style="color:#1e79bf;font-weight:600;">${qualite} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          📱 07 43 29 58 30<br>
+          ✉ handicapsi37@gmail.com<br>
+          🌐 www.hsi37.fr
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const objet = document.getElementById("courrier-objet").value.trim() || "Courrier HSI37";
+  const contenuHTML = `
+    <p>Bonjour,</p>
+    <p>Veuillez trouver ci-joint un courrier de l'association HSI37.</p>
+    <p><strong>Objet :</strong> ${objet}</p>
+    ${signatureHTML}
+  `;
+
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+
+  try {
+    const { error } = await clientSupabase.functions.invoke("envoyer-recu", {
+      body: {
+        emailDestinataire: email,
+        nomDestinataire: "",
+        sujet: objet,
+        contenuHTML,
+      }
+    });
+    if (error) throw error;
+    btn.textContent = "✅ Mail envoyé";
+    document.getElementById("courrier-email-dest").value = "";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  } catch(err) {
+    console.error("Erreur envoi courrier :", err);
+    btn.textContent = "❌ Échec envoi";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }
 });
 
 /* ---------- PAPIER À EN-TÊTE ---------- */
