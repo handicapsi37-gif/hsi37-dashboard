@@ -1239,7 +1239,7 @@ function initialiserSelectsDate() {
   /* --- Années : 2020 jusqu'à l'année en cours (dynamique) --- */
   const anneeActuelle = new Date().getFullYear();
   selectAnnee.innerHTML = '<option value="">Année</option>';
-  for (let a = 2020; a <= anneeActuelle; a++) {
+  for (let a = 2024; a <= anneeActuelle; a++) {
     const opt = document.createElement("option");
     opt.value       = String(a);
     opt.textContent = String(a);
@@ -2143,7 +2143,7 @@ function initialiserSelectsDateDon() {
 
   const anneeActuelle = new Date().getFullYear();
   selectAnnee.innerHTML = '<option value="">Année</option>';
-  for (let a = 2020; a <= anneeActuelle; a++) {
+  for (let a = 2024; a <= anneeActuelle; a++) {
     const opt = document.createElement("option");
     opt.value       = String(a);
     opt.textContent = String(a);
