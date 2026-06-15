@@ -384,7 +384,6 @@ def construire_contenu(s):
     ))
     for statut in [
         "<b>Vert — À jour :</b> la cotisation de l'année en cours est réglée.",
-        "<b>Orange — À renouveler :</b> la cotisation arrive bientôt à expiration.",
         "<b>Rouge — En retard :</b> la cotisation n'a pas été renouvelée.",
     ]:
         story.append(fleche(statut, s['liste']))
@@ -496,18 +495,19 @@ def construire_contenu(s):
         s['corps'],
     ))
     story.append(Paragraph(
-        "① Ajoutez d'abord l'adhérent normalement via l'onglet <b>Adhérents</b> "
-        "(nom, prénom, cotisation, date d'adhésion, etc.).",
+        "① Ajoutez l'adhérent normalement via l'onglet <b>Adhérents</b> "
+        "(nom, prénom, cotisation, date d'adhésion, etc.). "
+        "Si vous renseignez un montant de don dans le formulaire, "
+        "une fiche donateur est <b>créée automatiquement</b> dans l'onglet Donateurs — "
+        "aucune saisie supplémentaire n'est nécessaire.",
         s['corps'],
     ))
     story.append(Paragraph(
-        "② Allez ensuite dans l'onglet <b>Donateurs</b> et ajoutez <b>manuellement</b> "
-        "une fiche donateur pour cette même personne, en renseignant son don "
-        "(montant, date, type). Ce rajout ne se fait pas automatiquement.",
+        "② Si le don arrive <b>après</b> l'adhésion, allez dans l'onglet <b>Donateurs</b> "
+        "et ajoutez manuellement une fiche donateur pour cette personne.",
         s['corps'],
     ))
     story.append(Paragraph(
-        "Le don apparaît alors dans la liste des donateurs. "
         "Les deux fiches (adhérent et donateur) sont indépendantes : "
         "modifier l'une ne modifie pas l'autre.",
         s['corps'],
@@ -590,7 +590,7 @@ def construire_contenu(s):
          "Choisissez un signataire, puis téléchargez."),
         ("Relance de cotisation",
          "Apparaît uniquement pour les adhérents dont le badge est "
-         "<b>Orange</b> (à renouveler) ou <b>Rouge</b> (en retard). "
+         "<b>Rouge</b> (en retard). "
          "Cliquez sur l'icône courrier pour télécharger ou envoyer par mail."),
         ("Convocation AG",
          "Cliquez « Générer ». Remplissez la <b>date</b>, l'<b>heure</b>, "
