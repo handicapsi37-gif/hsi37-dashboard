@@ -11,7 +11,7 @@
 
 /* ---------- ENVOI DES REÇUS PAR MAIL — via Edge Function Supabase ---------- */
 
-async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDestinataire) {
+async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDestinataire, qualiteSignataire, nomSignataire) {
   const base64 = await new Promise(function(resolve, reject) {
     const reader = new FileReader();
     reader.onload  = function() { resolve(reader.result.split(',')[1]); };
@@ -19,18 +19,47 @@ async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDes
     reader.readAsDataURL(pdfBlob);
   });
 
+  const signatureHTML = `
+    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+      <tr>
+        <td style="padding-right:16px;vertical-align:top;">
+          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
+               alt="Logo HSI37" width="80" style="display:block;">
+        </td>
+        <td style="vertical-align:top;">
+          <strong style="font-size:14px;">${nomSignataire || ''}</strong><br>
+          <span style="color:#1e79bf;font-weight:600;">${qualiteSignataire || ''} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          📱 07 43 29 58 30<br>
+          ✉ handicapsi37@gmail.com<br>
+          🌐 www.hsi37.fr<br><br>
+          <span style="color:#F28C28;font-weight:600;">🏷 Soutenez nos actions :</span>
+          <a href="https://hsi37.fr/don" style="color:#1e79bf;">Faire un don</a> ou
+          <a href="https://hsi37.fr/adhesion" style="color:#1e79bf;">Devenir membre</a>
+        </td>
+      </tr>
+    </table>
+  `;
+
+  const contenuHTML = `
+    <p>Bonjour${nomDestinataire ? ' ' + nomDestinataire : ''},</p>
+    <p>Veuillez trouver ci-joint votre reçu.</p>
+    <p>Cordialement,</p>
+    ${signatureHTML}
+  `;
+
   const { error } = await clientSupabase.functions.invoke('envoyer-recu', {
     body: {
       emailDestinataire,
       nomDestinataire,
-      sujet:         "Votre reçu HSI37",
-      contenuHTML:   `<p>Bonjour${nomDestinataire ? ' ' + nomDestinataire : ''},</p><p>Veuillez trouver ci-joint votre reçu.</p><p>Cordialement,<br>HSI37</p>`,
-      pdfBase64:     base64,
+      sujet: "Votre reçu HSI37",
+      contenuHTML,
+      pdfBase64: base64,
       nomFichierPDF: nomFichier,
     },
   });
 
-  if (error) throw new Error(error.message || "Erreur Edge Function");
+  if (error) throw new Error("Erreur Edge Function");
 }
 
 /* ---------- CONFIGURATION DES TYPES DE MEMBRES ---------- */
@@ -2349,6 +2378,8 @@ document.getElementById("btn-mail-recu-adh").addEventListener("click", async fun
   const idAdherent = (adherentRecuEnCours && adherentRecuEnCours.id_adherent) || "recu";
   const nomFichier = `recu-adhesion-${idAdherent}.pdf`;
   const nom = [(adherentRecuEnCours.prenom || ""), (adherentRecuEnCours.nom || "")].join(" ").trim();
+  const qualiteAdh = document.getElementById("select-signataire-adh").value || "La trésorière";
+  const nomSignAdh = NOMS_SIGNATAIRES[qualiteAdh] || "BELHAJ Oum Keltoum";
   const doc = document.getElementById("recu-adherent-document");
   const imgLogo = document.getElementById("recu-adh-logo");
   const btn = this;
@@ -2367,7 +2398,7 @@ document.getElementById("btn-mail-recu-adh").addEventListener("click", async fun
     const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
     const pdfBlob = pdf.output("blob");
-    return envoyerRecuParMail(pdfBlob, nomFichier, email, nom);
+    return envoyerRecuParMail(pdfBlob, nomFichier, email, nom, qualiteAdh, nomSignAdh);
   }).then(function() {
     btn.textContent = "✅ Mail envoyé";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
@@ -2547,6 +2578,8 @@ document.getElementById("btn-mail-recu-don").addEventListener("click", async fun
   const nomFichier = `recu-don-${idDonateur}.pdf`;
   const nom = [(donateurRecuEnCours.prenom || ""), (donateurRecuEnCours.nom || ""),
                (donateurRecuEnCours.organisme || "")].filter(Boolean).join(" ") || "Donateur";
+  const qualiteDon = document.getElementById("select-signataire-don").value || "La trésorière";
+  const nomSignDon = NOMS_SIGNATAIRES[qualiteDon] || "BELHAJ Oum Keltoum";
   const doc = document.getElementById("recu-donateur-document");
   const imgLogo = document.getElementById("recu-don-logo");
   const btn = this;
@@ -2565,7 +2598,7 @@ document.getElementById("btn-mail-recu-don").addEventListener("click", async fun
     const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
     const pdfBlob = pdf.output("blob");
-    return envoyerRecuParMail(pdfBlob, nomFichier, email, nom);
+    return envoyerRecuParMail(pdfBlob, nomFichier, email, nom, qualiteDon, nomSignDon);
   }).then(function() {
     btn.textContent = "✅ Mail envoyé";
     setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
@@ -2991,13 +3024,36 @@ document.getElementById('btn-mail-relance').addEventListener('click', async func
   const saisonDerniere = adherentRelance.saison || (annee - 1);
   const nom = `${adherentRelance.prenom || ''} ${adherentRelance.nom || ''}`.trim();
   const sujet = `Renouvellement adhésion HSI37 — Saison ${annee}`;
+  const qualiteRelance = "La secrétaire";
+  const nomSignRelance = NOMS_SIGNATAIRES[qualiteRelance] || "BELHAJ Nawel";
+  const signatureHTMLRelance = `
+    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+      <tr>
+        <td style="padding-right:16px;vertical-align:top;">
+          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
+               alt="Logo HSI37" width="80" style="display:block;">
+        </td>
+        <td style="vertical-align:top;">
+          <strong style="font-size:14px;">${nomSignRelance}</strong><br>
+          <span style="color:#1e79bf;font-weight:600;">${qualiteRelance} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          📱 07 43 29 58 30<br>
+          ✉ handicapsi37@gmail.com<br>
+          🌐 www.hsi37.fr<br><br>
+          <span style="color:#F28C28;font-weight:600;">🏷 Soutenez nos actions :</span>
+          <a href="https://hsi37.fr/don" style="color:#1e79bf;">Faire un don</a> ou
+          <a href="https://hsi37.fr/adhesion" style="color:#1e79bf;">Devenir membre</a>
+        </td>
+      </tr>
+    </table>
+  `;
   const contenuHTML = `
     <p>Madame, Monsieur,</p>
     <p>Nous vous informons que votre adhésion à l'association <strong>Handicap Solidarité pour l'Inclusion 37</strong> pour la saison <strong>${saisonDerniere}</strong> est arrivée à échéance.</p>
     <p>Nous vous invitons à renouveler votre adhésion pour la saison <strong>${annee}</strong> au montant de <strong>20,00 €</strong>.</p>
     <p>Vous pouvez régler par : espèces, virement (IBAN : FR76 1027 8374 …. …. …. 116), chèque à l'ordre de l'Association Handicap Solidarité pour l'Inclusion 37, carte bancaire, PayPal ou HelloAsso.</p>
     <p>Nous vous remercions pour votre soutien et restons à votre disposition.</p>
-    <p>Cordialement,<br>HSI37</p>
+    ${signatureHTMLRelance}
   `;
   const btn = document.getElementById('btn-mail-relance');
   btn.disabled = true;
