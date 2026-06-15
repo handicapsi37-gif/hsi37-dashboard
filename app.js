@@ -3153,6 +3153,9 @@ document.getElementById('btn-mail-convocation').addEventListener('click', async 
   }
 
   const emails = data.map(a => a.email).join(', ');
+  const annee  = document.getElementById('conv-annee').value || anneeEnCours();
+  const sujet  = encodeURIComponent(`Convocation Assemblée Générale HSI37 — ${annee}`);
+  const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&bcc=${encodeURIComponent(emails)}&su=${sujet}`;
   const texte  = `Emails de tous les adhérents (${data.length}) :\n\n${emails}`;
 
   const zone = document.createElement('div');
@@ -3162,12 +3165,16 @@ document.getElementById('btn-mail-convocation').addEventListener('click', async 
     <p style="color:#1a2433;font-size:13px;margin:0 0 8px;">Copiez les adresses ci-dessous et collez-les dans le champ "Cci" de Gmail :</p>
     <textarea readonly style="width:100%;height:120px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:8px;box-sizing:border-box;">${emails}</textarea>
     <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
-      <button id="btn-copier-emails" style="background:#1e79bf;color:#fff;border:none;border-radius:4px;padding:8px 16px;cursor:pointer;">📋 Copier</button>
+      <button id="btn-ouvrir-gmail" style="background:#1e79bf;color:#fff;border:none;border-radius:4px;padding:8px 16px;cursor:pointer;">✉ Ouvrir dans Gmail</button>
+      <button id="btn-copier-emails" style="background:#f4f6f8;color:#1a2433;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">📋 Copier</button>
       <button id="btn-fermer-emails" style="background:#f4f6f8;color:#1a2433;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">Fermer</button>
     </div>
   `;
   document.body.appendChild(zone);
 
+  document.getElementById('btn-ouvrir-gmail').addEventListener('click', function() {
+    window.open(gmailUrl, '_blank');
+  });
   document.getElementById('btn-copier-emails').addEventListener('click', function() {
     navigator.clipboard.writeText(emails).then(function() {
       document.getElementById('btn-copier-emails').textContent = '✅ Copié !';
