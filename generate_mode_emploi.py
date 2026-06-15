@@ -327,6 +327,17 @@ def construire_contenu(s):
         "Le tableau de tous les adhérents s'affiche avec leurs informations.",
         s['corps'],
     ))
+    story.append(Paragraph(
+        "Pour <b>rechercher</b> un adhérent, tapez son nom, prénom ou e-mail "
+        "dans la barre de recherche au-dessus du tableau.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "Pour <b>trier</b> la liste, utilisez le menu déroulant "
+        "<b>« Trier par... »</b> : vous pouvez trier par nom, "
+        "date d'adhésion, statut ou type de membre.",
+        s['corps'],
+    ))
 
     story.append(Paragraph("3.2  Ajouter un nouvel adhérent", s['sous_section']))
     story.append(Paragraph(
@@ -452,6 +463,17 @@ def construire_contenu(s):
         "Cliquez sur la tuile <b>« Donateurs »</b> depuis la page d'accueil.",
         s['corps'],
     ))
+    story.append(Paragraph(
+        "Pour <b>rechercher</b> un donateur, tapez son nom, prénom ou e-mail "
+        "dans la barre de recherche au-dessus du tableau.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "Pour <b>trier</b> la liste, utilisez le menu déroulant "
+        "<b>« Trier par... »</b> : vous pouvez trier par nom, "
+        "date de don ou montant.",
+        s['corps'],
+    ))
 
     story.append(Paragraph("6.2  Ajouter un donateur (personne)", s['sous_section']))
     story.append(Paragraph(
@@ -572,6 +594,24 @@ def construire_contenu(s):
         "Ouvrez ce fichier avec Excel ou LibreOffice pour consulter ou archiver les données.",
     ]:
         story.append(fleche(etape, s['liste']))
+    story.append(Paragraph(
+        "<b>Ouvrir le fichier dans Google Sheets :</b>",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "① Allez sur <b>sheets.google.com</b> et connectez-vous avec votre compte Google.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "② Cliquez sur <b>Fichier → Importer</b>, puis choisissez le fichier CSV "
+        "téléchargé depuis votre dossier Téléchargements.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "③ Choisissez <b>« Remplacer la feuille de calcul »</b> et cliquez sur "
+        "<b>« Importer les données »</b>. Le tableau s'affiche immédiatement.",
+        s['corps'],
+    ))
     story.append(espacement(0.25))
     story.append(Paragraph("7.2  Exporter la liste des donateurs", s['sous_section']))
     story.append(espacement(0.15))
