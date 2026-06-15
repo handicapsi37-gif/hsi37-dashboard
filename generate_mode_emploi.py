@@ -442,10 +442,10 @@ def construire_contenu(s):
     ]:
         story.append(fleche(etape, s['liste']))
     story.append(Paragraph(
-        "→ Pour envoyer le reçu directement par mail : cliquez sur le bouton "
-        "<b>« Envoyer par mail »</b> dans la même fenêtre. "
-        "Le reçu est envoyé automatiquement à l'adresse e-mail de l'adhérent, "
-        "sans aucune manipulation supplémentaire.",
+        "En cliquant sur <b>« Télécharger le reçu »</b>, le PDF est téléchargé "
+        "dans votre dossier Téléchargements <b>et</b> envoyé automatiquement "
+        "par mail à l'adhérent en même temps. "
+        "Aucune manipulation supplémentaire n'est nécessaire.",
         s['corps'],
     ))
     story.append(Paragraph(
@@ -520,10 +520,10 @@ def construire_contenu(s):
         s['corps'],
     ))
     story.append(Paragraph(
-        "→ Pour envoyer le reçu directement par mail : cliquez sur le bouton "
-        "<b>« Envoyer par mail »</b>. "
-        "Le reçu est envoyé automatiquement à l'adresse e-mail du donateur, "
-        "sans aucune manipulation supplémentaire.",
+        "En cliquant sur <b>« Télécharger le reçu »</b>, le PDF est téléchargé "
+        "dans votre dossier Téléchargements <b>et</b> envoyé automatiquement "
+        "par mail au donateur en même temps. "
+        "Aucune manipulation supplémentaire n'est nécessaire.",
         s['corps'],
     ))
     story.append(Paragraph(
