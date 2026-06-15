@@ -2324,35 +2324,7 @@ document.getElementById("btn-telecharger-recu-adh").addEventListener("click", fu
       format: [mmLarg, mmHaut]
     });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
-    const pdfBlob   = pdf.output("blob");
     pdf.save(nomFichier);
-
-    const emailDest = (adherentRecuEnCours && adherentRecuEnCours.email) || "";
-    const nomDest   = [(adherentRecuEnCours.prenom || ""), (adherentRecuEnCours.nom || "")]
-                        .filter(Boolean).join(" ");
-    const actionsEl = document.getElementById("modale-recu-adh").querySelector(".recu-modale__actions");
-    const msgEl     = document.createElement("p");
-    msgEl.style.cssText = "font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:4px;margin-bottom:0.5rem;text-align:center;border:1px solid;";
-    actionsEl.insertAdjacentElement("beforebegin", msgEl);
-
-    if (!emailDest) {
-      Object.assign(msgEl.style, { background:"#fff0e0", color:"#a84800", borderColor:"#a84800" });
-      msgEl.textContent = "Aucun e-mail renseigné pour cet adhérent.";
-      setTimeout(function() { msgEl.remove(); }, 5000);
-    } else {
-      Object.assign(msgEl.style, { background:"#f0f6ff", color:"#1a5276", borderColor:"#1a5276" });
-      msgEl.textContent = "Envoi du reçu par e-mail…";
-      envoyerRecuParMail(pdfBlob, nomFichier, emailDest, nomDest)
-        .then(function() {
-          Object.assign(msgEl.style, { background:"#e6f5ec", color:"#1e7d45", borderColor:"#1e7d45" });
-          msgEl.textContent = "Reçu envoyé par mail à " + emailDest;
-        })
-        .catch(function(err) {
-          Object.assign(msgEl.style, { background:"#fee2e2", color:"#b91c1c", borderColor:"#b91c1c" });
-          msgEl.textContent = "Erreur d'envoi : " + err.message;
-        })
-        .finally(function() { setTimeout(function() { msgEl.remove(); }, 7000); });
-    }
   }).finally(function() {
     imgLogo.src = srcOriginal;
     btn.disabled = false;
@@ -2362,8 +2334,49 @@ document.getElementById("btn-telecharger-recu-adh").addEventListener("click", fu
         <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
               stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
-      Télécharger le reçu
+      Télécharger
     `.trim();
+  });
+});
+
+document.getElementById("btn-mail-recu-adh").addEventListener("click", async function() {
+  if (!adherentRecuEnCours) adherentRecuEnCours = adherentEnCours;
+  const email = (adherentRecuEnCours && adherentRecuEnCours.email) || "";
+  if (!email) {
+    alert("Aucune adresse e-mail renseignée pour cet adhérent.");
+    return;
+  }
+  const idAdherent = (adherentRecuEnCours && adherentRecuEnCours.id_adherent) || "recu";
+  const nomFichier = `recu-adhesion-${idAdherent}.pdf`;
+  const nom = [(adherentRecuEnCours.prenom || ""), (adherentRecuEnCours.nom || "")].join(" ").trim();
+  const doc = document.getElementById("recu-adherent-document");
+  const imgLogo = document.getElementById("recu-adh-logo");
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+  const srcOriginal = imgLogo.src;
+  chargerImageCommeDataUrl("assets/hsi37-redim-demi.png").then(function(dataUrl) {
+    imgLogo.src = dataUrl;
+    return new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+  }).then(function() {
+    return html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+  }).then(function(canvas) {
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg = 210;
+    const mmHaut = (canvas.height / canvas.width) * mmLarg;
+    const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob = pdf.output("blob");
+    return envoyerRecuParMail(pdfBlob, nomFichier, email, nom);
+  }).then(function() {
+    btn.textContent = "✅ Mail envoyé";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }).catch(function(err) {
+    console.error("Erreur envoi reçu :", err);
+    btn.textContent = "❌ Échec envoi";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }).finally(function() {
+    imgLogo.src = srcOriginal;
   });
 });
 
@@ -2509,36 +2522,7 @@ document.getElementById("btn-telecharger-recu-don").addEventListener("click", fu
       format: [mmLarg, mmHaut]
     });
     pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
-    const pdfBlob   = pdf.output("blob");
     pdf.save(nomFichier);
-
-    const emailDest = (donateurRecuEnCours && donateurRecuEnCours.email) || "";
-    const nomDest   = [(donateurRecuEnCours.prenom || ""), (donateurRecuEnCours.nom || ""),
-                       (donateurRecuEnCours.organisme || "")]
-                        .filter(Boolean).join(" ") || "Donateur";
-    const actionsEl = document.getElementById("modale-recu-don").querySelector(".recu-modale__actions");
-    const msgEl     = document.createElement("p");
-    msgEl.style.cssText = "font-size:0.85rem;padding:0.5rem 0.75rem;border-radius:4px;margin-bottom:0.5rem;text-align:center;border:1px solid;";
-    actionsEl.insertAdjacentElement("beforebegin", msgEl);
-
-    if (!emailDest) {
-      Object.assign(msgEl.style, { background:"#fff0e0", color:"#a84800", borderColor:"#a84800" });
-      msgEl.textContent = "Aucun e-mail renseigné pour ce donateur.";
-      setTimeout(function() { msgEl.remove(); }, 5000);
-    } else {
-      Object.assign(msgEl.style, { background:"#f0f6ff", color:"#1a5276", borderColor:"#1a5276" });
-      msgEl.textContent = "Envoi du reçu par e-mail…";
-      envoyerRecuParMail(pdfBlob, nomFichier, emailDest, nomDest)
-        .then(function() {
-          Object.assign(msgEl.style, { background:"#e6f5ec", color:"#1e7d45", borderColor:"#1e7d45" });
-          msgEl.textContent = "Reçu envoyé par mail à " + emailDest;
-        })
-        .catch(function(err) {
-          Object.assign(msgEl.style, { background:"#fee2e2", color:"#b91c1c", borderColor:"#b91c1c" });
-          msgEl.textContent = "Erreur d'envoi : " + err.message;
-        })
-        .finally(function() { setTimeout(function() { msgEl.remove(); }, 7000); });
-    }
   }).finally(function() {
     imgLogo.src = srcOriginal;
     btn.disabled = false;
@@ -2548,8 +2532,49 @@ document.getElementById("btn-telecharger-recu-don").addEventListener("click", fu
         <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
               stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
       </svg>
-      Télécharger le reçu
+      Télécharger
     `.trim();
+  });
+});
+
+document.getElementById("btn-mail-recu-don").addEventListener("click", async function() {
+  const email = (donateurRecuEnCours && donateurRecuEnCours.email) || "";
+  if (!email) {
+    alert("Aucune adresse e-mail renseignée pour ce donateur.");
+    return;
+  }
+  const idDonateur = (donateurRecuEnCours && donateurRecuEnCours.id_donateur) || "recu-don";
+  const nomFichier = `recu-don-${idDonateur}.pdf`;
+  const nom = [(donateurRecuEnCours.prenom || ""), (donateurRecuEnCours.nom || ""),
+               (donateurRecuEnCours.organisme || "")].filter(Boolean).join(" ") || "Donateur";
+  const doc = document.getElementById("recu-donateur-document");
+  const imgLogo = document.getElementById("recu-don-logo");
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+  const srcOriginal = imgLogo.src;
+  chargerImageCommeDataUrl("assets/hsi37-redim-demi.png").then(function(dataUrl) {
+    imgLogo.src = dataUrl;
+    return new Promise(function(resolve) { imgLogo.onload = resolve; imgLogo.onerror = resolve; });
+  }).then(function() {
+    return html2canvas(doc, { scale: 2, useCORS: false, allowTaint: true, backgroundColor: "#ffffff", logging: false });
+  }).then(function(canvas) {
+    const imgData = canvas.toDataURL("image/jpeg", 0.95);
+    const mmLarg = 210;
+    const mmHaut = (canvas.height / canvas.width) * mmLarg;
+    const pdf = new window.jspdf.jsPDF({ orientation: mmHaut > mmLarg ? "portrait" : "landscape", unit: "mm", format: [mmLarg, mmHaut] });
+    pdf.addImage(imgData, "JPEG", 0, 0, mmLarg, mmHaut);
+    const pdfBlob = pdf.output("blob");
+    return envoyerRecuParMail(pdfBlob, nomFichier, email, nom);
+  }).then(function() {
+    btn.textContent = "✅ Mail envoyé";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }).catch(function(err) {
+    console.error("Erreur envoi reçu :", err);
+    btn.textContent = "❌ Échec envoi";
+    setTimeout(function() { btn.disabled = false; btn.textContent = "✉ Envoyer par mail"; }, 3000);
+  }).finally(function() {
+    imgLogo.src = srcOriginal;
   });
 });
 
