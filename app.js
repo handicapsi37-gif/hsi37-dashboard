@@ -1175,6 +1175,33 @@ btnDeconnexion.addEventListener("click", async function() {
 });
 
 /* =====================================================
+   DÉCONNEXION AUTOMATIQUE APRÈS 30 MIN D'INACTIVITÉ
+   ===================================================== */
+(function() {
+  const DUREE_INACTIVITE = 30 * 60 * 1000; // 30 minutes en millisecondes
+  let minuteurInactivite;
+
+  function reinitialiserMinuteur() {
+    clearTimeout(minuteurInactivite);
+    minuteurInactivite = setTimeout(async function() {
+      await clientSupabase.auth.signOut();
+      afficherEcranConnexion();
+      const zoneErreur = document.getElementById("connexion-erreur");
+      if (zoneErreur) {
+        zoneErreur.textContent = "Session expirée — veuillez vous reconnecter.";
+        zoneErreur.hidden = false;
+      }
+    }, DUREE_INACTIVITE);
+  }
+
+  ["mousemove", "keydown", "click", "scroll", "touchstart"].forEach(function(evenement) {
+    document.addEventListener(evenement, reinitialiserMinuteur, { passive: true });
+  });
+
+  reinitialiserMinuteur();
+})();
+
+/* =====================================================
    INITIALISATION DES MENUS DÉROULANTS DE DATE
    ===================================================== */
 
