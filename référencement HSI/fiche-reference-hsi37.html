@@ -631,6 +631,60 @@
   </table>
 </section>
 
+<!-- SECTION 12 -->
+<section>
+  <h2><span class="num">12</span> MODULE DONS DE MATÉRIEL</h2>
+
+  <h3>Référentiel technique</h3>
+
+  <table class="lexique-table">
+    <thead>
+      <tr><th>Quoi</th><th>Détail</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Table Supabase</td><td><code>dons_materiel</code> — 13 colonnes, RLS activé</td></tr>
+      <tr><td>Bucket Storage</td><td><code>dons-materiel</code> — privé, sous-dossiers <code>{id_du_don}/</code></td></tr>
+      <tr><td>Page historique</td><td><code>dons-materiel.html</code> — tableau avec recherche et filtre par statut</td></tr>
+      <tr><td>Page formulaire</td><td><code>nouveau-don.html</code> — saisie + upload photos</td></tr>
+      <tr><td>Hub</td><td>Tuile "Dons de matériel" ajoutée sur <code>index.html</code></td></tr>
+    </tbody>
+  </table>
+
+  <h3>Guide utilisateur</h3>
+
+  <div class="etape">
+    <div class="pastille">1</div>
+    <div class="contenu">
+      <strong>Saisir un nouveau don</strong><br>
+      Cliquer sur la tuile <strong>« Dons de matériel »</strong> → bouton <strong>« + Nouveau don »</strong> → remplir le formulaire → <strong>« Enregistrer »</strong>
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">2</div>
+    <div class="contenu">
+      <strong>Uploader des photos</strong><br>
+      Section <strong>Photos</strong> du formulaire → cliquer ou glisser-déposer les fichiers. Les photos sont stockées dans Supabase Storage (bucket <code>dons-materiel</code>).
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">3</div>
+    <div class="contenu">
+      <strong>Consulter l'historique</strong><br>
+      Tuile <strong>« Dons de matériel »</strong> → tableau avec barre de recherche et filtre par statut.
+    </div>
+  </div>
+
+  <div class="etape">
+    <div class="pastille">4</div>
+    <div class="contenu">
+      <strong>Attestation PDF</strong><br>
+      Bouton <strong>« Attestation PDF »</strong> dans la colonne Actions — <em>à venir</em>.
+    </div>
+  </div>
+</section>
+
 <!-- RÈGLE D'OR -->
 <div class="regle-or">
   <h2>⭐ RÈGLE D'OR — DANS CET ORDRE, TOUJOURS</h2>
