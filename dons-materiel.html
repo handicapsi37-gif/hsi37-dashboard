@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HSI37 — Dons de matériel</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    .dons-entete {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.5rem 2rem 0.5rem;
+      flex-wrap: wrap;
+    }
+    .dons-entete__texte h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 1.5rem;
+      color: var(--bleu-fonce);
+      margin-bottom: 0.2rem;
+    }
+    .dons-entete__texte p {
+      font-size: 0.875rem;
+      color: var(--gris-moyen);
+    }
+    .badge-statut {
+      display: inline-block;
+      padding: 0.2em 0.7em;
+      border-radius: 20px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .badge-statut--prepare  { background: var(--orange-fond); color: var(--orange-statut); }
+    .badge-statut--expedie  { background: #e0f0ff; color: var(--bleu-fonce); }
+    .badge-statut--livre    { background: var(--vert-fond); color: var(--vert-statut); }
+    .badge-statut--annule   { background: var(--rouge-fond); color: var(--rouge-statut); }
+    .badge-statut--autre    { background: var(--gris-clair); color: var(--gris-moyen); }
+
+    .detail-grille {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.8rem 1.5rem;
+      margin: 1rem 0;
+    }
+    .detail-grille--large { grid-column: 1 / -1; }
+    .detail-label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--gris-moyen);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.15rem;
+    }
+    .detail-valeur {
+      font-size: 0.95rem;
+      color: var(--encre);
+    }
+    .materiel-liste {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .materiel-liste li {
+      padding: 0.35rem 0;
+      border-bottom: 1px solid var(--gris-clair);
+      font-size: 0.9rem;
+      color: var(--encre);
+    }
+    .materiel-liste li:last-child { border-bottom: none; }
+    .photos-grille {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .photos-grille a img {
+      width: 80px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: var(--rayon);
+      border: 1px solid var(--gris-bord);
+      cursor: pointer;
+    }
+    .modale__actions--detail {
+      display: flex;
+      gap: 0.75rem;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+    }
+    .chargement {
+      text-align: center;
+      padding: 2rem;
+      color: var(--gris-moyen);
+      font-size: 0.95rem;
+    }
+    .tableau td { vertical-align: middle; }
+    .actions-cellule {
+      display: flex;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .btn--petit {
+      padding: 0.3rem 0.7rem;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========== ÉCRAN DE CONNEXION ========== -->
+  <div id="ecran-connexion" aria-labelledby="connexion-titre">
+    <div class="connexion-carte">
+
+      <div class="connexion-entete">
+        <img src="assets/cropped-HSI37-512x512-1.png"
+             alt="hsi37 — Handicap Solidarité pour l'Inclusion"
+             class="connexion-logo-img" />
+      </div>
+
+      <h1 class="connexion-titre" id="connexion-titre">Connexion</h1>
+
+      <form id="formulaire-connexion" class="connexion-formulaire" novalidate
+            aria-label="Formulaire de connexion au tableau de bord HSI37">
+
+        <div class="champ-groupe">
+          <label for="connexion-email" class="champ-label">E-mail</label>
+          <input type="email" id="connexion-email" class="champ-input"
+                 autocomplete="email" required placeholder="votre@email.fr" />
+        </div>
+
+        <div class="champ-groupe">
+          <label for="connexion-mdp" class="champ-label">Mot de passe</label>
+          <input type="password" id="connexion-mdp" class="champ-input"
+                 autocomplete="current-password" required placeholder="••••••••" />
+        </div>
+
+        <div id="connexion-erreur" class="connexion-erreur"
+             role="alert" aria-live="polite" hidden></div>
+
+        <button type="submit" class="btn btn--primaire connexion-btn">
+          Se connecter
+        </button>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========== EN-TÊTE ========== -->
+  <header class="entete" role="banner" hidden>
+    <div class="entete__logo-bloc">
+      <img src="assets/hsi37-redim-demi.png"
+           alt="hsi37 — Handicap Solidarité pour l'Inclusion 37"
+           class="entete__logo-img" />
+    </div>
+    <h1 class="entete__titre">Tableau de bord HSI37</h1>
+    <div class="entete__actions">
+      <a href="index.html" class="btn-retour-accueil" id="btn-retour-accueil"
+         aria-label="Retour à l'accueil">
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24" width="15" height="15" fill="none"
+             stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/>
+          <polyline points="9 21 9 13 15 13 15 21"/>
+        </svg>
+        Accueil
+      </a>
+      <button class="btn btn--deconnexion" id="btn-deconnexion" type="button">
+        Se déconnecter
+      </button>
+    </div>
+  </header>
+
+  <!-- ========== CONTENU PRINCIPAL ========== -->
+  <main class="contenu-principal" id="contenu-principal" hidden>
+
+    <!-- En-tête de section -->
+    <div class="dons-entete">
+      <div class="dons-entete__texte">
+        <h2>Dons de matériel</h2>
+        <p>Historique des expéditions de matériel vers les bénéficiaires</p>
+      </div>
+      <a href="nouveau-don.html" class="btn btn--primaire">
+        <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+             viewBox="0 0 24 24" width="16" height="16">
+          <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round"/>
+        </svg>
+        Nouveau don
+      </a>
+    </div>
+
+    <!-- Messages -->
+    <div style="padding: 0 2rem;">
+      <div id="message-succes" class="message-succes" role="status" aria-live="polite" hidden></div>
+      <div id="message-erreur" class="message-erreur" role="alert" aria-live="assertive" hidden></div>
+    </div>
+
+    <!-- Barre d'actions -->
+    <section class="barre-actions" aria-label="Filtres et recherche">
+      <div class="barre-actions__gauche">
+        <div class="barre-recherche">
+          <label for="recherche-dons">🔍 Rechercher</label>
+          <input type="search" id="recherche-dons"
+                 placeholder="Bénéficiaire, ville, pays…" autocomplete="off" />
+        </div>
+        <select id="filtre-statut" class="champ-input champ-select"
+                aria-label="Filtrer par statut">
+          <option value="">Tous les statuts</option>
+          <option value="Préparé">Préparé</option>
+          <option value="Expédié">Expédié</option>
+          <option value="Livré">Livré</option>
+          <option value="Annulé">Annulé</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Tableau des dons -->
+    <section class="section-tableau" aria-label="Liste des dons de matériel">
+      <div class="tableau-conteneur" role="region"
+           aria-label="Tableau des dons de matériel" tabindex="0">
+        <table class="tableau" id="tableau-dons">
+          <thead>
+            <tr>
+              <th scope="col">Date</th>
+              <th scope="col">Bénéficiaire</th>
+              <th scope="col">Destination</th>
+              <th scope="col">Matériel (résumé)</th>
+              <th scope="col">Statut</th>
+              <th scope="col">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="corps-tableau-dons">
+            <tr>
+              <td colspan="6" class="chargement">Chargement en cours…</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========== MODALE DÉTAIL DU DON ========== -->
+  <div class="modale-fond" id="modale-fond-detail" role="presentation" hidden>
+    <div class="modale"
+         id="modale-detail"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="detail-titre"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="detail-titre">Détail du don</h2>
+        <button class="modale__fermer" id="btn-fermer-detail"
+                aria-label="Fermer le détail du don">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <div class="modale__formulaire" id="detail-corps">
+        <div class="detail-grille">
+          <div>
+            <div class="detail-label">Date d'expédition</div>
+            <div class="detail-valeur" id="detail-date">—</div>
+          </div>
+          <div>
+            <div class="detail-label">Statut</div>
+            <div class="detail-valeur" id="detail-statut">—</div>
+          </div>
+          <div>
+            <div class="detail-label">Type de bénéficiaire</div>
+            <div class="detail-valeur" id="detail-type-benef">—</div>
+          </div>
+          <div>
+            <div class="detail-label">Bénéficiaire</div>
+            <div class="detail-valeur" id="detail-nom-benef">—</div>
+          </div>
+          <div>
+            <div class="detail-label">Ville de destination</div>
+            <div class="detail-valeur" id="detail-ville">—</div>
+          </div>
+          <div>
+            <div class="detail-label">Pays de destination</div>
+            <div class="detail-valeur" id="detail-pays">—</div>
+          </div>
+          <div>
+            <div class="detail-label">Numéro de suivi</div>
+            <div class="detail-valeur" id="detail-suivi">—</div>
+          </div>
+          <div class="detail-grille--large">
+            <div class="detail-label">Matériel expédié</div>
+            <ul class="materiel-liste" id="detail-materiel"></ul>
+          </div>
+          <div class="detail-grille--large">
+            <div class="detail-label">Notes</div>
+            <div class="detail-valeur" id="detail-notes">—</div>
+          </div>
+          <div class="detail-grille--large" id="detail-photos-bloc" hidden>
+            <div class="detail-label">Photos</div>
+            <div class="photos-grille" id="detail-photos"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modale__actions modale__actions--detail">
+        <button type="button" class="btn btn--secondaire" id="btn-fermer-detail-bas">
+          Fermer
+        </button>
+        <button type="button" class="btn btn--primaire" id="btn-attestation-pdf">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="16" height="16">
+            <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+          Attestation PDF
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <!-- jsPDF pour l'attestation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Config -->
+  <script src="config.js"></script>
+  <!-- Logique page -->
+  <script src="dons-materiel.js"></script>
+</body>
+</html>
