@@ -557,9 +557,66 @@ def construire_contenu(s):
 
     story.append(PageBreak())
 
-    # ── SECTION 7 — DOCUMENTS ─────────────────────────────────────
-    # ── SECTION 7 — EXPORTER LES DONNÉES ─────────────────────────
-    story.append(Paragraph("7. Exporter les données", s['section']))
+    # ── SECTION 7 — MODULE DONS DE MATÉRIEL ──────────────────────
+    story.append(Paragraph("7. Module Dons de matériel", s['section']))
+    story.append(filet_bleu())
+
+    story.append(Paragraph("7.1  Référentiel technique", s['sous_section']))
+    for item in [
+        "Table Supabase : <b>dons_materiel</b> (13 colonnes, RLS activé).",
+        "Bucket Storage : <b>dons-materiel</b> (privé, sous-dossiers <b>{id_du_don}/</b>).",
+        "Page historique : <b>dons-materiel.html</b> — liste des dons avec recherche et filtre par statut.",
+        "Page formulaire : <b>nouveau-don.html</b> — saisie d'un don et upload de photos.",
+        "Tuile <b>« Dons de matériel »</b> ajoutée sur <b>index.html</b> (page d'accueil).",
+    ]:
+        story.append(fleche(item, s['liste']))
+
+    story.append(Paragraph("7.2  Saisir un nouveau don", s['sous_section']))
+    story.append(Paragraph(
+        "Depuis la page d'accueil, cliquez sur la tuile <b>« Dons de matériel »</b>.",
+        s['corps'],
+    ))
+    for etape in [
+        "Cliquez sur le bouton <b>« + Nouveau don »</b> en haut à droite.",
+        "Remplissez le formulaire : donateur, type de matériel, description, date, statut.",
+        "Cliquez sur <b>« Enregistrer »</b>. Le don apparaît aussitôt dans l'historique.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("7.3  Uploader des photos", s['sous_section']))
+    story.append(Paragraph(
+        "Dans le formulaire de saisie d'un don :",
+        s['corps'],
+    ))
+    for etape in [
+        "Faites défiler jusqu'à la section <b>Photos</b>.",
+        "Cliquez sur la zone d'upload ou <b>glissez-déposez</b> vos fichiers.",
+        "Les photos sont stockées dans Supabase Storage (bucket <b>dons-materiel</b>), "
+        "dans un sous-dossier propre à chaque don.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("7.4  Consulter l'historique", s['sous_section']))
+    for etape in [
+        "Cliquez sur la tuile <b>« Dons de matériel »</b> depuis la page d'accueil.",
+        "Le tableau affiche tous les dons enregistrés.",
+        "Utilisez la <b>barre de recherche</b> pour filtrer par nom ou description.",
+        "Utilisez le <b>filtre par statut</b> pour afficher les dons selon leur état.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("7.5  Attestation PDF", s['sous_section']))
+    story.append(Paragraph(
+        "Un bouton <b>« Attestation PDF »</b> sera disponible dans la colonne Actions "
+        "de chaque don — <i>fonctionnalité à venir</i>.",
+        s['corps'],
+    ))
+    story.append(espacement(0.3))
+
+    story.append(PageBreak())
+
+    # ── SECTION 8 — EXPORTER LES DONNÉES ─────────────────────────
+    story.append(Paragraph("8. Exporter les données", s['section']))
     story.append(filet_bleu())
     story.append(Paragraph(
         "Le Dashboard permet d'exporter la liste des adhérents et la liste des donateurs "
@@ -575,7 +632,7 @@ def construire_contenu(s):
     ]:
         story.append(fleche(raison, s['liste']))
     story.append(espacement(0.25))
-    story.append(Paragraph("7.1  Exporter la liste des adhérents", s['sous_section']))
+    story.append(Paragraph("8.1  Exporter la liste des adhérents", s['sous_section']))
     story.append(espacement(0.15))
     for etape in [
         "Depuis la page d'accueil, cliquez sur la tuile <b>« Adhérents »</b>.",
@@ -603,7 +660,7 @@ def construire_contenu(s):
         s['corps'],
     ))
     story.append(espacement(0.25))
-    story.append(Paragraph("7.2  Exporter la liste des donateurs", s['sous_section']))
+    story.append(Paragraph("8.2  Exporter la liste des donateurs", s['sous_section']))
     story.append(espacement(0.15))
     for etape in [
         "Depuis la page d'accueil, cliquez sur la tuile <b>« Donateurs »</b>.",
@@ -620,7 +677,7 @@ def construire_contenu(s):
     story.append(espacement(0.4))
 
     # ── SECTION 8 — LES DOCUMENTS DE L'ASSOCIATION ───────────────
-    story.append(Paragraph("8. Les documents de l'association", s['section']))
+    story.append(Paragraph("9. Les documents de l'association", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -663,7 +720,7 @@ def construire_contenu(s):
         story.append(espacement(0.1))
 
     # ── SECTION 9 — ENVOYER PAR MAIL ──────────────────────────────
-    story.append(Paragraph("9. Envoyer un document par mail", s['section']))
+    story.append(Paragraph("10. Envoyer un document par mail", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -684,7 +741,7 @@ def construire_contenu(s):
     story.append(PageBreak())
 
     # ── SECTION 10 — SE DÉCONNECTER ───────────────────────────────
-    story.append(Paragraph("10. Se déconnecter", s['section']))
+    story.append(Paragraph("11. Se déconnecter", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -701,7 +758,7 @@ def construire_contenu(s):
         story.append(fleche(etape, s['liste']))
 
     # ── SECTION 11 — EN CAS DE PROBLÈME ──────────────────────────
-    story.append(Paragraph("11. En cas de problème", s['section']))
+    story.append(Paragraph("12. En cas de problème", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
