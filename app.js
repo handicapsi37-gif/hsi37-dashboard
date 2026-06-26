@@ -3567,7 +3567,7 @@ if (btnSauvegarderProfil) {
 // --- Stats hub ---
 function mettreAJourStats() {
   var total = donneesAdherents.length;
-  var aJour = donneesAdherents.filter(function(a) { return calculerStatut(a.saison) === "a-jour"; }).length;
+  var aJour = donneesAdherents.filter(function(a) { return calculerStatut(a.saison) === "ajour"; }).length;
   var expires = total - aJour;
   var totalCotis = donneesAdherents.reduce(function(acc, a) {
     return acc + (Number(a.montant_cotisation) || 0);
