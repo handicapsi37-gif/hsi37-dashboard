@@ -126,8 +126,30 @@
 | numero_cheque | text | non | |
 | banque_cheque | text | non | |
 
+### Table "dons_materiel"
+| Colonne | Type | Obligatoire | Notes |
+|---------|------|-------------|-------|
+| id | uuid | auto | ID unique |
+| created_at | timestamptz | auto | |
+| date_expedition | date | non | |
+| type_beneficiaire | text | non | Particulier / Association / Structure médicale |
+| nom_beneficiaire | text | non | |
+| ville_destination | text | non | |
+| pays_destination | text | non | |
+| materiel | jsonb | non | liste [{nom, quantite_expediee, quantite_recue}] |
+| statut | text | non | Préparé / Expédié / Livré / Annulé |
+| numero_suivi | text | non | |
+| notes | text | non | |
+| photos | text[] | non | URLs stockées dans Supabase Storage |
+| user_id | uuid | non | référence auth.users |
+
+### Bucket Supabase Storage "dons-materiel"
+- Bucket **privé** — accès via URLs signées (validité 300 s)
+- Sous-dossiers par don : `{id_du_don}/photo.jpg`
+- RLS : lecture/écriture réservées à "authenticated"
+
 ### Sécurité Supabase
-- RLS activé sur les deux tables.
+- RLS activé sur les trois tables.
 - 4 politiques par table : lecture/création/modification/suppression réservées à "authenticated".
 - Authentification email + mot de passe, inscription libre désactivée.
 - 5 comptes bureau créés (auto-confirmés).
@@ -208,6 +230,23 @@
 - Nom complet : "Association HSI37 — Handicap Solidarité pour l'Inclusion 37"
 - Mention RUP ("reconnue d'utilité publique") SUPPRIMÉE (HSI37 n'a pas ce statut)
 
+### Module Dons de matériel
+- Page liste `dons-materiel.html` — tableau avec recherche et filtre par statut
+- Page formulaire `nouveau-don.html` — saisie + upload photos (bucket Storage privé)
+- Tuile "Dons de matériel" dans le hub de navigation
+- CRUD : Voir (modale détail) / Modifier (formulaire pré-rempli via `?id=`) / Supprimer (modale confirmation)
+- Statuts : Préparé / Expédié / Livré / Annulé (badges colorés)
+- Attestation PDF (jsPDF) : en-tête logo, corps officiel signé Mohammed Belhaj,
+  tableau Désignation/Qté expédiée/Qté reçue, pied bleu HSI ; annexe photos p.2
+  (URLs signées Supabase Storage, fetch+FileReader pour bucket privé)
+
+### Exports PDF (jsPDF)
+- **Liste adhérents PDF** : tableau A4 paysage, colonnes N° / Nom / Prénom / Type / Statut / Adhésion,
+  pagination automatique, pied "Page X / Y"
+- **Rapport annuel PDF** : p.1 six statistiques (adhérents total, à jour, expirés,
+  cotisations, dons financiers, dons matériel count) + tableaux adhérents / dons financiers /
+  dons matériel — bouton dans le hub sous les tuiles
+
 ### Mode d'emploi (en cours / à finaliser)
 - PDF téléchargeable depuis la page Documents
 - 10 sections : connexion, accueil, adhérents, carte, reçu, donateurs, documents, mail, déconnexion, problèmes
@@ -248,7 +287,7 @@
 - Historique des cotisations année par année + règle de radiation après 3 ans (Article 7 des statuts)
 - Distinction adhésion / don dans le montant (le bulletin prévoit un don facultatif)
 - QR code sur la carte d'adhérent (mène vers hsi37.fr)
-- Passer les reçus/documents de PNG à PDF (librairie jsPDF ou html2pdf.js)
+- ~~Passer les reçus/documents de PNG à PDF (librairie jsPDF ou html2pdf.js)~~ ✅ Fait — jsPDF : attestations don, liste adhérents, rapport annuel
 - Intégrer la signature manuscrite (image) dans les reçus et attestations
 - Mot de passe oublié automatique (Niveau 2 avec SMTP, service Brevo recommandé)
 - Envoi de mails automatiques (SMTP) au lieu du mailto: actuel

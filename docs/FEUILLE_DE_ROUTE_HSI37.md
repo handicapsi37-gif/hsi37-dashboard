@@ -38,6 +38,14 @@ Coût : 0 €. Règle : pas de données de santé (décision confirmée).
 - Saisie de la date par 3 menus déroulants (Jour / Mois / Année 2020→en cours).
 - Serveur local de développement : localhost:8001
 
+### Phase V2 — Nouvelles fonctionnalités (2026)
+- **Module Dons de matériel** : table Supabase `dons_materiel`, bucket Storage privé `dons-materiel`,
+  pages `dons-materiel.html` et `nouveau-don.html`, tuile dans le hub, CRUD complet,
+  attestation PDF officielle (jsPDF) avec annexe photos.
+- **Exports PDF (jsPDF)** : liste adhérents PDF (bouton à côté du CSV) + rapport annuel PDF
+  (stats + 3 tableaux) bouton dans le hub.
+- **Correction** : compteur "À jour" dans le hub corrigé (`calculerStatut` retourne `"ajour"` sans trait d'union).
+
 ### Charte graphique (fait aujourd'hui)
 - SKILL.md de charte graphique HSI37 créé (à placer dans les skills du projet
   pour que Claude Code applique la charte automatiquement).
@@ -113,6 +121,7 @@ Les convocations sont les plus automatisables (cadre + liste de diffusion).
 - Séparer "date de première adhésion" (figée) et "saison de cotisation" (renouvelée).
 - Historique des cotisations année par année + règle de radiation après 3 ans (statuts).
 - Distinction adhésion / don (le bulletin prévoit un don facultatif).
+- ~~Passer les reçus/documents de PNG à PDF~~ ✅ Fait (jsPDF)
 - Paiement en ligne, comptabilité, rôles cloisonnés, gouvernance.
 
 ---
