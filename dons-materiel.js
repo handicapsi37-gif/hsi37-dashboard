@@ -259,20 +259,20 @@ async function genererAttestation(id) {
   const BLANC   = [255, 255, 255];
   const BLEU_CL = [235, 244, 251];
 
-  function chargerBase64(src) {
-    return new Promise(resolve => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.onload = () => {
-        const c = document.createElement('canvas');
-        c.width  = img.naturalWidth;
-        c.height = img.naturalHeight;
-        c.getContext('2d').drawImage(img, 0, 0);
-        resolve(c.toDataURL('image/png'));
-      };
-      img.onerror = () => resolve(null);
-      img.src = src;
-    });
+  async function chargerBase64(src) {
+    try {
+      const resp = await fetch(src);
+      if (!resp.ok) return null;
+      const blob = await resp.blob();
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload  = () => resolve(reader.result);
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(blob);
+      });
+    } catch {
+      return null;
+    }
   }
 
   const dateAujourdhui = new Date().toLocaleDateString('fr-FR');
@@ -432,6 +432,20 @@ async function genererAttestation(id) {
   const photos = don.photos_urls;
   if (photos && Array.isArray(photos) && photos.length > 0) {
 
+    const MARQUEUR = '/object/public/dons-materiel/';
+    const chemins  = photos.map(url => {
+      const idx = url.indexOf(MARQUEUR);
+      return idx !== -1 ? url.slice(idx + MARQUEUR.length) : null;
+    }).filter(Boolean);
+
+    let urlsSignees = photos;
+    if (chemins.length === photos.length) {
+      const { data: signedData } = await clientSupabase.storage
+        .from('dons-materiel')
+        .createSignedUrls(chemins, 300);
+      if (signedData) urlsSignees = signedData.map(item => item.signedUrl);
+    }
+
     function enteteAnnexe(titre) {
       doc.setFillColor(...BLEU);
       doc.rect(0, 0, 210, 22, 'F');
@@ -478,7 +492,7 @@ async function genererAttestation(id) {
       const px  = START_X + col * (IMG_W + GAP_X);
       const py  = START_Y + row * (IMG_H + GAP_Y + 6);
 
-      const photoData = await chargerBase64(photos[i]);
+      const photoData = await chargerBase64(urlsSignees[i]);
       if (photoData) {
         doc.addImage(photoData, 'PNG', px, py, IMG_W, IMG_H);
         doc.setFont('helvetica', 'normal');
