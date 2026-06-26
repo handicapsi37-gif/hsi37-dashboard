@@ -103,6 +103,34 @@ function afficherDons(dons) {
                   aria-label="Télécharger l'attestation PDF">
             Attestation PDF
           </button>
+          <button class="btn-icone btn-icone--modifier"
+                  onclick="window.location.href='nouveau-don.html?id=${don.id}'"
+                  title="Modifier" aria-label="Modifier ce don" type="button">
+            <svg aria-hidden="true" focusable="false"
+                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 width="17" height="17">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button class="btn-icone btn-icone--supprimer"
+                  onclick="demanderSuppression('${don.id}')"
+                  title="Supprimer" aria-label="Supprimer ce don" type="button">
+            <svg aria-hidden="true" focusable="false"
+                 xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                 width="17" height="17">
+              <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"
+                        fill="none" stroke-linecap="round"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M10 11v6M14 11v6"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
         </div>
       </td>
     </tr>`;
@@ -217,125 +245,322 @@ document.getElementById('btn-attestation-pdf').addEventListener('click', () => {
 
 /* ---------- GÉNÉRATION ATTESTATION PDF ---------- */
 
-function genererAttestation(id) {
+async function genererAttestation(id) {
   const don = tousLesDons.find(d => d.id === id);
   if (!don) return;
 
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  const bleuHSI  = [45, 130, 196];
-  const corail   = [242, 140, 40];
-  const encre    = [51, 51, 51];
-  const grisMoyen = [102, 102, 102];
+  const BLEU    = [45, 130, 196];
+  const CORAIL  = [242, 140, 40];
+  const ENCRE   = [51, 51, 51];
+  const GRIS    = [102, 102, 102];
+  const BLANC   = [255, 255, 255];
+  const BLEU_CL = [235, 244, 251];
 
-  /* En-tête colorée */
-  doc.setFillColor(...bleuHSI);
-  doc.rect(0, 0, 210, 28, 'F');
-  doc.setFillColor(...corail);
-  doc.rect(0, 28, 210, 2, 'F');
-
-  doc.setTextColor(255, 255, 255);
-  doc.setFontSize(16);
-  doc.setFont('helvetica', 'bold');
-  doc.text('HSI37 — Handicap Solidarité pour l\'Inclusion 37', 15, 13);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'normal');
-  doc.text('17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps  |  handicapsi37@gmail.com  |  hsi37.fr', 15, 22);
-
-  /* Titre */
-  doc.setTextColor(...bleuHSI);
-  doc.setFontSize(15);
-  doc.setFont('helvetica', 'bold');
-  doc.text('ATTESTATION DE DON DE MATÉRIEL', 105, 44, { align: 'center' });
-
-  doc.setDrawColor(...corail);
-  doc.setLineWidth(0.8);
-  doc.line(30, 47, 180, 47);
-
-  /* Corps */
-  let y = 58;
-
-  function ligne(label, valeur) {
-    doc.setFontSize(9);
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...grisMoyen);
-    doc.text(label.toUpperCase(), 15, y);
-
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...encre);
-    doc.setFontSize(10);
-    const lignes = doc.splitTextToSize(valeur || '—', 100);
-    doc.text(lignes, 75, y);
-    y += Math.max(7, lignes.length * 5.5);
-  }
-
-  ligne('Date d\'expédition', don.date_expedition ? formaterDate(don.date_expedition) : '—');
-  ligne('Bénéficiaire', don.beneficiaire_nom || don.beneficiaire_type || '—');
-  ligne('Ville de destination', don.ville_destination || '—');
-  ligne('Pays de destination', don.pays_destination || '—');
-  ligne('Numéro de suivi', don.numero_suivi || '—');
-  ligne('Statut', don.statut || '—');
-
-  y += 3;
-  doc.setDrawColor(...bleuHSI);
-  doc.setLineWidth(0.3);
-  doc.line(15, y, 195, y);
-  y += 8;
-
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...bleuHSI);
-  doc.text('MATÉRIEL EXPÉDIÉ', 15, y);
-  y += 6;
-
-  const materiel = don.materiel;
-  if (Array.isArray(materiel)) {
-    materiel.forEach(item => {
-      doc.setFont('helvetica', 'normal');
-      doc.setTextColor(...encre);
-      doc.setFontSize(10);
-      let texte;
-      if (typeof item === 'object' && item !== null) {
-        const qte = item.quantite ? `${item.quantite}×  ` : '';
-        texte = qte + (item.nom || item.description || JSON.stringify(item));
-      } else {
-        texte = String(item);
-      }
-      doc.text(`• ${texte}`, 20, y);
-      y += 6;
+  function chargerBase64(src) {
+    return new Promise(resolve => {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        const c = document.createElement('canvas');
+        c.width  = img.naturalWidth;
+        c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        resolve(c.toDataURL('image/png'));
+      };
+      img.onerror = () => resolve(null);
+      img.src = src;
     });
   }
 
-  if (don.notes) {
-    y += 4;
-    doc.setFont('helvetica', 'bold');
-    doc.setTextColor(...bleuHSI);
-    doc.setFontSize(10);
-    doc.text('NOTES', 15, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setTextColor(...encre);
-    const notesLignes = doc.splitTextToSize(don.notes, 175);
-    doc.text(notesLignes, 15, y);
-    y += notesLignes.length * 5.5 + 4;
+  const dateAujourdhui = new Date().toLocaleDateString('fr-FR');
+  const dateExp      = don.date_expedition ? formaterDate(don.date_expedition) : '___________';
+  const beneficiaire = don.beneficiaire_nom || don.beneficiaire_type || '___________';
+
+  /* ============================================================
+     PAGE 1 — ATTESTATION
+  ============================================================ */
+
+  /* --- En-tête --- */
+  doc.setFillColor(...BLEU);
+  doc.rect(0, 0, 210, 32, 'F');
+  doc.setFillColor(...CORAIL);
+  doc.rect(0, 32, 210, 2, 'F');
+
+  const logoData = await chargerBase64('assets/cropped-HSI37-512x512-1.png');
+  if (logoData) doc.addImage(logoData, 'PNG', 8, 4, 24, 24);
+
+  doc.setTextColor(...BLANC);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(12);
+  doc.text("HSI37 — Handicap Solidarité pour l'Inclusion 37", 36, 14);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.text('17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps', 36, 21);
+  doc.text('handicapsi37@gmail.com  |  hsi37.fr', 36, 27);
+
+  /* --- Titre --- */
+  let y = 46;
+  doc.setTextColor(...BLEU);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  doc.text('ATTESTATION DE DON DE MATÉRIEL', 105, y, { align: 'center' });
+  y += 3;
+  doc.setDrawColor(...CORAIL);
+  doc.setLineWidth(0.8);
+  doc.line(30, y, 180, y);
+  y += 10;
+
+  /* --- Corps officiel --- */
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...ENCRE);
+  const texteCorps = "Je soussigné Mohammed Belhaj, président de l'association HSI37, atteste la donation de matériel médicale mentionnée ci-dessous remis au transporteur le " + dateExp + ".";
+  const lignesCorps = doc.splitTextToSize(texteCorps, 178);
+  doc.text(lignesCorps, 16, y);
+  y += lignesCorps.length * 5.8 + 8;
+
+  /* --- Tableau matériel --- */
+  const COL = { x: 15, desi: 15, qteExp: 115, qteRec: 162, fin: 195 };
+  const ROW_H = 7;
+
+  doc.setFillColor(...BLEU);
+  doc.rect(COL.x, y, COL.fin - COL.x, ROW_H, 'F');
+  doc.setTextColor(...BLANC);
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.text('Désignation', COL.desi + 3, y + 5);
+  doc.text('Qté expédiée', (COL.qteExp + COL.qteRec) / 2, y + 5, { align: 'center' });
+  doc.text('Qté reçue',   (COL.qteRec  + COL.fin)    / 2, y + 5, { align: 'center' });
+  const tableDebut = y;
+  y += ROW_H;
+
+  const materiel = don.materiel;
+  if (Array.isArray(materiel) && materiel.length > 0) {
+    materiel.forEach((item, idx) => {
+      if (idx % 2 === 0) {
+        doc.setFillColor(...BLEU_CL);
+        doc.rect(COL.x, y, COL.fin - COL.x, ROW_H, 'F');
+      }
+      doc.setTextColor(...ENCRE);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const nom    = typeof item === 'object' ? (item.nom || item.description || '—') : String(item);
+      const qteExp = typeof item === 'object' && item.quantite_expediee != null ? String(item.quantite_expediee) : (item.quantite != null ? String(item.quantite) : '—');
+      const qteRec = typeof item === 'object' && item.quantite_recue    != null ? String(item.quantite_recue)    : '—';
+      const nomCourt = doc.splitTextToSize(nom, COL.qteExp - COL.desi - 6)[0] || nom;
+      doc.text(nomCourt, COL.desi + 3, y + 5);
+      doc.text(qteExp,   (COL.qteExp + COL.qteRec) / 2, y + 5, { align: 'center' });
+      doc.text(qteRec,   (COL.qteRec  + COL.fin)    / 2, y + 5, { align: 'center' });
+      y += ROW_H;
+    });
+  } else {
+    doc.setFillColor(...BLEU_CL);
+    doc.rect(COL.x, y, COL.fin - COL.x, ROW_H, 'F');
+    doc.setTextColor(...GRIS);
+    doc.setFont('helvetica', 'italic');
+    doc.setFontSize(9);
+    doc.text('Aucun article renseigné', 105, y + 5, { align: 'center' });
+    y += ROW_H;
   }
 
-  /* Pied de page */
-  doc.setDrawColor(...corail);
-  doc.setLineWidth(0.5);
-  doc.line(15, 277, 195, 277);
-  doc.setFontSize(8);
-  doc.setTextColor(...grisMoyen);
-  doc.setFont('helvetica', 'italic');
-  doc.text(
-    `Document généré le ${new Date().toLocaleDateString('fr-FR')} par le Dashboard HSI37`,
-    105, 283, { align: 'center' }
-  );
+  doc.setDrawColor(...BLEU);
+  doc.setLineWidth(0.3);
+  doc.rect(COL.x, tableDebut, COL.fin - COL.x, y - tableDebut);
+  doc.line(COL.qteExp, tableDebut, COL.qteExp, y);
+  doc.line(COL.qteRec, tableDebut, COL.qteRec, y);
+  y += 7;
 
-  const nomFichier = `attestation-don-${don.date_expedition || 'date'}-${(don.beneficiaire_nom || 'beneficiaire').replace(/\s+/g, '-')}.pdf`;
+  /* --- Numéro de suivi --- */
+  if (don.numero_suivi) {
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(...GRIS);
+    doc.text('N° DE SUIVI TRANSPORTEUR', 16, y);
+    doc.setFont('helvetica', 'normal');
+    doc.setTextColor(...ENCRE);
+    doc.setFontSize(10);
+    doc.text(String(don.numero_suivi), 81, y);
+    y += 9;
+  }
+
+  y += 2;
+
+  /* --- Mention gracieux --- */
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(10);
+  doc.setTextColor(...ENCRE);
+  const mentionTexte  = 'Matériel donné à titre gracieux par HSI37 au bénéfice de ' + beneficiaire + '.';
+  const mentionLignes = doc.splitTextToSize(mentionTexte, 178);
+  doc.text(mentionLignes, 16, y);
+  y += mentionLignes.length * 5.8 + 12;
+
+  /* --- Lieu et date --- */
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(10);
+  doc.setTextColor(...ENCRE);
+  doc.text('Fait le ' + dateAujourdhui + ' à Tours', 16, y);
+  y += 18;
+
+  /* --- Bloc signature --- */
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(10);
+  doc.setTextColor(...BLEU);
+  doc.text('Le Président,', 16, y);
+  y += 6;
+  doc.setFont('helvetica', 'normal');
+  doc.setTextColor(...ENCRE);
+  doc.text('Mohammed Belhaj', 16, y);
+
+  /* --- Pied de page P1 --- */
+  doc.setFillColor(...BLEU);
+  doc.rect(0, 278, 210, 19, 'F');
+  doc.setDrawColor(...CORAIL);
+  doc.setLineWidth(0.6);
+  doc.line(0, 278, 210, 278);
+  doc.setTextColor(...BLANC);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8);
+  doc.text('HSI37 — 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps  |  handicapsi37@gmail.com  |  hsi37.fr', 105, 285, { align: 'center' });
+  doc.text('Document généré le ' + dateAujourdhui + ' par le Dashboard HSI37', 105, 291, { align: 'center' });
+
+  /* ============================================================
+     PAGE 2 — ANNEXE PHOTOS
+  ============================================================ */
+  const photos = don.photos_urls;
+  if (photos && Array.isArray(photos) && photos.length > 0) {
+
+    function enteteAnnexe(titre) {
+      doc.setFillColor(...BLEU);
+      doc.rect(0, 0, 210, 22, 'F');
+      doc.setFillColor(...CORAIL);
+      doc.rect(0, 22, 210, 2, 'F');
+      doc.setTextColor(...BLANC);
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(12);
+      doc.text(titre, 105, 14, { align: 'center' });
+    }
+
+    function piedAnnexe() {
+      doc.setFillColor(...BLEU);
+      doc.rect(0, 278, 210, 19, 'F');
+      doc.setDrawColor(...CORAIL);
+      doc.setLineWidth(0.6);
+      doc.line(0, 278, 210, 278);
+      doc.setTextColor(...BLANC);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.text('HSI37 — 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps  |  handicapsi37@gmail.com  |  hsi37.fr', 105, 285, { align: 'center' });
+      doc.text('Document généré le ' + dateAujourdhui + ' par le Dashboard HSI37', 105, 291, { align: 'center' });
+    }
+
+    const IMG_W  = 85;
+    const IMG_H  = 60;
+    const GAP_X  = 15;
+    const GAP_Y  = 10;
+    const START_X = 15;
+    const START_Y = 30;
+
+    doc.addPage();
+    enteteAnnexe('ANNEXE PHOTOS');
+
+    for (let i = 0; i < photos.length; i++) {
+      if (i > 0 && i % 6 === 0) {
+        piedAnnexe();
+        doc.addPage();
+        enteteAnnexe('ANNEXE PHOTOS (suite)');
+      }
+      const posPage = i % 6;
+      const col = posPage % 2;
+      const row = Math.floor(posPage / 2);
+      const px  = START_X + col * (IMG_W + GAP_X);
+      const py  = START_Y + row * (IMG_H + GAP_Y + 6);
+
+      const photoData = await chargerBase64(photos[i]);
+      if (photoData) {
+        doc.addImage(photoData, 'PNG', px, py, IMG_W, IMG_H);
+        doc.setFont('helvetica', 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(...GRIS);
+        doc.text('Photo ' + (i + 1), px + IMG_W / 2, py + IMG_H + 4, { align: 'center' });
+      }
+    }
+
+    piedAnnexe();
+  }
+
+  /* --- Sauvegarde --- */
+  const nomFichier = 'attestation-don-' + (don.date_expedition || 'date') + '-' + (don.beneficiaire_nom || 'beneficiaire').replace(/\s+/g, '-') + '.pdf';
   doc.save(nomFichier);
 }
+
+/* ---------- SUPPRESSION ---------- */
+
+let donASupprimer = null;
+
+function demanderSuppression(id) {
+  donASupprimer = tousLesDons.find(d => d.id === id);
+  if (!donASupprimer) return;
+  document.getElementById('modale-fond-confirmation').removeAttribute('hidden');
+  document.getElementById('modale-confirmation').focus();
+}
+
+function fermerConfirmation() {
+  document.getElementById('modale-fond-confirmation').hidden = true;
+  donASupprimer = null;
+}
+
+async function supprimerDon() {
+  if (!donASupprimer) return;
+
+  const id     = donASupprimer.id;
+  const photos = donASupprimer.photos_urls;
+
+  fermerConfirmation();
+
+  if (photos && Array.isArray(photos) && photos.length > 0) {
+    const chemins = photos.map(url => {
+      const marqueur = '/dons-materiel/';
+      const idx = url.indexOf(marqueur);
+      return idx !== -1 ? url.slice(idx + marqueur.length) : null;
+    }).filter(Boolean);
+
+    if (chemins.length > 0) {
+      await clientSupabase.storage.from('dons-materiel').remove(chemins);
+    }
+  }
+
+  const { error } = await clientSupabase
+    .from('dons_materiel')
+    .delete()
+    .eq('id', id);
+
+  if (error) {
+    afficherErreur('Impossible de supprimer le don : ' + error.message);
+    return;
+  }
+
+  tousLesDons = tousLesDons.filter(d => d.id !== id);
+  afficherDons(tousLesDons);
+
+  const el = document.getElementById('message-succes');
+  el.textContent = 'Don supprimé avec succès.';
+  el.hidden = false;
+  setTimeout(() => { el.hidden = true; }, 4000);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('btn-fermer-confirmation')
+    .addEventListener('click', fermerConfirmation);
+  document.getElementById('btn-annuler-suppression')
+    .addEventListener('click', fermerConfirmation);
+  document.getElementById('btn-confirmer-suppression-don')
+    .addEventListener('click', supprimerDon);
+  document.getElementById('modale-fond-confirmation')
+    .addEventListener('click', e => { if (e.target === e.currentTarget) fermerConfirmation(); });
+});
 
 /* ---------- UTILITAIRES ---------- */
 
