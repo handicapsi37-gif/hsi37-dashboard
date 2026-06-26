@@ -3614,6 +3614,294 @@ function exporterCSV(donnees, colonnes, nomsColonnes, nomFichier) {
   URL.revokeObjectURL(url);
 }
 
+/* ============================================================
+   EXPORTS PDF — LISTE ADHÉRENTS & RAPPORT ANNUEL
+============================================================ */
+
+async function chargerLogoBase64PDF(src) {
+  try {
+    const resp = await fetch(src);
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    return new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch { return null; }
+}
+
+async function exporterListeAdherentsPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc     = new jsPDF({ unit: 'mm', format: 'a4' });
+  const BLEU    = [45, 130, 196];
+  const CORAIL  = [242, 140, 40];
+  const ENCRE   = [51, 51, 51];
+  const BLANC   = [255, 255, 255];
+  const BLEU_CL = [235, 244, 251];
+  const ROW_H   = 7;
+  const Y_MAX   = 270;
+  const annee   = new Date().getFullYear();
+  const dateExp = new Date().toLocaleDateString('fr-FR');
+  const logo    = await chargerLogoBase64PDF('assets/hsi37-redim-demi.png');
+
+  function pdfEnTete(titre) {
+    doc.setFillColor(...BLEU);  doc.rect(0, 0, 210, 28, 'F');
+    doc.setFillColor(...CORAIL); doc.rect(0, 28, 210, 2, 'F');
+    if (logo) doc.addImage(logo, 'PNG', 8, 4, 20, 20);
+    doc.setTextColor(...BLANC);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text("HSI37 — Handicap Solidarité pour l'Inclusion 37", 32, 14);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text('17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps', 32, 21);
+    doc.setTextColor(...BLEU);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+    doc.text(titre, 105, 38, { align: 'center' });
+    doc.setDrawColor(...CORAIL); doc.setLineWidth(0.7);
+    doc.line(30, 41, 180, 41);
+  }
+
+  const C = { x: 12, num: 12, nom: 38, prenom: 78, type: 118, statut: 150, date: 174, fin: 198 };
+
+  function enTeteTabAdh(y) {
+    doc.setFillColor(...BLEU); doc.rect(C.x, y, C.fin - C.x, ROW_H, 'F');
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+    doc.text('N° adhérent', C.num + 1,    y + 5);
+    doc.text('Nom',         C.nom + 1,    y + 5);
+    doc.text('Prénom',      C.prenom + 1, y + 5);
+    doc.text('Type',        C.type + 1,   y + 5);
+    doc.text('Statut',      C.statut + 1, y + 5);
+    doc.text('Adhésion',    C.date + 1,   y + 5);
+    return y + ROW_H;
+  }
+
+  function bord(yD, yF) {
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.3);
+    doc.rect(C.x, yD, C.fin - C.x, yF - yD);
+  }
+
+  const statLib = { ajour: 'À jour', arenouveler: 'À renouveler', enretard: 'En retard' };
+  const typeLib = k => (typesMembres[k] ? typesMembres[k].libelle : k) || '—';
+  const tronc   = (s, mm) => doc.splitTextToSize(String(s || '—'), mm)[0];
+
+  pdfEnTete('Liste des adhérents ' + annee);
+  let y = enTeteTabAdh(50);
+  let yD = 50;
+
+  donneesAdherents.forEach((a, idx) => {
+    if (y > Y_MAX) {
+      bord(yD, y);
+      doc.addPage();
+      pdfEnTete('Liste des adhérents ' + annee);
+      y = enTeteTabAdh(50); yD = 50;
+    }
+    if (idx % 2 === 0) { doc.setFillColor(...BLEU_CL); doc.rect(C.x, y, C.fin - C.x, ROW_H, 'F'); }
+    doc.setTextColor(...ENCRE); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text(tronc(a.id_adherent,        C.nom - C.num - 2),    C.num + 1,    y + 5);
+    doc.text(tronc(a.nom,                C.prenom - C.nom - 2), C.nom + 1,    y + 5);
+    doc.text(tronc(a.prenom,             C.type - C.prenom - 2),C.prenom + 1, y + 5);
+    doc.text(tronc(typeLib(a.type_membre),C.statut - C.type - 2),C.type + 1,  y + 5);
+    doc.text(statLib[calculerStatut(a.saison)] || '—',           C.statut + 1, y + 5);
+    doc.text(formaterDate(a.date_adhesion),                      C.date + 1,   y + 5);
+    y += ROW_H;
+  });
+  bord(yD, y);
+
+  const total = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...BLEU); doc.rect(0, 278, 210, 19, 'F');
+    doc.setDrawColor(...CORAIL); doc.setLineWidth(0.5); doc.line(0, 278, 210, 278);
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text('Exporté le ' + dateExp + ' — HSI37', 15, 285);
+    doc.text('Page ' + p + ' / ' + total, 195, 285, { align: 'right' });
+  }
+
+  doc.save('liste-adherents-HSI37-' + annee + '.pdf');
+}
+
+async function exporterRapportAnnuelPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc     = new jsPDF({ unit: 'mm', format: 'a4' });
+  const BLEU    = [45, 130, 196];
+  const CORAIL  = [242, 140, 40];
+  const ENCRE   = [51, 51, 51];
+  const BLANC   = [255, 255, 255];
+  const BLEU_CL = [235, 244, 251];
+  const GRIS_CL = [245, 245, 245];
+  const ROW_H   = 7;
+  const Y_MAX   = 270;
+  const annee   = new Date().getFullYear();
+  const dateExp = new Date().toLocaleDateString('fr-FR');
+  const logo    = await chargerLogoBase64PDF('assets/hsi37-redim-demi.png');
+
+  /* ---- Chargement dons de matériel ---- */
+  let donsMateriel = [];
+  const { data: dmData } = await clientSupabase
+    .from('dons_materiel')
+    .select('date_expedition, beneficiaire_nom, beneficiaire_type, ville_destination, pays_destination, statut')
+    .order('date_expedition', { ascending: false });
+  if (dmData) donsMateriel = dmData;
+
+  /* ---- Helpers ---- */
+  function pdfEnTete(titre) {
+    doc.setFillColor(...BLEU);  doc.rect(0, 0, 210, 28, 'F');
+    doc.setFillColor(...CORAIL); doc.rect(0, 28, 210, 2, 'F');
+    if (logo) doc.addImage(logo, 'PNG', 8, 4, 20, 20);
+    doc.setTextColor(...BLANC);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text("HSI37 — Handicap Solidarité pour l'Inclusion 37", 32, 14);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text('17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps', 32, 21);
+    doc.setTextColor(...BLEU);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+    doc.text(titre, 105, 38, { align: 'center' });
+    doc.setDrawColor(...CORAIL); doc.setLineWidth(0.7);
+    doc.line(30, 41, 180, 41);
+  }
+
+  function titreSec(titre, y) {
+    doc.setFillColor(...BLEU); doc.rect(12, y, 186, 8, 'F');
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'bold'); doc.setFontSize(10);
+    doc.text(titre, 105, y + 5.5, { align: 'center' });
+    return y + 8;
+  }
+
+  function carteStat(x, y, chiffre, label, couleur) {
+    const w = 86, h = 30;
+    doc.setDrawColor(...(couleur || BLEU)); doc.setLineWidth(0.4);
+    doc.setFillColor(255, 255, 255); doc.roundedRect(x, y, w, h, 3, 3, 'FD');
+    doc.setTextColor(...(couleur || BLEU));
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(22);
+    doc.text(String(chiffre), x + w / 2, y + 17, { align: 'center' });
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8.5);
+    doc.setTextColor(80, 80, 80);
+    doc.text(label, x + w / 2, y + 25, { align: 'center' });
+  }
+
+  function tronc(s, mm) { return doc.splitTextToSize(String(s || '—'), mm)[0]; }
+
+  function dessinerTableau(cols, donnees, yDepart, getTitreSuite) {
+    let y = yDepart;
+    let yD = yDepart;
+
+    // En-tête
+    doc.setFillColor(...BLEU); doc.rect(cols[0].x, y, cols[cols.length-1].fin - cols[0].x, ROW_H, 'F');
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+    cols.forEach(c => { if (c.label) doc.text(c.label, c.x + 1, y + 5); });
+    y += ROW_H;
+
+    donnees.forEach((row, idx) => {
+      if (y > Y_MAX) {
+        doc.setDrawColor(...BLEU); doc.setLineWidth(0.3);
+        doc.rect(cols[0].x, yD, cols[cols.length-1].fin - cols[0].x, y - yD);
+        doc.addPage();
+        pdfEnTete(getTitreSuite());
+        let ny = titreSec(getTitreSuite(), 50);
+        doc.setFillColor(...BLEU); doc.rect(cols[0].x, ny, cols[cols.length-1].fin - cols[0].x, ROW_H, 'F');
+        doc.setTextColor(...BLANC); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+        cols.forEach(c => { if (c.label) doc.text(c.label, c.x + 1, ny + 5); });
+        y = ny + ROW_H; yD = ny;
+      }
+      if (idx % 2 === 0) {
+        doc.setFillColor(...BLEU_CL);
+        doc.rect(cols[0].x, y, cols[cols.length-1].fin - cols[0].x, ROW_H, 'F');
+      }
+      doc.setTextColor(...ENCRE); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+      cols.forEach(c => {
+        if (c.valeur) doc.text(tronc(c.valeur(row), c.fin - c.x - 2), c.x + 1, y + 5);
+      });
+      y += ROW_H;
+    });
+
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.3);
+    doc.rect(cols[0].x, yD, cols[cols.length-1].fin - cols[0].x, y - yD);
+    return y;
+  }
+
+  /* ---- Page 1 : statistiques ---- */
+  const totalAdh    = donneesAdherents.length;
+  const aJour       = donneesAdherents.filter(a => calculerStatut(a.saison) === 'ajour').length;
+  const expires     = totalAdh - aJour;
+  const totalCotis  = donneesAdherents.reduce((s, a) => s + (Number(a.montant_cotisation) || 0), 0);
+  const totalDonsF  = donneesDonateurs.reduce((s, d) => {
+    const estMat = (d.type_don || '').toLowerCase().includes('mat');
+    return s + (estMat ? 0 : (Number(d.montant_don) || 0));
+  }, 0);
+  const nbDonsMat   = donsMateriel.length;
+
+  pdfEnTete('Rapport annuel ' + annee);
+
+  carteStat(12,  52,  totalAdh,  'Adhérents total',       BLEU);
+  carteStat(112, 52,  aJour,     'À jour',                [34, 139, 34]);
+  carteStat(12,  90,  expires,   'Expirés',               [200, 50, 50]);
+  carteStat(112, 90,  totalCotis.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €',
+                                 'Total cotisations', BLEU);
+  carteStat(12,  128, totalDonsF.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €',
+                                 'Total dons financiers',  [180, 100, 0]);
+  carteStat(112, 128, nbDonsMat, 'Dons de matériel',      [45, 130, 196]);
+
+  /* ---- Page 2 : tableau des adhérents ---- */
+  doc.addPage();
+  pdfEnTete('Rapport annuel ' + annee);
+  let y = titreSec('LISTE DES ADHÉRENTS', 50);
+
+  const statLib = { ajour: 'À jour', arenouveler: 'À renouveler', enretard: 'En retard' };
+  const typeLib = k => (typesMembres[k] ? typesMembres[k].libelle : k) || '—';
+
+  const colsAdh = [
+    { x: 12, fin: 38, label: 'N° adhérent', valeur: a => a.id_adherent },
+    { x: 38, fin: 78, label: 'Nom',         valeur: a => a.nom },
+    { x: 78, fin: 118,label: 'Prénom',      valeur: a => a.prenom },
+    { x: 118,fin: 150,label: 'Type',        valeur: a => typeLib(a.type_membre) },
+    { x: 150,fin: 175,label: 'Statut',      valeur: a => statLib[calculerStatut(a.saison)] || '—' },
+    { x: 175,fin: 198,label: 'Adhésion',    valeur: a => formaterDate(a.date_adhesion) },
+  ];
+  dessinerTableau(colsAdh, donneesAdherents, y, () => 'Rapport annuel ' + annee);
+
+  /* ---- Page suivante : dons financiers ---- */
+  doc.addPage();
+  pdfEnTete('Rapport annuel ' + annee);
+  y = titreSec('DONS FINANCIERS REÇUS', 50);
+
+  const donsFin = donneesDonateurs.filter(d => !(d.type_don || '').toLowerCase().includes('mat'));
+  const colsDonFin = [
+    { x: 12, fin: 36, label: 'Date',       valeur: d => formaterDate(d.date_don) },
+    { x: 36, fin: 76, label: 'Nom',        valeur: d => (d.nom || '') + ' ' + (d.prenom || '') },
+    { x: 76, fin: 120,label: 'Organisme',  valeur: d => d.organisme },
+    { x: 120,fin: 162,label: 'Type de don',valeur: d => d.type_don },
+    { x: 162,fin: 198,label: 'Montant',    valeur: d => d.montant_don != null ? Number(d.montant_don).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €' : '—' },
+  ];
+  dessinerTableau(colsDonFin, donsFin, y, () => 'Rapport annuel ' + annee);
+
+  /* ---- Page suivante : dons de matériel ---- */
+  doc.addPage();
+  pdfEnTete('Rapport annuel ' + annee);
+  y = titreSec('DONS DE MATÉRIEL ENVOYÉS', 50);
+
+  const colsDonMat = [
+    { x: 12, fin: 36, label: 'Date',         valeur: d => formaterDate(d.date_expedition) },
+    { x: 36, fin: 100,label: 'Bénéficiaire', valeur: d => d.beneficiaire_nom || d.beneficiaire_type },
+    { x: 100,fin: 155,label: 'Destination',  valeur: d => [d.ville_destination, d.pays_destination].filter(Boolean).join(', ') },
+    { x: 155,fin: 198,label: 'Statut',       valeur: d => d.statut },
+  ];
+  dessinerTableau(colsDonMat, donsMateriel, y, () => 'Rapport annuel ' + annee);
+
+  /* ---- Pied de page (2 passes) ---- */
+  const total = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...BLEU); doc.rect(0, 278, 210, 19, 'F');
+    doc.setDrawColor(...CORAIL); doc.setLineWidth(0.5); doc.line(0, 278, 210, 278);
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text('Exporté le ' + dateExp + ' — HSI37', 15, 285);
+    doc.text('Page ' + p + ' / ' + total, 195, 285, { align: 'right' });
+  }
+
+  doc.save('rapport-annuel-HSI37-' + annee + '.pdf');
+}
+
 document.addEventListener("DOMContentLoaded", function() {
   var btnAdh = document.getElementById("btn-export-adherents");
   if (btnAdh) {
@@ -3639,6 +3927,16 @@ document.addEventListener("DOMContentLoaded", function() {
         "donateurs_HSI37_" + annee + ".csv"
       );
     });
+  }
+
+  var btnListePDF = document.getElementById("btn-export-adherents-pdf");
+  if (btnListePDF) {
+    btnListePDF.addEventListener("click", function() { exporterListeAdherentsPDF(); });
+  }
+
+  var btnRapportPDF = document.getElementById("btn-rapport-annuel-pdf");
+  if (btnRapportPDF) {
+    btnRapportPDF.addEventListener("click", function() { exporterRapportAnnuelPDF(); });
   }
 });
 
