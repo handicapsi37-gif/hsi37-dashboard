@@ -1159,6 +1159,8 @@ function afficherTableauDeBord() {
   contenuPrincipal.hidden = false;
   piedDePage.hidden       = false;
   afficherHub();
+  chargerAdherents();
+  chargerDonateurs();
 }
 
 function afficherEcranConnexion() {
