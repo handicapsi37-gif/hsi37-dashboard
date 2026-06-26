@@ -517,8 +517,15 @@ let donASupprimer = null;
 function demanderSuppression(id) {
   donASupprimer = tousLesDons.find(d => d.id === id);
   if (!donASupprimer) return;
+
   document.getElementById('modale-fond-confirmation').removeAttribute('hidden');
   document.getElementById('modale-confirmation').focus();
+
+  document.getElementById('btn-fermer-confirmation').onclick = fermerConfirmation;
+  document.getElementById('btn-annuler-suppression').onclick = fermerConfirmation;
+  document.getElementById('btn-confirmer-suppression-don').onclick = supprimerDon;
+  document.getElementById('modale-fond-confirmation').onclick =
+    e => { if (e.target === e.currentTarget) fermerConfirmation(); };
 }
 
 function fermerConfirmation() {
@@ -564,17 +571,6 @@ async function supprimerDon() {
   el.hidden = false;
   setTimeout(() => { el.hidden = true; }, 4000);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  document.getElementById('btn-fermer-confirmation')
-    .addEventListener('click', fermerConfirmation);
-  document.getElementById('btn-annuler-suppression')
-    .addEventListener('click', fermerConfirmation);
-  document.getElementById('btn-confirmer-suppression-don')
-    .addEventListener('click', supprimerDon);
-  document.getElementById('modale-fond-confirmation')
-    .addEventListener('click', e => { if (e.target === e.currentTarget) fermerConfirmation(); });
-});
 
 /* ---------- UTILITAIRES ---------- */
 
