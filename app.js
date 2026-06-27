@@ -454,7 +454,7 @@ const champsChequesAdherents = new Map();
  */
 function majChampsConditionnelsAdherent() {
   const mode = document.getElementById("champ-mode-paiement").value;
-  document.getElementById("groupe-cheque-adh").hidden = (mode !== "Chèque");
+  document.getElementById("groupe-cheque-adh").hidden = (mode !== "chèque");
 
   const type        = document.getElementById("champ-type").value;
   const valDon      = parseFloat(document.getElementById("champ-montant-don").value) || 0;
@@ -820,16 +820,19 @@ formulaire.addEventListener("submit", async function(evenement) {
     if (montantCotisation) {
       const aujourdhui   = new Date().toISOString().split("T")[0];
       const anneeEnCours = new Date().getFullYear();
-      await clientSupabase.from("cotisations").insert([{
+      console.log("[cotisation] INSERT — adherent_id:", adherentEnCours.id, "| montant:", montantCotisation, "| mode_paiement:", JSON.stringify(modePaiement));
+      const { error, data } = await clientSupabase.from("cotisations").insert([{
         adherent_id:   adherentEnCours.id,
         annee:         anneeEnCours,
         date_paiement: aujourdhui,
         montant:       montantCotisation,
         mode_paiement: modePaiement || null
       }]);
+      console.log("Erreur INSERT cotisation:", JSON.stringify(error));
+      console.log("Data INSERT cotisation:", JSON.stringify(data));
     }
 
-    if (modePaiement === "Chèque") {
+    if (modePaiement === "chèque") {
       champsChequesAdherents.set(String(adherentEnCours.id), { numero_cheque: numeroCheque, banque: banqueAdh });
     } else {
       champsChequesAdherents.delete(String(adherentEnCours.id));
@@ -891,7 +894,7 @@ formulaire.addEventListener("submit", async function(evenement) {
     fermerModale();
     await chargerAdherents();
 
-    if (modePaiement === "Chèque") {
+    if (modePaiement === "chèque") {
       const nouvelAdherentEnCache = donneesAdherents.find(function(a) { return a.id_adherent === idAdherent; });
       if (nouvelAdherentEnCache) {
         champsChequesAdherents.set(String(nouvelAdherentEnCache.id), { numero_cheque: numeroCheque, banque: banqueAdh });
