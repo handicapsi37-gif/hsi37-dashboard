@@ -1126,7 +1126,7 @@ function ouvrirModaleCotisations(adherent) {
           </label>
           <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
             Montant (€) *
-            <input id="cotis-montant" type="number" step="0.01" min="0" required
+            <input id="cotis-montant" type="number" step="1" min="0" required
                    style="padding:7px;border:1px solid #ccc;border-radius:4px;">
           </label>
           <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
