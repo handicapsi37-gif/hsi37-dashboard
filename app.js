@@ -818,10 +818,12 @@ formulaire.addEventListener("submit", async function(evenement) {
     }
 
     if (montantCotisation) {
+      const aujourdhui   = new Date().toISOString().split("T")[0];
+      const anneeEnCours = new Date().getFullYear();
       await clientSupabase.from("cotisations").insert([{
         adherent_id:   adherentEnCours.id,
-        annee:         parseInt(anneeSaisie, 10),
-        date_paiement: dateAdhesion,
+        annee:         anneeEnCours,
+        date_paiement: aujourdhui,
         montant:       montantCotisation,
         mode_paiement: modePaiement || null
       }]);
