@@ -1141,6 +1141,10 @@ function ouvrirModaleCotisations(adherent) {
               <option value="virement">Virement</option>
               <option value="chèque">Chèque</option>
               <option value="espèces">Espèces</option>
+              <option value="carte bancaire">Carte bancaire</option>
+              <option value="payasso">PayAsso</option>
+              <option value="paypal">PayPal</option>
+              <option value="helloasso">HelloAsso</option>
             </select>
           </label>
           <button type="submit"
