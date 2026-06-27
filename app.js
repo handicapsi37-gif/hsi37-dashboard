@@ -1273,6 +1273,7 @@ function ouvrirModaleDons(donateur) {
               <th style="padding:8px 10px;text-align:left;">Date</th>
               <th style="padding:8px 10px;text-align:right;">Montant</th>
               <th style="padding:8px 10px;text-align:left;">Mode de paiement</th>
+              <th style="padding:8px 10px;text-align:left;">Type</th>
             </tr>
           </thead>
           <tbody id="dons-corps"></tbody>
@@ -1308,6 +1309,15 @@ function ouvrirModaleDons(donateur) {
               <option value="payasso">PayAsso</option>
             </select>
           </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
+            Type
+            <select id="don-his-type" style="padding:7px;border:1px solid #ccc;border-radius:4px;">
+              <option value="">—</option>
+              <option value="don">Don</option>
+              <option value="repas">Repas</option>
+              <option value="evenement">Événement</option>
+            </select>
+          </label>
           <button type="submit"
                   style="grid-column:1/-1;padding:9px;background:var(--bleu,#3B77B5);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.95rem;">
             Enregistrer
@@ -1329,6 +1339,7 @@ function ouvrirModaleDons(donateur) {
       const date    = document.getElementById("don-his-date").value;
       const montant = parseFloat(document.getElementById("don-his-montant").value.replace(",", "."));
       const mode    = document.getElementById("don-his-mode").value || null;
+      const typeDon = document.getElementById("don-his-type").value || null;
 
       if (!annee || !date || isNaN(montant)) {
         zoneErreur.textContent = "Veuillez remplir les champs obligatoires.";
@@ -1341,7 +1352,8 @@ function ouvrirModaleDons(donateur) {
         annee,
         date_don:     date,
         montant,
-        mode_paiement: mode
+        mode_paiement: mode,
+        type_don:      typeDon
       }]);
 
       if (error) {
@@ -1376,7 +1388,7 @@ function afficherDonsDansModale() {
 
   const corps = document.getElementById("dons-corps");
   if (!dons.length) {
-    corps.innerHTML = '<tr><td colspan="4" style="padding:10px;text-align:center;color:#888;">Aucun don enregistré.</td></tr>';
+    corps.innerHTML = '<tr><td colspan="5" style="padding:10px;text-align:center;color:#888;">Aucun don enregistré.</td></tr>';
     return;
   }
   corps.innerHTML = dons.map(function(don, i) {
@@ -1387,6 +1399,7 @@ function afficherDonsDansModale() {
       <td style="padding:7px 10px;">${formaterDate(don.date_don)}</td>
       <td style="padding:7px 10px;text-align:right;">${montantStr}</td>
       <td style="padding:7px 10px;">${don.mode_paiement || "—"}</td>
+      <td style="padding:7px 10px;">${don.type_don || "—"}</td>
     </tr>`;
   }).join("");
 }
