@@ -1187,6 +1187,8 @@ function ouvrirModaleCotisations(adherent) {
   }
 
   fond.style.display = "flex";
+  document.getElementById("cotisations-form").reset();
+  document.getElementById("cotisations-erreur").style.display = "none";
   afficherCotisationsDansModale();
   document.getElementById("cotisations-modale").focus();
 }
