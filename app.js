@@ -119,8 +119,9 @@ const statutsConfig = {
 
 /* ---------- CACHE DES DONNÉES SUPABASE ---------- */
 /* Conserve les objets complets pour pré-remplir la modale sans requête supplémentaire */
-let donneesAdherents = [];
-var filtreAdherents  = "";
+let donneesAdherents   = [];
+let donneesCotisations = [];
+var filtreAdherents    = "";
 var triAdherents     = { colonne: null, sens: "asc" };
 
 /* ---------- ÉTAT DE LA MODALE ---------- */
@@ -141,6 +142,19 @@ function calculerStatut(saison) {
   const s = parseInt(saison, 10);
   if (isNaN(s) || s >= annee) return "ajour";
   return "enretard";
+}
+
+function derniereCotisation(adherentId) {
+  const cotis = donneesCotisations.filter(function(c) {
+    return String(c.adherent_id) === String(adherentId);
+  });
+  if (!cotis.length) return null;
+  return cotis.reduce(function(max, c) { return c.annee > max.annee ? c : max; }, cotis[0]);
+}
+
+function calculerStatutAdherent(adherent) {
+  const derniere = derniereCotisation(adherent.id);
+  return calculerStatut(derniere ? derniere.annee : adherent.saison);
 }
 
 /**
@@ -223,6 +237,22 @@ function genererBoutonsActions(idAdherent, idTechnique, statutCle) {
   ` : '';
 
   return `
+    <button class="btn-icone btn-icone--cotisations"
+            aria-label="Cotisations de ${idAdherent}"
+            title="Gérer les cotisations"
+            type="button"
+            data-id-technique="${idTechnique}">
+      <svg aria-hidden="true" focusable="false"
+           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+           width="17" height="17">
+        <line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="3" cy="6" r="1.5" fill="currentColor"/>
+        <circle cx="3" cy="12" r="1.5" fill="currentColor"/>
+        <circle cx="3" cy="18" r="1.5" fill="currentColor"/>
+      </svg>
+    </button>
     <button class="btn-icone btn-icone--modifier"
             aria-label="Modifier l'adhérent ${idAdherent}"
             title="Modifier"
@@ -333,11 +363,13 @@ function remplirTableau(adherents) {
   }
 
   adherents.forEach(function(adherent) {
-    const ligne = document.createElement("tr");
-
-    const montant = (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
-      ? Number(adherent.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+    const ligne       = document.createElement("tr");
+    const derniere    = derniereCotisation(adherent.id);
+    const montant     = derniere
+      ? Number(derniere.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
+    const modePmt     = derniere ? (derniere.mode_paiement || "—") : "—";
+    const statut      = calculerStatutAdherent(adherent);
 
     ligne.innerHTML = `
       <td class="col-id">${adherent.id_adherent || "—"}</td>
@@ -354,9 +386,9 @@ function remplirTableau(adherents) {
       <td>${genererCelluleType(adherent.type_membre)}</td>
       <td>${formaterDate(adherent.date_adhesion)}</td>
       <td>${montant}</td>
-      <td>${adherent.mode_paiement || "—"}</td>
-      <td>${genererBadge(calculerStatut(adherent.saison))}</td>
-      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id, calculerStatut(adherent.saison))}</td>
+      <td>${modePmt}</td>
+      <td>${genererBadge(statut)}</td>
+      <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id, statut)}</td>
     `;
 
     corps.appendChild(ligne);
@@ -377,11 +409,12 @@ async function chargerAdherents() {
     `;
   }
 
-  const { data, error } = await clientSupabase
-    .from("adherents")
-    .select("*");
+  const [resAdh, resCotis] = await Promise.all([
+    clientSupabase.from("adherents").select("*"),
+    clientSupabase.from("cotisations").select("*")
+  ]);
 
-  if (error) {
+  if (resAdh.error) {
     if (corps) {
       corps.innerHTML = `
         <tr>
@@ -394,7 +427,8 @@ async function chargerAdherents() {
     return;
   }
 
-  donneesAdherents = data;
+  donneesCotisations = resCotis.data || [];
+  donneesAdherents   = resAdh.data;
   appliquerFiltreAdherents();
   mettreAJourStats();
 }
@@ -501,11 +535,8 @@ function ouvrirModaleModification(adherent) {
     document.getElementById("champ-date-jour").value  = "";
   }
   document.getElementById("champ-type").value      = adherent.type_membre || "";
-  document.getElementById("champ-montant").value   =
-    (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
-      ? adherent.montant_cotisation
-      : "";
-  document.getElementById("champ-mode-paiement").value = adherent.mode_paiement || "";
+  document.getElementById("champ-montant").value        = "";
+  document.getElementById("champ-mode-paiement").value  = "";
   document.getElementById("champ-montant-don").value =
     (adherent.montant_don !== null && adherent.montant_don !== undefined)
       ? adherent.montant_don : "";
@@ -773,12 +804,10 @@ formulaire.addEventListener("submit", async function(evenement) {
         email,
         telephone,
         adresse,
-        date_adhesion:      dateAdhesion,
-        montant_cotisation: montantCotisation,
-        montant_don:        montantDon,
-        type_membre:        typeMembre,
-        civilite,
-        mode_paiement:      modePaiement
+        date_adhesion: dateAdhesion,
+        montant_don:   montantDon,
+        type_membre:   typeMembre,
+        civilite
       })
       .eq("id", adherentEnCours.id);
 
@@ -786,6 +815,16 @@ formulaire.addEventListener("submit", async function(evenement) {
       zoneErreurModale.textContent = "La modification a échoué. Vérifiez votre connexion et réessayez.";
       zoneErreurModale.hidden = false;
       return;
+    }
+
+    if (montantCotisation) {
+      await clientSupabase.from("cotisations").insert([{
+        adherent_id:   adherentEnCours.id,
+        annee:         parseInt(anneeSaisie, 10),
+        date_paiement: dateAdhesion,
+        montant:       montantCotisation,
+        mode_paiement: modePaiement || null
+      }]);
     }
 
     if (modePaiement === "Chèque") {
@@ -812,29 +851,39 @@ formulaire.addEventListener("submit", async function(evenement) {
     }
 
     const nouvelAdherent = {
-      id_adherent:        idAdherent,
+      id_adherent:   idAdherent,
       nom,
       prenom,
       civilite,
       email,
       telephone,
       adresse,
-      date_adhesion:      dateAdhesion,
-      montant_cotisation: montantCotisation,
-      montant_don:        montantDon,
-      type_membre:        typeMembre,
-      mode_paiement:      modePaiement,
+      date_adhesion: dateAdhesion,
+      montant_don:   montantDon,
+      type_membre:   typeMembre,
       saison
     };
 
-    const { error } = await clientSupabase
+    const { data: dataInsert, error } = await clientSupabase
       .from("adherents")
-      .insert([nouvelAdherent]);
+      .insert([nouvelAdherent])
+      .select("id")
+      .single();
 
     if (error) {
       zoneErreurModale.textContent = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
       zoneErreurModale.hidden = false;
       return;
+    }
+
+    if (dataInsert && montantCotisation) {
+      await clientSupabase.from("cotisations").insert([{
+        adherent_id:   dataInsert.id,
+        annee:         parseInt(anneeSaisie, 10),
+        date_paiement: dateAdhesion,
+        montant:       montantCotisation,
+        mode_paiement: modePaiement || null
+      }]);
     }
 
     fermerModale();
@@ -891,12 +940,19 @@ formulaire.addEventListener("submit", async function(evenement) {
 
 document.getElementById("corps-tableau").addEventListener("click", function(evenement) {
   /* closest() remonte l'arbre DOM même si le clic a touché le SVG interne */
+  const btnCotisations = evenement.target.closest(".btn-icone--cotisations");
   const btnModifier    = evenement.target.closest(".btn-icone--modifier");
   const btnSupprimer   = evenement.target.closest(".btn-icone--supprimer");
   const btnCarte       = evenement.target.closest(".btn-icone--carte");
   const btnRecuAdh     = evenement.target.closest(".btn-icone--recu-adh");
   const btnAttestation = evenement.target.closest(".btn-icone--attestation");
   const btnRelance     = evenement.target.closest(".btn-icone--relance");
+
+  if (btnCotisations) {
+    const idTechnique = btnCotisations.dataset.idTechnique;
+    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
+    if (adherent) ouvrirModaleCotisations(adherent);
+  }
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
@@ -1021,6 +1077,152 @@ document.getElementById("btn-confirmer-suppression").addEventListener("click", a
   await chargerAdherents();
   afficherMessageSucces(`Adhérent supprimé : ${nomComplet}.`);
 });
+
+/* =====================================================
+   MODALE COTISATIONS — HISTORIQUE + AJOUT
+   ===================================================== */
+
+let modaleCotisationsAdherent = null;
+
+function ouvrirModaleCotisations(adherent) {
+  modaleCotisationsAdherent = adherent;
+
+  let fond = document.getElementById("cotisations-fond");
+  if (!fond) {
+    fond = document.createElement("div");
+    fond.id = "cotisations-fond";
+    fond.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;";
+    fond.innerHTML = `
+      <div id="cotisations-modale" role="dialog" aria-modal="true" tabindex="-1"
+           style="background:#fff;border-radius:8px;padding:28px 32px;max-width:640px;width:95%;max-height:85vh;overflow-y:auto;outline:none;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
+          <h2 id="cotisations-titre" style="font-size:1.15rem;margin:0;color:var(--bleu,#3B77B5);"></h2>
+          <button id="cotisations-fermer" type="button" aria-label="Fermer"
+                  style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;">&#x2715;</button>
+        </div>
+        <table id="cotisations-table" style="width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:22px;">
+          <thead>
+            <tr style="background:var(--bleu,#3B77B5);color:#fff;">
+              <th style="padding:8px 10px;text-align:left;">Année</th>
+              <th style="padding:8px 10px;text-align:left;">Date</th>
+              <th style="padding:8px 10px;text-align:right;">Montant</th>
+              <th style="padding:8px 10px;text-align:left;">Mode de paiement</th>
+            </tr>
+          </thead>
+          <tbody id="cotisations-corps"></tbody>
+        </table>
+        <h3 style="font-size:1rem;margin:0 0 12px;color:var(--encre,#403E3E);">Ajouter une cotisation</h3>
+        <div id="cotisations-erreur" role="alert" style="color:#c0392b;margin-bottom:10px;display:none;"></div>
+        <form id="cotisations-form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
+            Année *
+            <input id="cotis-annee" type="number" min="2000" max="2099" required
+                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
+            Date de paiement *
+            <input id="cotis-date" type="date" required
+                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
+            Montant (€) *
+            <input id="cotis-montant" type="number" step="0.01" min="0" required
+                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
+          </label>
+          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
+            Mode de paiement
+            <select id="cotis-mode" style="padding:7px;border:1px solid #ccc;border-radius:4px;">
+              <option value="">—</option>
+              <option value="virement">Virement</option>
+              <option value="chèque">Chèque</option>
+              <option value="espèces">Espèces</option>
+            </select>
+          </label>
+          <button type="submit"
+                  style="grid-column:1/-1;padding:9px;background:var(--bleu,#3B77B5);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.95rem;">
+            Enregistrer
+          </button>
+        </form>
+      </div>
+    `;
+    document.body.appendChild(fond);
+
+    document.getElementById("cotisations-fermer").addEventListener("click", fermerModaleCotisations);
+    fond.addEventListener("click", function(e) { if (e.target === fond) fermerModaleCotisations(); });
+
+    document.getElementById("cotisations-form").addEventListener("submit", async function(e) {
+      e.preventDefault();
+      const zoneErreur = document.getElementById("cotisations-erreur");
+      zoneErreur.style.display = "none";
+
+      const annee    = parseInt(document.getElementById("cotis-annee").value, 10);
+      const date     = document.getElementById("cotis-date").value;
+      const montant  = parseFloat(document.getElementById("cotis-montant").value.replace(",", "."));
+      const mode     = document.getElementById("cotis-mode").value || null;
+
+      if (!annee || !date || isNaN(montant)) {
+        zoneErreur.textContent = "Veuillez remplir les champs obligatoires.";
+        zoneErreur.style.display = "block";
+        return;
+      }
+
+      const { error } = await clientSupabase.from("cotisations").insert([{
+        adherent_id:   modaleCotisationsAdherent.id,
+        annee,
+        date_paiement: date,
+        montant,
+        mode_paiement: mode
+      }]);
+
+      if (error) {
+        zoneErreur.textContent = "Enregistrement échoué. Vérifiez votre connexion.";
+        zoneErreur.style.display = "block";
+        return;
+      }
+
+      await chargerAdherents();
+      afficherCotisationsDansModale();
+      document.getElementById("cotisations-form").reset();
+    });
+  }
+
+  fond.style.display = "flex";
+  afficherCotisationsDansModale();
+  document.getElementById("cotisations-modale").focus();
+}
+
+function afficherCotisationsDansModale() {
+  if (!modaleCotisationsAdherent) return;
+  const a = modaleCotisationsAdherent;
+  document.getElementById("cotisations-titre").textContent =
+    "Cotisations — " + (a.prenom || "") + " " + (a.nom || "");
+
+  const cotis = donneesCotisations
+    .filter(function(c) { return String(c.adherent_id) === String(a.id); })
+    .sort(function(x, y) { return y.annee - x.annee; });
+
+  const corps = document.getElementById("cotisations-corps");
+  if (!cotis.length) {
+    corps.innerHTML = '<tr><td colspan="4" style="padding:10px;text-align:center;color:#888;">Aucune cotisation enregistrée.</td></tr>';
+    return;
+  }
+  corps.innerHTML = cotis.map(function(c, i) {
+    const bg = i % 2 === 0 ? "#f7f8fa" : "#fff";
+    const montantStr = Number(c.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+    return `<tr style="background:${bg};">
+      <td style="padding:7px 10px;">${c.annee}</td>
+      <td style="padding:7px 10px;">${formaterDate(c.date_paiement)}</td>
+      <td style="padding:7px 10px;text-align:right;">${montantStr}</td>
+      <td style="padding:7px 10px;">${c.mode_paiement || "—"}</td>
+    </tr>`;
+  }).join("");
+}
+
+function fermerModaleCotisations() {
+  const fond = document.getElementById("cotisations-fond");
+  if (fond) fond.style.display = "none";
+  modaleCotisationsAdherent = null;
+}
 
 /* =====================================================
    AUTHENTIFICATION SUPABASE
@@ -2262,8 +2464,10 @@ function majTexteRecuAdh() {
   const signataire = document.getElementById("select-signataire-adh").value;
   const saison = a.saison || "—";
 
-  const cotis = (a.montant_cotisation != null)
-    ? Number(a.montant_cotisation).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+  const derniereRecuAdh = derniereCotisation(a.id);
+  const montantCotis    = derniereRecuAdh ? Number(derniereRecuAdh.montant) : null;
+  const cotis = montantCotis != null
+    ? montantCotis.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
     : "—";
   const donVal = (a.montant_don != null && Number(a.montant_don) > 0)
     ? Number(a.montant_don)
@@ -2271,8 +2475,8 @@ function majTexteRecuAdh() {
   const donStr = donVal
     ? donVal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
     : null;
-  const totalStr = (donVal && a.montant_cotisation != null)
-    ? (Number(a.montant_cotisation) + donVal).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+  const totalStr = (donVal && montantCotis != null)
+    ? (montantCotis + donVal).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
     : null;
   const montantCert = totalStr || cotis;
 
@@ -3569,10 +3773,10 @@ if (btnSauvegarderProfil) {
 // --- Stats hub ---
 function mettreAJourStats() {
   var total = donneesAdherents.length;
-  var aJour = donneesAdherents.filter(function(a) { return calculerStatut(a.saison) === "ajour"; }).length;
+  var aJour = donneesAdherents.filter(function(a) { return calculerStatutAdherent(a) === "ajour"; }).length;
   var expires = total - aJour;
-  var totalCotis = donneesAdherents.reduce(function(acc, a) {
-    return acc + (Number(a.montant_cotisation) || 0);
+  var totalCotis = donneesCotisations.reduce(function(acc, c) {
+    return acc + (Number(c.montant) || 0);
   }, 0);
 
   var elTotal = document.getElementById("val-total-adherents");
@@ -3826,7 +4030,7 @@ async function exporterRapportAnnuelPDF() {
   const totalAdh    = donneesAdherents.length;
   const aJour       = donneesAdherents.filter(a => calculerStatut(a.saison) === 'ajour').length;
   const expires     = totalAdh - aJour;
-  const totalCotis  = donneesAdherents.reduce((s, a) => s + (Number(a.montant_cotisation) || 0), 0);
+  const totalCotis  = donneesCotisations.reduce((s, c) => s + (Number(c.montant) || 0), 0);
   const totalDonsF  = donneesDonateurs.reduce((s, d) => {
     const estMat = (d.type_don || '').toLowerCase().includes('mat');
     return s + (estMat ? 0 : (Number(d.montant_don) || 0));
@@ -3911,8 +4115,8 @@ document.addEventListener("DOMContentLoaded", function() {
       var annee = new Date().getFullYear();
       exporterCSV(
         donneesAdherents,
-        ["id_adherent","nom","prenom","email","telephone","type_membre","date_adhesion","montant_cotisation","mode_paiement","statut","saison"],
-        ["ID","Nom","Prénom","Email","Téléphone","Type de membre","Date d'adhésion","Montant","Mode de paiement","Statut","Saison"],
+        ["id_adherent","nom","prenom","email","telephone","type_membre","date_adhesion","statut","saison"],
+        ["ID","Nom","Prénom","Email","Téléphone","Type de membre","Date d'adhésion","Statut","Saison"],
         "adherents_HSI37_" + annee + ".csv"
       );
     });
@@ -3988,7 +4192,6 @@ function appliquerFiltreAdherents() {
     liste.sort(function(a,b) {
       var va = col==="statut" ? calculerStatut(a.saison) : (a[col]||"");
       var vb = col==="statut" ? calculerStatut(b.saison) : (b[col]||"");
-      if (col==="montant_cotisation") { va=Number(va)||0; vb=Number(vb)||0; }
       return sens==="asc" ? (va<vb?-1:va>vb?1:0) : (va>vb?-1:va<vb?1:0);
     });
   }
