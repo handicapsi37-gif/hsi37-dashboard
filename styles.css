@@ -6,13 +6,13 @@
 
 /* ---------- Variables CSS (charte HSI37) ---------- */
 :root {
-  --bleu-hsi: #2D82C4;        /* Bleu principal officiel : aplats, en-têtes, boutons */
-  --bleu-clair: #5AA9E6;      /* Bleu clair : survols, icônes, éléments secondaires */
-  --bleu-fonce: #1F4E79;      /* Bleu foncé : texte bleu sur fond clair, liens */
-  --corail: #F28C28;          /* Orange officiel : accent, CTA */
-  --corail-fonce: #D96F00;    /* Orange foncé : survol orange, texte orange sur fond clair */
-  --encre: #333333;           /* Gris texte officiel : texte courant principal */
-  --gris-fond: #F8F9FA;       /* Fond clair officiel : fonds de section */
+  --bleu-hsi: #3B77B5;        /* Bleu principal officiel : aplats, en-têtes, boutons */
+  --bleu-clair: #3B77B5;      /* Bleu clair : survols, icônes, éléments secondaires */
+  --bleu-fonce: #3B77B5;      /* Bleu foncé : texte bleu sur fond clair, liens */
+  --corail: #F7CD46;          /* Orange officiel : accent, CTA */
+  --corail-fonce: #F7CD46;    /* Orange foncé : survol orange, texte orange sur fond clair */
+  --encre: #403E3E;           /* Gris texte officiel : texte courant principal */
+  --gris-fond: #FAFBF9;       /* Fond clair officiel : fonds de section */
   --blanc: #ffffff;
 
   /* Tons neutres complémentaires */
@@ -695,7 +695,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 .champ-aide {
   font-size: 0.85rem;
-  color: var(--orange, #F28C28);
+  color: var(--orange, #F7CD46);
   font-style: italic;
   margin-top: 0.3rem;
   line-height: 1.4;
@@ -703,7 +703,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 .alerte-avertissement {
   font-size: 0.85rem;
-  color: var(--orange-fonce, #D96F00);
+  color: var(--orange-fonce, #F7CD46);
   background: #FFF8EE;
   border: 1px solid #F5D89A;
   border-radius: var(--rayon);
@@ -1105,7 +1105,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Bouton "Générer la carte" dans le tableau */
 .btn-icone--carte:hover,
 .btn-icone--carte:focus-visible {
-  color: #2D82C4;
+  color: #3B77B5;
   background-color: #e8f2fb;
 }
 
@@ -1142,14 +1142,14 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   flex-shrink: 0;
 }
 
 /* Bande bleue en haut */
 .carte__bandeau-haut {
   height: 8px;
-  background-color: #2D82C4;
+  background-color: #3B77B5;
   flex-shrink: 0;
 }
 
@@ -1198,10 +1198,10 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .carte__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #2D82C4;
+  color: #3B77B5;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   line-height: 1.2;
@@ -1209,9 +1209,9 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .carte__sous-titre {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.73rem;
-  color: #1F4E79;
+  color: #3B77B5;
   font-weight: 600;
   letter-spacing: 0.02em;
   margin: 0;
@@ -1220,7 +1220,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Filet orange séparateur */
 .carte__divider {
   height: 2px;
-  background-color: #F28C28;
+  background-color: #F7CD46;
   border-radius: 1px;
   margin-bottom: 16px;
   flex-shrink: 0;
@@ -1251,20 +1251,20 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .carte__info-valeur {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #1F4E79;
+  color: #3B77B5;
 }
 
 /* N° adhérent : monospace + bleu vif pour l'identifiant */
 .carte__info-valeur--id {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.90rem;
-  color: #2D82C4;
+  color: #3B77B5;
   font-weight: 700;
 }
 
 /* Pied de carte : coordonnées, discret */
 .carte__pied {
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 0.63rem;
   color: #6b7a8f;
   padding-top: 10px;
@@ -1299,7 +1299,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Bande orange en bas */
 .carte__bandeau-bas {
   height: 5px;
-  background-color: #F28C28;
+  background-color: #F7CD46;
   flex-shrink: 0;
 }
 
@@ -1403,7 +1403,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   width: 560px;
   background: #ffffff;
   box-shadow: 0 4px 20px rgba(30, 36, 51, 0.18);
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   flex-shrink: 0;
 }
 
@@ -1429,7 +1429,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .recu__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
   color: #ffffff;
@@ -1466,7 +1466,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .recu__asso-nom {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--bleu-fonce);
@@ -1654,7 +1654,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .bulletin-choix__option-titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 1rem;
   font-weight: 600;
   color: var(--bleu-fonce);
@@ -1685,18 +1685,18 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   top: 0;
   width: 794px;
   background: #ffffff;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 14px;
-  color: #333333;
+  color: #403E3E;
   line-height: 1.6;
-  border-top: 5px solid #F28C28;
+  border-top: 5px solid #F7CD46;
 }
 
 /* Partie inscription */
 .bulletin__partie-haute {
   padding: 34px 44px 36px;
   background: #ffffff;
-  border-bottom: 4px solid #F28C28;
+  border-bottom: 4px solid #F7CD46;
 }
 
 /* En-tête : titre + logo */
@@ -1713,16 +1713,16 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .bulletin__grand-titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   font-weight: 700;
-  color: #1F4E79;
+  color: #3B77B5;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin: 0 0 10px;
   line-height: 1.2;
   padding-bottom: 7px;
-  border-bottom: 2px solid #F28C28;
+  border-bottom: 2px solid #F7CD46;
   display: inline-block;
 }
 
@@ -1743,13 +1743,13 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Filets colorés */
 .bulletin__filet {
   height: 3px;
-  background: #2D82C4;
+  background: #3B77B5;
   margin: 18px 0;
   border-radius: 2px;
 }
 
 .bulletin__filet--orange {
-  background: #F28C28;
+  background: #F7CD46;
 }
 
 /* Bloc champs à remplir */
@@ -1778,7 +1778,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .bulletin__champ-label {
   font-size: 14px;
   font-weight: 600;
-  color: #333333;
+  color: #403E3E;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1799,7 +1799,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   margin: 14px 0;
   padding: 9px 12px;
   background: #F0F5FA;
-  border-left: 3px solid #2D82C4;
+  border-left: 3px solid #3B77B5;
   border-radius: 0 4px 4px 0;
   line-height: 1.55;
 }
@@ -1824,7 +1824,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 .bulletin__montant-euro {
   font-weight: 700;
-  color: #1F4E79;
+  color: #3B77B5;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1842,7 +1842,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .bulletin__paiements-titre {
   font-weight: 700;
   font-size: 14px;
-  color: #2D82C4;
+  color: #3B77B5;
   margin: 0 0 9px;
 }
 
@@ -1854,7 +1854,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 .bulletin__paiements-liste span {
   font-size: 13.5px;
-  color: #333333;
+  color: #403E3E;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -1862,7 +1862,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 .bulletin__paiements-liste span::before {
   content: '\2610';
-  color: #F28C28;
+  color: #F7CD46;
   font-size: 15px;
   flex-shrink: 0;
   line-height: 1;
@@ -1893,7 +1893,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   border: 1.5px solid rgba(255, 255, 255, 0.65);
   border-radius: 6px;
   color: #ffffff;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 13px;
   font-weight: 600;
   cursor: pointer;
@@ -1958,7 +1958,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .hub__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 28px;
   font-weight: 700;
   color: var(--bleu-fonce);
@@ -1992,7 +1992,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   border-radius: 14px;
   box-shadow: 0 2px 10px rgba(31, 78, 121, 0.07);
   cursor: pointer;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   color: inherit;
   transition: transform 0.18s ease, box-shadow 0.18s ease, border-bottom-color 0.18s ease;
 }
@@ -2022,7 +2022,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .hub-tuile__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 20px;
   font-weight: 600;
   color: var(--bleu-fonce);
@@ -2055,7 +2055,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .section-hub-page__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 24px;
   font-weight: 700;
   color: var(--bleu-fonce);
@@ -2105,7 +2105,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .doc-carte__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 17px;
   font-weight: 600;
   color: var(--bleu-fonce);
@@ -2200,9 +2200,9 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .doc-a4 {
   width: 620px;
   background: #ffffff;
-  font-family: 'Open Sans', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   font-size: 13px;
-  color: #333333;
+  color: #403E3E;
   line-height: 1.6;
   box-shadow: 0 4px 20px rgba(30, 36, 51, 0.18);
   flex-shrink: 0;
@@ -2237,21 +2237,21 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 /* Nom association : bleu foncé + "37" orange */
 .doc-a4__nom {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #1F4E79;
+  color: #3B77B5;
   margin: 0 0 4px;
   line-height: 1.3;
 }
 
 .doc-a4__accent {
-  color: #F28C28;
+  color: #F7CD46;
 }
 
 /* Séparateur ◆ orange dans les coordonnées */
 .doc-a4__sep {
-  color: #F28C28;
+  color: #F7CD46;
 }
 
 .doc-a4__coord {
@@ -2264,13 +2264,13 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Filet orange (séparateur en-tête / pied de page) */
 .doc-a4__filet {
   height: 3px;
-  background: #F28C28;
+  background: #F7CD46;
   margin: 0;
 }
 
 .doc-a4__pied-filet {
   height: 2px;
-  background: #F28C28;
+  background: #F7CD46;
   margin-top: 0;
 }
 
@@ -2284,22 +2284,22 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 /* Titre du document — bleu foncé + soulignement orange */
 .doc-a4__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 17px;
   font-weight: 700;
-  color: #1F4E79;
+  color: #3B77B5;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: center;
   padding-bottom: 10px;
-  border-bottom: 2px solid #F28C28;
+  border-bottom: 2px solid #F7CD46;
   margin: 0 0 6px;
 }
 
 /* Paragraphe courant */
 .doc-a4__para {
   margin: 0;
-  color: #333333;
+  color: #403E3E;
 }
 
 .doc-a4__para--statut {
@@ -2310,8 +2310,8 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 /* Bloc infos encadré */
 .doc-a4__infos-bloc {
-  background: #f8f9fa;
-  border-left: 3px solid #F28C28;
+  background: #fafbf9;
+  border-left: 3px solid #F7CD46;
   border-radius: 0 4px 4px 0;
   padding: 10px 14px;
   display: flex;
@@ -2325,7 +2325,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Sous-titre de section */
 .doc-a4__sous-titre-section {
   font-weight: 700;
-  color: #1F4E79;
+  color: #3B77B5;
   font-size: 13px;
   margin: 0;
 }
@@ -2340,7 +2340,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .doc-a4__liste li {
-  color: #333333;
+  color: #403E3E;
 }
 
 /* Corps de texte avec sauts de ligne */
@@ -2362,11 +2362,11 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 /* Bloc destinataire (courrier) */
 .doc-a4__destinataire {
-  background: #f8f9fa;
+  background: #fafbf9;
   border: 1px solid #e0e0e0;
   padding: 10px 14px;
   font-size: 13px;
-  color: #333333;
+  color: #403E3E;
   white-space: pre-line;
   min-height: 50px;
 }
@@ -2406,14 +2406,14 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .doc-a4__sig-zone {
-  border-bottom: 1px solid #333333;
+  border-bottom: 1px solid #403E3E;
   height: 52px;
 }
 
 .doc-a4__sig-nom {
   font-size: 12px;
   font-weight: 600;
-  color: #1F4E79;
+  color: #3B77B5;
   margin: 0;
 }
 
@@ -2466,7 +2466,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 }
 
 .sig-carte__titre {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 16px;
   font-weight: 600;
   color: var(--bleu-fonce);
@@ -2543,8 +2543,8 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .mention-rgpd-form {
   font-size: 0.8rem;
   color: #666666;
-  background: #F8F9FA;
-  border-left: 3px solid #F28C28;
+  background: #FAFBF9;
+  border-left: 3px solid #F7CD46;
   padding: 8px;
   margin-bottom: 0.75rem;
   line-height: 1.5;
