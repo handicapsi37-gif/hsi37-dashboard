@@ -1116,7 +1116,7 @@ function ouvrirModaleCotisations(adherent) {
         <form id="cotisations-form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
           <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
             Année *
-            <input id="cotis-annee" type="number" min="2000" max="2099" required
+            <input id="cotis-annee" type="number" min="2024" max="2099" value="2026" required
                    style="padding:7px;border:1px solid #ccc;border-radius:4px;">
           </label>
           <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
