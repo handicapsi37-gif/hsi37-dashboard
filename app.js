@@ -1517,7 +1517,8 @@ let donneesDonateurs      = [];
 let donneesDons           = [];
 var filtreDonateurs       = "";
 var triDonateurs          = { colonne: null, sens: "asc" };
-let donateurEnCours       = null;
+let donateurEnCours          = null;
+let donateurExistantPourDon  = null;
 let elementAvantModaleDon = null;
 
 /* =====================================================
@@ -1814,8 +1815,14 @@ function ouvrirModaleDonAjout() {
   majChampsConditionnelsDon();
   majCiviliteVisibiliteDon();
 
-  document.getElementById("groupe-id-don").hidden    = true;
-  document.getElementById("groupe-ajout-don").hidden  = true;
+  donateurExistantPourDon = null;
+  document.getElementById("groupe-id-don").hidden              = true;
+  document.getElementById("groupe-ajout-don").hidden           = true;
+  document.getElementById("zone-recherche-don").hidden         = false;
+  document.getElementById("don-recherche").value               = "";
+  document.getElementById("don-recherche-resultats").hidden    = true;
+  document.getElementById("don-donateur-trouve").hidden        = true;
+  document.getElementById("formulaire-don-complet").hidden     = false;
   document.getElementById("modale-don-titre").textContent = "Ajouter un donateur";
   document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer";
   document.getElementById("btn-fermer-modale-don").setAttribute("aria-label", "Fermer la fenêtre d'ajout de donateur");
@@ -1824,6 +1831,62 @@ function ouvrirModaleDonAjout() {
   requestAnimationFrame(function() { modaleDon.focus(); });
   document.addEventListener("keydown", gererToucheDon);
 }
+
+document.getElementById("don-recherche").addEventListener("input", function() {
+  const q = this.value.trim().toLowerCase();
+  const liste = document.getElementById("don-recherche-resultats");
+  if (q.length < 2) { liste.hidden = true; return; }
+
+  const resultats = donneesDonateurs.filter(function(d) {
+    return (d.nom || "").toLowerCase().includes(q)
+        || (d.email || "").toLowerCase().includes(q)
+        || (d.organisme || "").toLowerCase().includes(q);
+  }).slice(0, 8);
+
+  if (!resultats.length) {
+    liste.innerHTML = '<li style="padding:8px 12px;color:#888;">Aucun résultat — créez une nouvelle fiche ci-dessous.</li>';
+  } else {
+    liste.innerHTML = resultats.map(function(d) {
+      const label = [d.prenom, d.nom || d.organisme, d.email ? "(" + d.email + ")" : ""]
+        .filter(Boolean).join(" ");
+      return `<li data-id="${d.id}"
+                  style="padding:8px 12px;cursor:pointer;border-bottom:1px solid #eee;">
+                ${label}
+              </li>`;
+    }).join("");
+  }
+  liste.hidden = false;
+});
+
+document.getElementById("don-recherche-resultats").addEventListener("click", function(e) {
+  const li = e.target.closest("li[data-id]");
+  if (!li) return;
+  donateurExistantPourDon = donneesDonateurs.find(function(d) {
+    return String(d.id) === li.dataset.id;
+  });
+  if (!donateurExistantPourDon) return;
+
+  const nom = [donateurExistantPourDon.prenom,
+               donateurExistantPourDon.nom || donateurExistantPourDon.organisme]
+    .filter(Boolean).join(" ");
+  document.getElementById("don-donateur-trouve-nom").textContent  = nom;
+  document.getElementById("don-donateur-trouve").hidden           = false;
+  document.getElementById("don-recherche-resultats").hidden       = true;
+  document.getElementById("formulaire-don-complet").hidden        = true;
+  document.getElementById("groupe-ajout-don").hidden              = false;
+  document.getElementById("don-ajout-montant").value              = "";
+  document.getElementById("don-ajout-mode").value                 = "";
+  document.getElementById("don-ajout-type").value                 = "";
+});
+
+document.getElementById("don-nouvelle-fiche").addEventListener("click", function() {
+  donateurExistantPourDon = null;
+  document.getElementById("don-donateur-trouve").hidden    = true;
+  document.getElementById("formulaire-don-complet").hidden = false;
+  document.getElementById("groupe-ajout-don").hidden       = true;
+  document.getElementById("don-recherche").value           = "";
+  document.getElementById("don-recherche-resultats").hidden = true;
+});
 
 /**
  * Ouvre la modale en mode MODIFICATION : champs pré-remplis.
@@ -1867,10 +1930,12 @@ function ouvrirModaleDonModification(donateur) {
   majChampsConditionnelsDon();
   majCiviliteVisibiliteDon();
 
-  document.getElementById("groupe-ajout-don").hidden = false;
-  document.getElementById("don-ajout-montant").value = "";
-  document.getElementById("don-ajout-mode").value    = "";
-  document.getElementById("don-ajout-type").value    = "";
+  document.getElementById("zone-recherche-don").hidden     = true;
+  document.getElementById("formulaire-don-complet").hidden  = false;
+  document.getElementById("groupe-ajout-don").hidden        = false;
+  document.getElementById("don-ajout-montant").value        = "";
+  document.getElementById("don-ajout-mode").value           = "";
+  document.getElementById("don-ajout-type").value           = "";
 
   document.getElementById("modale-don-titre").textContent = "Modifier un donateur";
   document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer les modifications";
@@ -2088,6 +2153,34 @@ formulaireDon.addEventListener("submit", async function(evenement) {
   const modePaiement = document.getElementById("don-mode").value || null;
   const numeroCheque = document.getElementById("don-numero-cheque").value.trim() || null;
   const banqueCheque = document.getElementById("don-banque-cheque").value.trim() || null;
+
+  if (donateurExistantPourDon) {
+    /* ---- DONATEUR EXISTANT : INSERT don uniquement ---- */
+    const montantAjout = document.getElementById("don-ajout-montant").value.trim();
+    if (!montantAjout) {
+      zoneErreur.textContent = "Le montant est obligatoire.";
+      zoneErreur.hidden = false;
+      return;
+    }
+    const { error } = await clientSupabase.from("dons").insert([{
+      donateur_id:   donateurExistantPourDon.id,
+      annee:         new Date().getFullYear(),
+      date_don:      new Date().toISOString().split("T")[0],
+      montant:       parseFloat(montantAjout.replace(",", ".")),
+      mode_paiement: document.getElementById("don-ajout-mode").value || null,
+      type_don:      document.getElementById("don-ajout-type").value || null
+    }]);
+    if (error) {
+      zoneErreur.textContent = "L'enregistrement a échoué. Vérifiez votre connexion.";
+      zoneErreur.hidden = false;
+      return;
+    }
+    donateurExistantPourDon = null;
+    fermerModaleDon();
+    await chargerDonateurs();
+    afficherSuccesDon("Don ajouté.");
+    return;
+  }
 
   if (donateurEnCours) {
     /* ---- MODE MODIFICATION : UPDATE Supabase ---- */

@@ -1041,6 +1041,24 @@
         <div id="modale-don-erreur" class="modale-erreur"
              role="alert" aria-live="polite" hidden></div>
 
+        <!-- Zone recherche — visible en mode ajout uniquement -->
+        <div id="zone-recherche-don" hidden style="margin-bottom:16px;">
+          <label for="don-recherche" class="champ-label">Rechercher un donateur existant</label>
+          <input type="text" id="don-recherche" class="champ-input"
+                 placeholder="Nom ou e-mail…" autocomplete="off">
+          <ul id="don-recherche-resultats" hidden
+              style="list-style:none;margin:4px 0 0;padding:0;border:1px solid #ccc;border-radius:4px;max-height:180px;overflow-y:auto;background:#fff;position:relative;z-index:10;"></ul>
+          <div id="don-donateur-trouve" hidden
+               style="margin-top:10px;padding:10px 12px;background:#eef4fb;border-radius:4px;display:flex;align-items:center;justify-content:space-between;">
+            <span id="don-donateur-trouve-nom" style="font-weight:600;color:var(--bleu,#3B77B5);"></span>
+            <button type="button" id="don-nouvelle-fiche"
+                    style="font-size:.8rem;padding:3px 8px;border:1px solid #aaa;border-radius:3px;background:#fff;cursor:pointer;">
+              Nouvelle fiche
+            </button>
+          </div>
+        </div>
+
+        <div id="formulaire-don-complet">
         <div class="formulaire__grille">
 
           <!-- ID donateur : lecture seule en mode modification -->
@@ -1187,6 +1205,8 @@
         </div>
 
         <p class="mention-rgpd-form">Les données saisies sont collectées et conservées 3 ans par l'Association HSI37, uniquement pour la gestion des adhésions et des dons. Conformément au RGPD, vous pouvez exercer vos droits en écrivant à handicapsi37@gmail.com.</p>
+
+        </div><!-- fin formulaire-don-complet -->
 
         <fieldset id="groupe-ajout-don" hidden style="border:1px solid #ddd;border-radius:4px;padding:10px 14px;margin-top:6px;">
           <legend style="font-size:.85rem;color:#666;padding:0 4px;">Ajouter un don</legend>
