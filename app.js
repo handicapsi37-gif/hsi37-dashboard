@@ -1113,18 +1113,6 @@ function ouvrirModaleCotisations(adherent) {
           <button id="cotisations-fermer" type="button" aria-label="Fermer"
                   style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;">&#x2715;</button>
         </div>
-        <table id="cotisations-table" style="width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:22px;">
-          <thead>
-            <tr style="background:var(--bleu,#3B77B5);color:#fff;">
-              <th style="padding:8px 10px;text-align:left;">Année</th>
-              <th style="padding:8px 10px;text-align:left;">Date</th>
-              <th style="padding:8px 10px;text-align:right;">Montant</th>
-              <th style="padding:8px 10px;text-align:left;">Mode de paiement</th>
-            </tr>
-          </thead>
-          <tbody id="cotisations-corps"></tbody>
-        </table>
-        <h3 style="font-size:1rem;margin:0 0 12px;color:var(--encre,#403E3E);">Ajouter une cotisation</h3>
         <div id="cotisations-erreur" role="alert" style="color:#c0392b;margin-bottom:10px;display:none;"></div>
         <form id="cotisations-form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
           <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
@@ -1198,7 +1186,6 @@ function ouvrirModaleCotisations(adherent) {
       }
 
       await chargerAdherents();
-      afficherCotisationsDansModale();
       document.getElementById("cotisations-form").reset();
     });
   }
@@ -1206,35 +1193,9 @@ function ouvrirModaleCotisations(adherent) {
   fond.style.display = "flex";
   document.getElementById("cotisations-form").reset();
   document.getElementById("cotisations-erreur").style.display = "none";
-  afficherCotisationsDansModale();
-  document.getElementById("cotisations-modale").focus();
-}
-
-function afficherCotisationsDansModale() {
-  if (!modaleCotisationsAdherent) return;
-  const a = modaleCotisationsAdherent;
   document.getElementById("cotisations-titre").textContent =
-    "Cotisations — " + (a.prenom || "") + " " + (a.nom || "");
-
-  const cotis = donneesCotisations
-    .filter(function(c) { return String(c.adherent_id) === String(a.id); })
-    .sort(function(x, y) { return y.annee - x.annee; });
-
-  const corps = document.getElementById("cotisations-corps");
-  if (!cotis.length) {
-    corps.innerHTML = '<tr><td colspan="4" style="padding:10px;text-align:center;color:#888;">Aucune cotisation enregistrée.</td></tr>';
-    return;
-  }
-  corps.innerHTML = cotis.map(function(c, i) {
-    const bg = i % 2 === 0 ? "#f7f8fa" : "#fff";
-    const montantStr = Number(c.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
-    return `<tr style="background:${bg};">
-      <td style="padding:7px 10px;">${c.annee}</td>
-      <td style="padding:7px 10px;">${formaterDate(c.date_paiement)}</td>
-      <td style="padding:7px 10px;text-align:right;">${montantStr}</td>
-      <td style="padding:7px 10px;">${c.mode_paiement || "—"}</td>
-    </tr>`;
-  }).join("");
+    "Cotisation — " + (adherent.prenom || "") + " " + (adherent.nom || "");
+  document.getElementById("cotisations-modale").focus();
 }
 
 function fermerModaleCotisations() {
@@ -1266,19 +1227,6 @@ function ouvrirModaleDons(donateur) {
           <button id="dons-fermer" type="button" aria-label="Fermer"
                   style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;">&#x2715;</button>
         </div>
-        <table id="dons-table" style="width:100%;border-collapse:collapse;font-size:.9rem;margin-bottom:22px;">
-          <thead>
-            <tr style="background:var(--bleu,#3B77B5);color:#fff;">
-              <th style="padding:8px 10px;text-align:left;">Année</th>
-              <th style="padding:8px 10px;text-align:left;">Date</th>
-              <th style="padding:8px 10px;text-align:right;">Montant</th>
-              <th style="padding:8px 10px;text-align:left;">Mode de paiement</th>
-              <th style="padding:8px 10px;text-align:left;">Type</th>
-            </tr>
-          </thead>
-          <tbody id="dons-corps"></tbody>
-        </table>
-        <h3 style="font-size:1rem;margin:0 0 12px;color:var(--encre,#403E3E);">Ajouter un don</h3>
         <div id="dons-erreur" role="alert" style="color:#c0392b;margin-bottom:10px;display:none;"></div>
         <form id="dons-form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
           <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
@@ -1363,7 +1311,6 @@ function ouvrirModaleDons(donateur) {
       }
 
       await chargerDonateurs();
-      afficherDonsDansModale();
       document.getElementById("dons-form").reset();
       document.getElementById("don-his-annee").value = "2026";
       document.getElementById("don-his-date").value  = new Date().toISOString().split("T")[0];
@@ -1372,36 +1319,9 @@ function ouvrirModaleDons(donateur) {
 
   fond.style.display = "flex";
   document.getElementById("dons-erreur").style.display = "none";
-  afficherDonsDansModale();
-  document.getElementById("dons-modale").focus();
-}
-
-function afficherDonsDansModale() {
-  if (!modaleDonsDonateurCourant) return;
-  const d = modaleDonsDonateurCourant;
   document.getElementById("dons-titre").textContent =
-    "Dons — " + (d.prenom ? d.prenom + " " : "") + (d.nom || d.organisme || "");
-
-  const dons = donneesDons
-    .filter(function(don) { return String(don.donateur_id) === String(d.id); })
-    .sort(function(x, y) { return y.annee - x.annee; });
-
-  const corps = document.getElementById("dons-corps");
-  if (!dons.length) {
-    corps.innerHTML = '<tr><td colspan="5" style="padding:10px;text-align:center;color:#888;">Aucun don enregistré.</td></tr>';
-    return;
-  }
-  corps.innerHTML = dons.map(function(don, i) {
-    const bg = i % 2 === 0 ? "#f7f8fa" : "#fff";
-    const montantStr = Number(don.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
-    return `<tr style="background:${bg};">
-      <td style="padding:7px 10px;">${don.annee}</td>
-      <td style="padding:7px 10px;">${formaterDate(don.date_don)}</td>
-      <td style="padding:7px 10px;text-align:right;">${montantStr}</td>
-      <td style="padding:7px 10px;">${don.mode_paiement || "—"}</td>
-      <td style="padding:7px 10px;">${don.type_don || "—"}</td>
-    </tr>`;
-  }).join("");
+    "Don — " + (donateur.prenom ? donateur.prenom + " " : "") + (donateur.nom || donateur.organisme || "");
+  document.getElementById("dons-modale").focus();
 }
 
 function fermerModaleDons() {
