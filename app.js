@@ -1069,132 +1069,6 @@ document.getElementById("btn-confirmer-suppression").addEventListener("click", a
 });
 
 /* =====================================================
-   MODALE DONS — HISTORIQUE + AJOUT
-   ===================================================== */
-
-let modaleDonsDonateurCourant = null;
-
-function ouvrirModaleDons(donateur) {
-  modaleDonsDonateurCourant = donateur;
-
-  let fond = document.getElementById("dons-fond");
-  if (!fond) {
-    fond = document.createElement("div");
-    fond.id = "dons-fond";
-    fond.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;";
-    const aujourdhui = new Date().toISOString().split("T")[0];
-    fond.innerHTML = `
-      <div id="dons-modale" role="dialog" aria-modal="true" tabindex="-1"
-           style="background:#fff;border-radius:8px;padding:28px 32px;max-width:640px;width:95%;max-height:85vh;overflow-y:auto;outline:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-          <h2 id="dons-titre" style="font-size:1.15rem;margin:0;color:var(--bleu,#3B77B5);"></h2>
-          <button id="dons-fermer" type="button" aria-label="Fermer"
-                  style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;">&#x2715;</button>
-        </div>
-        <div id="dons-erreur" role="alert" style="color:#c0392b;margin-bottom:10px;display:none;"></div>
-        <form id="dons-form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Année *
-            <input id="don-his-annee" type="number" min="2024" max="2099" value="2026" required
-                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Date du don *
-            <input id="don-his-date" type="date" value="${aujourdhui}" required
-                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Montant (€) *
-            <input id="don-his-montant" type="number" step="1" min="0" required
-                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Mode de paiement
-            <select id="don-his-mode" style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-              <option value="">—</option>
-              <option value="virement">Virement</option>
-              <option value="chèque">Chèque</option>
-              <option value="espèces">Espèces</option>
-              <option value="carte bancaire">Carte bancaire</option>
-              <option value="paypal">PayPal</option>
-              <option value="helloasso">HelloAsso</option>
-              <option value="payasso">PayAsso</option>
-            </select>
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Type
-            <select id="don-his-type" style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-              <option value="">—</option>
-              <option value="don">Don</option>
-              <option value="repas">Repas</option>
-              <option value="evenement">Événement</option>
-            </select>
-          </label>
-          <button type="submit"
-                  style="grid-column:1/-1;padding:9px;background:var(--bleu,#3B77B5);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.95rem;">
-            Enregistrer
-          </button>
-        </form>
-      </div>
-    `;
-    document.body.appendChild(fond);
-
-    document.getElementById("dons-fermer").addEventListener("click", fermerModaleDons);
-    fond.addEventListener("click", function(e) { if (e.target === fond) fermerModaleDons(); });
-
-    document.getElementById("dons-form").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const zoneErreur = document.getElementById("dons-erreur");
-      zoneErreur.style.display = "none";
-
-      const annee   = parseInt(document.getElementById("don-his-annee").value, 10);
-      const date    = document.getElementById("don-his-date").value;
-      const montant = parseFloat(document.getElementById("don-his-montant").value.replace(",", "."));
-      const mode    = document.getElementById("don-his-mode").value || null;
-      const typeDon = document.getElementById("don-his-type").value || null;
-
-      if (!annee || !date || isNaN(montant)) {
-        zoneErreur.textContent = "Veuillez remplir les champs obligatoires.";
-        zoneErreur.style.display = "block";
-        return;
-      }
-
-      const { error } = await clientSupabase.from("dons").insert([{
-        donateur_id:  modaleDonsDonateurCourant.id,
-        annee,
-        date_don:     date,
-        montant,
-        mode_paiement: mode,
-        type_don:      typeDon
-      }]);
-
-      if (error) {
-        zoneErreur.textContent = "Enregistrement échoué. Vérifiez votre connexion.";
-        zoneErreur.style.display = "block";
-        return;
-      }
-
-      await chargerDonateurs();
-      document.getElementById("dons-form").reset();
-      document.getElementById("don-his-annee").value = "2026";
-      document.getElementById("don-his-date").value  = new Date().toISOString().split("T")[0];
-    });
-  }
-
-  fond.style.display = "flex";
-  document.getElementById("dons-erreur").style.display = "none";
-  document.getElementById("dons-titre").textContent =
-    "Don — " + (donateur.prenom ? donateur.prenom + " " : "") + (donateur.nom || donateur.organisme || "");
-  document.getElementById("dons-modale").focus();
-}
-
-function fermerModaleDons() {
-  const fond = document.getElementById("dons-fond");
-  if (fond) fond.style.display = "none";
-  modaleDonsDonateurCourant = null;
-}
-
-/* =====================================================
    AUTHENTIFICATION SUPABASE
    ===================================================== */
 
@@ -1658,17 +1532,6 @@ let elementAvantModaleDon = null;
  */
 function genererBoutonsActionsDonateur(idDonateur, idTechnique) {
   return `
-    <button class="btn-icone btn-icone--dons-don"
-            aria-label="Gérer les dons de ${idDonateur}"
-            title="Gérer les dons"
-            type="button"
-            data-id-technique="${idTechnique}">
-      <svg aria-hidden="true" focusable="false"
-           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="17" height="17">
-        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" fill="none"/>
-        <path d="M12 8v4l3 3" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-      </svg>
-    </button>
     <button class="btn-icone btn-icone--modifier btn-icone--mod-don"
             aria-label="Modifier le donateur ${idDonateur}"
             title="Modifier"
@@ -2235,16 +2098,9 @@ formulaireDon.addEventListener("submit", async function(evenement) {
    ===================================================== */
 
 document.getElementById("corps-tableau-donateurs").addEventListener("click", function(evenement) {
-  const btnDons      = evenement.target.closest(".btn-icone--dons-don");
   const btnModifier  = evenement.target.closest(".btn-icone--mod-don");
   const btnSupprimer = evenement.target.closest(".btn-icone--sup-don");
   const btnRecuDon   = evenement.target.closest(".btn-icone--recu-don");
-
-  if (btnDons) {
-    const idTechnique = btnDons.dataset.idTechnique;
-    const donateur = donneesDonateurs.find(function(d) { return String(d.id) === idTechnique; });
-    if (donateur) ouvrirModaleDons(donateur);
-  }
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
