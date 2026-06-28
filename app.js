@@ -121,6 +121,8 @@ const statutsConfig = {
 /* Conserve les objets complets pour pré-remplir la modale sans requête supplémentaire */
 let donneesAdherents   = [];
 let donneesCotisations = [];
+let donneesEvenements    = [];
+let donneesParticipants  = [];
 var filtreAdherents    = "";
 var triAdherents     = { colonne: null, sens: "asc" };
 
@@ -1176,6 +1178,7 @@ function afficherHub() {
   navOnglets.hidden        = true;
   document.getElementById("panneau-adherents").hidden = true;
   document.getElementById("panneau-donateurs").hidden = true;
+  document.getElementById("panneau-evenements").hidden = true;
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
@@ -1200,20 +1203,27 @@ function allerVers(vue) {
     navOnglets.hidden = false;
     activerOnglet("panneau-donateurs");
     chargerDonateurs();
+  } else if (vue === "evenements") {
+    navOnglets.hidden = false;
+    activerOnglet("panneau-evenements");
+    chargerEvenements();
   } else if (vue === "documents") {
     navOnglets.hidden = true;
     document.getElementById("panneau-adherents").hidden = true;
     document.getElementById("panneau-donateurs").hidden = true;
+    document.getElementById("panneau-evenements").hidden = true;
     sectionDocuments.hidden = false;
   } else if (vue === "signatures") {
     navOnglets.hidden = true;
     document.getElementById("panneau-adherents").hidden = true;
     document.getElementById("panneau-donateurs").hidden = true;
+    document.getElementById("panneau-evenements").hidden = true;
     sectionSignatures.hidden = false;
   } else if (vue === "rgpd") {
     navOnglets.hidden = true;
     document.getElementById("panneau-adherents").hidden = true;
     document.getElementById("panneau-donateurs").hidden = true;
+    document.getElementById("panneau-evenements").hidden = true;
     sectionRgpd.hidden = false;
   }
 }
@@ -1226,6 +1236,7 @@ function afficherTableauDeBord() {
   afficherHub();
   chargerAdherents();
   chargerDonateurs();
+  chargerEvenements();
 }
 
 function afficherEcranConnexion() {
@@ -1507,7 +1518,8 @@ document.getElementById("btn-telecharger-carte").addEventListener("click", funct
 function activerOnglet(idPanneau) {
   const config = {
     "panneau-adherents": "onglet-adherents",
-    "panneau-donateurs": "onglet-donateurs"
+    "panneau-donateurs": "onglet-donateurs",
+    "panneau-evenements": "onglet-evenements"
   };
 
   Object.keys(config).forEach(function(id) {
@@ -1527,6 +1539,111 @@ document.getElementById("onglet-donateurs").addEventListener("click", function()
   activerOnglet("panneau-donateurs");
   chargerDonateurs();
 });
+document.getElementById("onglet-evenements").addEventListener("click", function() {
+  activerOnglet("panneau-evenements");
+  chargerEvenements();
+});
+
+/* =====================================================
+   SECTION ÉVÉNEMENTS
+   ===================================================== */
+
+var filtreEvenements = "";
+
+async function chargerEvenements() {
+  const [resEv, resPart] = await Promise.all([
+    clientSupabase.from("evenements").select("*").order("date", { ascending: false }),
+    clientSupabase.from("participants_evenements").select("*")
+  ]);
+
+  if (resEv.error) {
+    console.error("Erreur chargement événements:", resEv.error);
+    return;
+  }
+
+  donneesEvenements   = resEv.data  || [];
+  donneesParticipants = resPart.data || [];
+
+  remplirTableauEvenements();
+
+  const inputRecherche = document.getElementById("recherche-evenements");
+  if (inputRecherche && !inputRecherche._listenerEv) {
+    inputRecherche._listenerEv = true;
+    inputRecherche.addEventListener("input", function() {
+      filtreEvenements = this.value.toLowerCase();
+      remplirTableauEvenements();
+    });
+  }
+}
+
+function remplirTableauEvenements() {
+  const corps = document.getElementById("corps-tableau-evenements");
+  if (!corps) return;
+
+  const liste = filtreEvenements
+    ? donneesEvenements.filter(function(ev) {
+        return (ev.nom || "").toLowerCase().includes(filtreEvenements);
+      })
+    : donneesEvenements;
+
+  if (!liste.length) {
+    corps.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1rem;color:#666;">Aucun événement trouvé.</td></tr>';
+    return;
+  }
+
+  corps.innerHTML = liste.map(function(ev) {
+    const participants = donneesParticipants.filter(function(p) {
+      return String(p.evenement_id) === String(ev.id);
+    });
+    const nbParticipants = participants.reduce(function(sum, p) { return sum + (p.quantite || 1); }, 0);
+    const total = participants.reduce(function(sum, p) { return sum + (parseFloat(p.montant) || 0); }, 0);
+    const date = ev.date ? new Date(ev.date).toLocaleDateString("fr-FR") : "—";
+    const prix = ev.prix_unitaire != null ? parseFloat(ev.prix_unitaire).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "—";
+    const totalStr = total > 0 ? total.toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "0,00 €";
+
+    const lignesParticipants = participants.length ? [
+      `<tr class="sous-ligne-participant sous-ligne-entete" data-ev="${ev.id}" hidden>
+        <th></th><th>Nom / Prénom</th><th>Email</th><th>Téléphone</th><th>Quantité</th><th>Montant</th>
+      </tr>`
+    ].concat(participants.map(function(p) {
+      const montantP = p.montant != null ? parseFloat(p.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "—";
+      return `<tr class="sous-ligne-participant" data-ev="${ev.id}" hidden>
+        <td></td>
+        <td>${(p.prenom || "") + " " + (p.nom || "")}</td>
+        <td>${p.email || "—"}</td>
+        <td>${p.telephone || "—"}</td>
+        <td>${p.quantite || 1}</td>
+        <td>${montantP}</td>
+      </tr>`;
+    })).join("") : "";
+
+    const btnToggle = participants.length
+      ? `<button type="button" class="btn-toggle-participants" data-ev="${ev.id}" aria-expanded="false">${nbParticipants} participant${nbParticipants > 1 ? "s" : ""} ▼</button>`
+      : `<span style="color:#999;">0 participant</span>`;
+
+    return `<tr class="ligne-evenement" data-ev="${ev.id}">
+      <td>${ev.nom || "—"}</td>
+      <td>${date}</td>
+      <td>${prix}</td>
+      <td>${btnToggle}</td>
+      <td>${totalStr}</td>
+    </tr>${lignesParticipants}`;
+  }).join("");
+
+  corps.addEventListener("click", function handler(e) {
+    const btn = e.target.closest(".btn-toggle-participants");
+    if (!btn) return;
+    const idEv = btn.dataset.ev;
+    const ouvert = btn.getAttribute("aria-expanded") === "true";
+    corps.querySelectorAll(`.sous-ligne-participant[data-ev="${idEv}"]`).forEach(function(tr) {
+      tr.hidden = ouvert;
+    });
+    btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
+    btn.textContent = ouvert
+      ? btn.textContent.replace("▲", "▼")
+      : btn.textContent.replace("▼", "▲");
+  });
+}
 
 /* =====================================================
    SECTION DONATEURS — CACHE ET ÉTAT

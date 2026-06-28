@@ -298,6 +298,10 @@
               aria-selected="false" aria-controls="panneau-donateurs" type="button">
         Donateurs
       </button>
+      <button class="onglet" id="onglet-evenements" role="tab"
+              aria-selected="false" aria-controls="panneau-evenements" type="button">
+        Événements
+      </button>
     </nav>
 
     <!-- ========== PANNEAU ADHÉRENTS ========== -->
@@ -430,6 +434,41 @@
 
     </div>
     <!-- fin panneau-donateurs -->
+
+    <!-- ========== PANNEAU ÉVÉNEMENTS ========== -->
+    <div id="panneau-evenements" role="tabpanel" aria-labelledby="onglet-evenements" hidden>
+
+      <section class="barre-actions" aria-label="Barre d'actions événements">
+        <div class="barre-actions__gauche">
+          <div class="barre-recherche">
+            <label for="recherche-evenements">🔍 Rechercher</label>
+            <input type="search" id="recherche-evenements" placeholder="Nom de l'événement…" autocomplete="off">
+          </div>
+        </div>
+      </section>
+
+      <div id="message-succes-evenements" class="message-succes" role="status" aria-live="polite" hidden></div>
+      <div id="message-erreur-evenements" class="message-erreur" role="alert" aria-live="assertive" hidden></div>
+
+      <section class="section-tableau" aria-label="Liste des événements">
+        <div class="tableau-conteneur" role="region" aria-label="Tableau des événements" tabindex="0">
+          <table class="tableau" id="tableau-evenements">
+            <thead>
+              <tr>
+                <th scope="col">Nom</th>
+                <th scope="col">Date</th>
+                <th scope="col">Prix unitaire</th>
+                <th scope="col">Participants</th>
+                <th scope="col">Total collecté</th>
+              </tr>
+            </thead>
+            <tbody id="corps-tableau-evenements"></tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+    <!-- fin panneau-evenements -->
 
     <!-- ========== SECTION DOCUMENTS ========== -->
     <section id="section-documents" class="section-hub-page" hidden
