@@ -1601,25 +1601,60 @@ function remplirTableauEvenements() {
     const prix = ev.prix_unitaire != null ? parseFloat(ev.prix_unitaire).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "—";
     const totalStr = total > 0 ? total.toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "0,00 €";
 
-    const lignesParticipants = participants.length ? [
+    const lignesParticipants = [
       `<tr class="sous-ligne-participant sous-ligne-entete" data-ev="${ev.id}" hidden>
-        <th></th><th>Nom / Prénom</th><th>Email</th><th>Téléphone</th><th>Quantité</th><th>Montant</th>
+        <th></th><th>Nom / Prénom</th><th>Email</th><th>Téléphone</th><th>Quantité</th><th>Montant</th><th>Actions</th>
       </tr>`
     ].concat(participants.map(function(p) {
       const montantP = p.montant != null ? parseFloat(p.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "—";
-      return `<tr class="sous-ligne-participant" data-ev="${ev.id}" hidden>
+      return `<tr class="sous-ligne-participant" data-ev="${ev.id}" data-part-id="${p.id}" hidden>
         <td></td>
         <td>${(p.prenom || "") + " " + (p.nom || "")}</td>
         <td>${p.email || "—"}</td>
         <td>${p.telephone || "—"}</td>
         <td>${p.quantite || 1}</td>
         <td>${montantP}</td>
+        <td>
+          <button type="button" class="btn-icone btn-modifier-participant"
+                  data-ev="${ev.id}" data-part-id="${p.id}"
+                  title="Modifier" aria-label="Modifier le participant">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" width="15" height="15">
+              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+          <button type="button" class="btn-icone btn-supprimer-participant"
+                  data-ev="${ev.id}" data-part-id="${p.id}"
+                  title="Supprimer" aria-label="Supprimer le participant">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" width="15" height="15">
+              <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"
+                        fill="none" stroke-linecap="round"/>
+              <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+              <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2"
+                    fill="none" stroke-linecap="round"/>
+              <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+                    stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            </svg>
+          </button>
+        </td>
       </tr>`;
-    })).join("") : "";
+    })).concat([
+      `<tr class="sous-ligne-participant sous-ligne-ajout" data-ev="${ev.id}" hidden>
+        <td colspan="7" style="padding:0.4rem 0.75rem;">
+          <button type="button" class="btn btn--secondaire btn-ajouter-participant"
+                  data-ev="${ev.id}" style="font-size:0.82rem;padding:0.3rem 0.8rem;">
+            + Ajouter un participant
+          </button>
+        </td>
+      </tr>`
+    ]).join("");
 
-    const btnToggle = participants.length
-      ? `<button type="button" class="btn-toggle-participants" data-ev="${ev.id}" aria-expanded="false">${nbParticipants} participant${nbParticipants > 1 ? "s" : ""} ▼</button>`
-      : `<span style="color:#999;">0 participant</span>`;
+    const btnToggle = `<button type="button" class="btn-toggle-participants" data-ev="${ev.id}" aria-expanded="false">${nbParticipants} participant${nbParticipants > 1 ? "s" : ""} ▼</button>`;
 
     return `<tr class="ligne-evenement" data-ev="${ev.id}">
       <td>${ev.nom || "—"}</td>
@@ -1633,19 +1668,170 @@ function remplirTableauEvenements() {
   if (!corps._listenerToggle) {
     corps._listenerToggle = true;
     corps.addEventListener("click", function(e) {
-      const btn = e.target.closest(".btn-toggle-participants");
-      if (!btn) return;
-      const idEv = btn.dataset.ev;
-      const ouvert = btn.getAttribute("aria-expanded") === "true";
-      corps.querySelectorAll(`.sous-ligne-participant[data-ev="${idEv}"]`).forEach(function(tr) {
-        tr.hidden = ouvert;
-      });
-      btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
-      btn.textContent = ouvert
-        ? btn.textContent.replace("▲", "▼")
-        : btn.textContent.replace("▼", "▲");
+
+      const btnToggle = e.target.closest(".btn-toggle-participants");
+      if (btnToggle) {
+        const idEv = btnToggle.dataset.ev;
+        const ouvert = btnToggle.getAttribute("aria-expanded") === "true";
+        corps.querySelectorAll(`.sous-ligne-participant[data-ev="${idEv}"]`).forEach(function(tr) {
+          tr.hidden = ouvert;
+        });
+        btnToggle.setAttribute("aria-expanded", ouvert ? "false" : "true");
+        btnToggle.textContent = ouvert
+          ? btnToggle.textContent.replace("▲", "▼")
+          : btnToggle.textContent.replace("▼", "▲");
+        return;
+      }
+
+      const btnModifier = e.target.closest(".btn-modifier-participant");
+      if (btnModifier) {
+        const participant = donneesParticipants.find(function(p) {
+          return String(p.id) === String(btnModifier.dataset.partId);
+        });
+        ouvrirModaleParticipant(btnModifier.dataset.ev, participant);
+        return;
+      }
+
+      const btnSupprimer = e.target.closest(".btn-supprimer-participant");
+      if (btnSupprimer) {
+        supprimerParticipant(btnSupprimer.dataset.partId, btnSupprimer.dataset.ev);
+        return;
+      }
+
+      const btnAjouter = e.target.closest(".btn-ajouter-participant");
+      if (btnAjouter) {
+        ouvrirModaleParticipant(btnAjouter.dataset.ev, null);
+        return;
+      }
     });
   }
+}
+
+function ouvrirModaleParticipant(idEv, participant) {
+  const modeModif = !!participant;
+
+  let modale = document.getElementById("modale-participant");
+  if (modale) modale.remove();
+
+  modale = document.createElement("div");
+  modale.id = "modale-participant";
+  modale.className = "modale-fond";
+  modale.setAttribute("role", "dialog");
+  modale.setAttribute("aria-modal", "true");
+  modale.setAttribute("aria-labelledby", "titre-modale-participant");
+  modale.innerHTML = `
+    <div class="modale-boite" style="max-width:480px;">
+      <div class="modale-entete">
+        <h2 class="modale-titre" id="titre-modale-participant">
+          ${modeModif ? "Modifier le participant" : "Ajouter un participant"}
+        </h2>
+        <button type="button" class="modale-fermer" id="btn-fermer-participant" aria-label="Fermer">✕</button>
+      </div>
+      <form id="formulaire-participant" novalidate>
+        <div class="champ-groupe">
+          <label class="champ-label" for="part-nom">Nom <span aria-hidden="true">*</span></label>
+          <input type="text" id="part-nom" class="champ-input"
+                 value="${modeModif ? (participant.nom || "") : ""}" required>
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="part-prenom">Prénom</label>
+          <input type="text" id="part-prenom" class="champ-input"
+                 value="${modeModif ? (participant.prenom || "") : ""}">
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="part-email">Email</label>
+          <input type="email" id="part-email" class="champ-input"
+                 value="${modeModif ? (participant.email || "") : ""}">
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="part-telephone">Téléphone</label>
+          <input type="tel" id="part-telephone" class="champ-input"
+                 value="${modeModif ? (participant.telephone || "") : ""}">
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="part-quantite">Quantité</label>
+          <input type="number" id="part-quantite" class="champ-input"
+                 min="1" step="1" value="${modeModif ? (participant.quantite || 1) : 1}">
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="part-montant">Montant (€)</label>
+          <input type="number" id="part-montant" class="champ-input"
+                 min="0" step="1" value="${modeModif ? (participant.montant || "") : ""}">
+        </div>
+        <div id="erreur-participant" class="message-erreur" role="alert" hidden></div>
+        <div class="modale-actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-participant">Annuler</button>
+          <button type="submit" class="btn btn--primaire">${modeModif ? "Enregistrer" : "Ajouter"}</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modale);
+
+  const fermer = function() { modale.remove(); };
+  document.getElementById("btn-fermer-participant").addEventListener("click", fermer);
+  document.getElementById("btn-annuler-participant").addEventListener("click", fermer);
+  modale.addEventListener("click", function(e) { if (e.target === modale) fermer(); });
+
+  document.getElementById("formulaire-participant").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const zoneErreur = document.getElementById("erreur-participant");
+    zoneErreur.hidden = true;
+
+    const nom = document.getElementById("part-nom").value.trim();
+    if (!nom) {
+      zoneErreur.textContent = "Le nom est obligatoire.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    const payload = {
+      evenement_id: idEv,
+      nom,
+      prenom:    document.getElementById("part-prenom").value.trim()    || null,
+      email:     document.getElementById("part-email").value.trim()     || null,
+      telephone: document.getElementById("part-telephone").value.trim() || null,
+      quantite:  parseInt(document.getElementById("part-quantite").value, 10) || 1,
+      montant:   parseFloat(document.getElementById("part-montant").value) || null,
+    };
+
+    let erreur;
+    if (modeModif) {
+      ({ error: erreur } = await clientSupabase
+        .from("participants_evenements").update(payload).eq("id", participant.id));
+    } else {
+      ({ error: erreur } = await clientSupabase
+        .from("participants_evenements").insert([payload]));
+    }
+
+    if (erreur) {
+      zoneErreur.textContent = "Erreur lors de l'enregistrement.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    fermer();
+    await chargerEvenements();
+    const corps = document.getElementById("corps-tableau-evenements");
+    if (corps) {
+      const btn = corps.querySelector(`.btn-toggle-participants[data-ev="${idEv}"]`);
+      if (btn && btn.getAttribute("aria-expanded") === "false") btn.click();
+    }
+  });
+
+  document.getElementById("part-nom").focus();
+}
+
+async function supprimerParticipant(idPart, idEv) {
+  if (!confirm("Supprimer ce participant ?")) return;
+  const { error } = await clientSupabase
+    .from("participants_evenements").delete().eq("id", idPart);
+  if (error) {
+    alert("Erreur lors de la suppression.");
+    return;
+  }
+  await chargerEvenements();
 }
 
 /* =====================================================
