@@ -894,35 +894,54 @@ formulaire.addEventListener("submit", async function(evenement) {
     }
 
     if (montantDon && montantDon > 0) {
-      let idDonateur;
-      try {
-        idDonateur = await genererIdDonateur(saison);
-      } catch (_) {
-        afficherMessageErreur(`Adhérent ajouté (${idAdherent}), mais l'enregistrement du don a échoué — veuillez le saisir manuellement dans le panneau Donateurs.`);
-        return;
+      const msgErrDon = `Adhérent ajouté (${idAdherent}), mais l'enregistrement du don a échoué — veuillez le saisir manuellement dans le panneau Donateurs.`;
+
+      let donateurExistant = null;
+      if (email) {
+        const { data: trouvé } = await clientSupabase
+          .from("donateurs")
+          .select("id")
+          .eq("email", email)
+          .maybeSingle();
+        donateurExistant = trouvé || null;
       }
 
-      const { data: dataDon, error: errorDon } = await clientSupabase.from("donateurs").insert([{
-        id_donateur:     idDonateur,
-        nom,
-        prenom,
-        civilite,
-        organisme:       null,
-        email,
-        telephone,
-        adresse,
-        type_don:        "Don financier",
-        montant_don:     montantDon,
-        date_don:        dateAdhesion,
-        mode_paiement:   modePaiement,
-        description_don: null,
-        numero_cheque:   null,
-        banque_cheque:   null
-      }]);
-
-      if (errorDon) {
-        afficherMessageErreur(`Adhérent ajouté (${idAdherent}), mais l'enregistrement du don a échoué — veuillez le saisir manuellement dans le panneau Donateurs.`);
-        return;
+      if (donateurExistant) {
+        const { error: errorDon } = await clientSupabase.from("dons").insert([{
+          donateur_id:   donateurExistant.id,
+          annee:         parseInt(saison, 10),
+          date_don:      dateAdhesion,
+          montant:       montantDon,
+          mode_paiement: modePaiement || null,
+          type_don:      "Don financier"
+        }]);
+        if (errorDon) { afficherMessageErreur(msgErrDon); return; }
+      } else {
+        let idDonateur;
+        try {
+          idDonateur = await genererIdDonateur(saison);
+        } catch (_) {
+          afficherMessageErreur(msgErrDon);
+          return;
+        }
+        const { error: errorDon } = await clientSupabase.from("donateurs").insert([{
+          id_donateur:     idDonateur,
+          nom,
+          prenom,
+          civilite,
+          organisme:       null,
+          email,
+          telephone,
+          adresse,
+          type_don:        "Don financier",
+          montant_don:     montantDon,
+          date_don:        dateAdhesion,
+          mode_paiement:   modePaiement,
+          description_don: null,
+          numero_cheque:   null,
+          banque_cheque:   null
+        }]);
+        if (errorDon) { afficherMessageErreur(msgErrDon); return; }
       }
     }
 
