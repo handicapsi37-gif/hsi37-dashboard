@@ -532,11 +532,12 @@ function ouvrirModaleModification(adherent) {
     document.getElementById("champ-date-jour").value  = "";
   }
   document.getElementById("champ-type").value      = adherent.type_membre || "";
-  document.getElementById("champ-montant").value =
-    (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
-      ? adherent.montant_cotisation : "";
   const dernCotis = derniereCotisation(adherent.id);
-  const modeVal   = (dernCotis && dernCotis.mode_paiement) || adherent.mode_paiement || "";
+  document.getElementById("champ-montant").value =
+    (dernCotis && dernCotis.montant != null)
+      ? dernCotis.montant
+      : (adherent.montant_cotisation != null ? adherent.montant_cotisation : "");
+  const modeVal = (dernCotis && dernCotis.mode_paiement) || adherent.mode_paiement || "";
   document.getElementById("champ-mode-paiement").value = modeVal.toLowerCase().trim();
   document.getElementById("champ-montant-don").value   = "";
 
