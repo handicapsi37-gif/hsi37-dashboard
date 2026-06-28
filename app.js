@@ -1630,19 +1630,22 @@ function remplirTableauEvenements() {
     </tr>${lignesParticipants}`;
   }).join("");
 
-  corps.addEventListener("click", function handler(e) {
-    const btn = e.target.closest(".btn-toggle-participants");
-    if (!btn) return;
-    const idEv = btn.dataset.ev;
-    const ouvert = btn.getAttribute("aria-expanded") === "true";
-    corps.querySelectorAll(`.sous-ligne-participant[data-ev="${idEv}"]`).forEach(function(tr) {
-      tr.hidden = ouvert;
+  if (!corps._listenerToggle) {
+    corps._listenerToggle = true;
+    corps.addEventListener("click", function(e) {
+      const btn = e.target.closest(".btn-toggle-participants");
+      if (!btn) return;
+      const idEv = btn.dataset.ev;
+      const ouvert = btn.getAttribute("aria-expanded") === "true";
+      corps.querySelectorAll(`.sous-ligne-participant[data-ev="${idEv}"]`).forEach(function(tr) {
+        tr.hidden = ouvert;
+      });
+      btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
+      btn.textContent = ouvert
+        ? btn.textContent.replace("▲", "▼")
+        : btn.textContent.replace("▼", "▲");
     });
-    btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
-    btn.textContent = ouvert
-      ? btn.textContent.replace("▲", "▼")
-      : btn.textContent.replace("▼", "▲");
-  });
+  }
 }
 
 /* =====================================================
