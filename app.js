@@ -151,7 +151,10 @@ function derniereCotisation(adherentId) {
     return String(c.adherent_id) === String(adherentId);
   });
   if (!cotis.length) return null;
-  return cotis.reduce(function(max, c) { return c.annee > max.annee ? c : max; }, cotis[0]);
+  return cotis.reduce(function(max, c) {
+    if (c.annee !== max.annee) return c.annee > max.annee ? c : max;
+    return (c.date_paiement || "") > (max.date_paiement || "") ? c : max;
+  }, cotis[0]);
 }
 
 function dernierDon(donateurId) {
@@ -815,24 +818,30 @@ formulaire.addEventListener("submit", async function(evenement) {
     if (montantCotisation) {
       const aujourdhui   = new Date().toISOString().split("T")[0];
       const anneeEnCours = new Date().getFullYear();
-      console.log("[cotisation] INSERT — adherent_id:", adherentEnCours.id, "| montant:", montantCotisation, "| mode_paiement:", JSON.stringify(modePaiement));
-      const { error: errorCotis, data: dataCotis } = await clientSupabase
-        .from("cotisations")
-        .insert([{
-          adherent_id:   adherentEnCours.id,
-          annee:         anneeEnCours,
-          date_paiement: aujourdhui,
-          montant:       montantCotisation,
-          mode_paiement: modePaiement || null
-        }])
-        .select();
 
-      if (errorCotis || !dataCotis || dataCotis.length === 0) {
-        console.warn("[cotisation] INSERT échoué ou bloqué (RLS):", JSON.stringify(errorCotis));
-        afficherMessageErreur(`Adhérent modifié, mais l'enregistrement de la cotisation a échoué — vérifiez les règles d'accès Supabase (RLS).`);
+      const cotisExistante = donneesCotisations.find(function(c) {
+        return String(c.adherent_id) === String(adherentEnCours.id)
+            && Number(c.annee) === anneeEnCours;
+      });
+
+      let resCotis;
+      if (cotisExistante) {
+        resCotis = await clientSupabase
+          .from("cotisations")
+          .update({ montant: montantCotisation, mode_paiement: modePaiement || null, date_paiement: aujourdhui })
+          .eq("id", cotisExistante.id)
+          .select();
+      } else {
+        resCotis = await clientSupabase
+          .from("cotisations")
+          .insert([{ adherent_id: adherentEnCours.id, annee: anneeEnCours, date_paiement: aujourdhui, montant: montantCotisation, mode_paiement: modePaiement || null }])
+          .select();
+      }
+
+      if (resCotis.error || !resCotis.data || resCotis.data.length === 0) {
+        afficherMessageErreur(`Adhérent modifié, mais l'enregistrement de la cotisation a échoué.`);
         return;
       }
-      console.log("[cotisation] INSERT OK:", JSON.stringify(dataCotis));
     }
 
     if (modePaiement === "chèque") {
