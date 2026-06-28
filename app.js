@@ -851,16 +851,16 @@ formulaire.addEventListener("submit", async function(evenement) {
     }
 
     const nouvelAdherent = {
-      id_adherent:   idAdherent,
+      id_adherent:        idAdherent,
       nom,
       prenom,
       civilite,
       email,
       telephone,
       adresse,
-      date_adhesion: dateAdhesion,
-      montant_don:   montantDon,
-      type_membre:   typeMembre,
+      date_adhesion:      dateAdhesion,
+      montant_cotisation: montantDon,
+      type_membre:        typeMembre,
       saison
     };
 
@@ -2956,8 +2956,8 @@ function majTexteRecuAdh() {
   const cotis = montantCotis != null
     ? montantCotis.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
     : "—";
-  const donVal = (a.montant_don != null && Number(a.montant_don) > 0)
-    ? Number(a.montant_don)
+  const donVal = (a.montant_cotisation != null && Number(a.montant_cotisation) > 0)
+    ? Number(a.montant_cotisation)
     : null;
   const donStr = donVal
     ? donVal.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
