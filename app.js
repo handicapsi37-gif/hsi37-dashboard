@@ -2412,10 +2412,13 @@ function ouvrirModaleDonModification(donateur) {
   document.getElementById("don-telephone").value   = donateur.telephone || "";
   document.getElementById("don-adresse").value     = donateur.adresse || "";
   document.getElementById("don-type").value        = donateur.type_don || "";
-  document.getElementById("don-montant").value     =
-    (donateur.montant_don !== null && donateur.montant_don !== undefined) ? donateur.montant_don : "";
-  document.getElementById("don-description").value    = donateur.description_don || "";
-  document.getElementById("don-mode").value            = donateur.mode_paiement || "";
+  const dernDon = dernierDon(donateur.id);
+  document.getElementById("don-montant").value =
+    (dernDon && dernDon.montant != null) ? dernDon.montant
+    : (donateur.montant_don != null ? donateur.montant_don : "");
+  document.getElementById("don-description").value = donateur.description_don || "";
+  const modeValDon = ((dernDon && dernDon.mode_paiement) || donateur.mode_paiement || "").toLowerCase().trim();
+  document.getElementById("don-mode").value = modeValDon;
   document.getElementById("don-numero-cheque").value   = donateur.numero_cheque || "";
   document.getElementById("don-banque-cheque").value   = donateur.banque_cheque || "";
 
