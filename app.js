@@ -1761,14 +1761,14 @@ function ouvrirModaleParticipant(idEv, participant) {
   modale.setAttribute("aria-modal", "true");
   modale.setAttribute("aria-labelledby", "titre-modale-participant");
   modale.innerHTML = `
-    <div class="modale-boite" style="max-width:480px;">
-      <div class="modale-entete">
-        <h2 class="modale-titre" id="titre-modale-participant">
+    <div class="modale" style="max-width:480px;">
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="titre-modale-participant">
           ${modeModif ? "Modifier le participant" : "Ajouter un participant"}
         </h2>
-        <button type="button" class="modale-fermer" id="btn-fermer-participant" aria-label="Fermer">✕</button>
+        <button type="button" class="modale__fermer" id="btn-fermer-participant" aria-label="Fermer">✕</button>
       </div>
-      <form id="formulaire-participant" novalidate>
+      <form id="formulaire-participant" class="modale__formulaire" novalidate>
         <div class="champ-groupe">
           <label class="champ-label" for="part-nom">Nom <span aria-hidden="true">*</span></label>
           <input type="text" id="part-nom" class="champ-input"
@@ -1800,7 +1800,7 @@ function ouvrirModaleParticipant(idEv, participant) {
                  min="0" step="1" value="${modeModif ? (participant.montant || "") : ""}">
         </div>
         <div id="erreur-participant" class="message-erreur" role="alert" hidden></div>
-        <div class="modale-actions">
+        <div class="modale__actions">
           <button type="button" class="btn btn--secondaire" id="btn-annuler-participant">Annuler</button>
           <button type="submit" class="btn btn--primaire">${modeModif ? "Enregistrer" : "Ajouter"}</button>
         </div>
@@ -1888,14 +1888,14 @@ function ouvrirModaleEvenement(evenement) {
   modale.setAttribute("aria-modal", "true");
   modale.setAttribute("aria-labelledby", "titre-modale-evenement");
   modale.innerHTML = `
-    <div class="modale-boite" style="max-width:480px;">
-      <div class="modale-entete">
-        <h2 class="modale-titre" id="titre-modale-evenement">
+    <div class="modale" style="max-width:480px;">
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="titre-modale-evenement">
           ${modeModif ? "Modifier l'événement" : "Ajouter un événement"}
         </h2>
-        <button type="button" class="modale-fermer" id="btn-fermer-evenement" aria-label="Fermer">✕</button>
+        <button type="button" class="modale__fermer" id="btn-fermer-evenement" aria-label="Fermer">✕</button>
       </div>
-      <form id="formulaire-evenement" novalidate>
+      <form id="formulaire-evenement" class="modale__formulaire" novalidate>
         <div class="champ-groupe">
           <label class="champ-label" for="ev-nom">Nom <span aria-hidden="true">*</span></label>
           <input type="text" id="ev-nom" class="champ-input"
@@ -1918,7 +1918,7 @@ function ouvrirModaleEvenement(evenement) {
                  value="${modeModif && evenement.prix_unitaire != null ? evenement.prix_unitaire : ""}">
         </div>
         <div id="erreur-evenement" class="message-erreur" role="alert" hidden></div>
-        <div class="modale-actions">
+        <div class="modale__actions">
           <button type="button" class="btn btn--secondaire" id="btn-annuler-evenement">Annuler</button>
           <button type="submit" class="btn btn--primaire">${modeModif ? "Enregistrer" : "Ajouter"}</button>
         </div>
