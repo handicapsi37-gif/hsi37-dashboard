@@ -816,15 +816,23 @@ formulaire.addEventListener("submit", async function(evenement) {
       const aujourdhui   = new Date().toISOString().split("T")[0];
       const anneeEnCours = new Date().getFullYear();
       console.log("[cotisation] INSERT — adherent_id:", adherentEnCours.id, "| montant:", montantCotisation, "| mode_paiement:", JSON.stringify(modePaiement));
-      const { error, data } = await clientSupabase.from("cotisations").insert([{
-        adherent_id:   adherentEnCours.id,
-        annee:         anneeEnCours,
-        date_paiement: aujourdhui,
-        montant:       montantCotisation,
-        mode_paiement: modePaiement || null
-      }]);
-      console.log("Erreur INSERT cotisation:", JSON.stringify(error));
-      console.log("Data INSERT cotisation:", JSON.stringify(data));
+      const { error: errorCotis, data: dataCotis } = await clientSupabase
+        .from("cotisations")
+        .insert([{
+          adherent_id:   adherentEnCours.id,
+          annee:         anneeEnCours,
+          date_paiement: aujourdhui,
+          montant:       montantCotisation,
+          mode_paiement: modePaiement || null
+        }])
+        .select();
+
+      if (errorCotis || !dataCotis || dataCotis.length === 0) {
+        console.warn("[cotisation] INSERT échoué ou bloqué (RLS):", JSON.stringify(errorCotis));
+        afficherMessageErreur(`Adhérent modifié, mais l'enregistrement de la cotisation a échoué — vérifiez les règles d'accès Supabase (RLS).`);
+        return;
+      }
+      console.log("[cotisation] INSERT OK:", JSON.stringify(dataCotis));
     }
 
     if (modePaiement === "chèque") {
