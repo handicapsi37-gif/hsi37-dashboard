@@ -108,6 +108,56 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 | date_don | date | Date du don |
 | mode_paiement | text | virement / chèque / espèces |
 
+### Structure de la table `cotisations`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | uuid | Identifiant technique (généré automatiquement) |
+| adherent_id | uuid | Lien vers l'adhérent (clé étrangère → adherents.id) |
+| annee | integer | Année de la cotisation (ex. 2026) |
+| date_paiement | date | Date du paiement |
+| montant | numeric | Montant payé en € |
+| mode_paiement | text | virement / chèque / espèces / etc. |
+| created_at | timestamp | Date de création de la ligne |
+
+### Structure de la table `dons`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | uuid | Identifiant technique (généré automatiquement) |
+| donateur_id | uuid | Lien vers le donateur (clé étrangère → donateurs.id) |
+| annee | integer | Année du don (ex. 2026) |
+| date_don | date | Date du don |
+| montant | numeric | Montant en € |
+| mode_paiement | text | virement / chèque / espèces / etc. |
+| type_don | text | Don financier / Don de matériel |
+| created_at | timestamp | Date de création de la ligne |
+
+### Structure de la table `evenements`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | uuid | Identifiant technique (généré automatiquement) |
+| nom | text | Nom de l'événement |
+| date | date | Date de l'événement |
+| lieu | text | Lieu de l'événement |
+| prix_unitaire | numeric | Prix par participant en € |
+| created_at | timestamp | Date de création de la ligne |
+
+### Structure de la table `participants_evenements`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | uuid | Identifiant technique (généré automatiquement) |
+| evenement_id | uuid | Lien vers l'événement (clé étrangère → evenements.id) |
+| nom | text | Nom du participant |
+| prenom | text | Prénom du participant |
+| email | text | Adresse e-mail |
+| telephone | text | Numéro de téléphone |
+| quantite | integer | Nombre de places |
+| montant | numeric | Montant total payé en € |
+| created_at | timestamp | Date de création de la ligne |
+
 > ⚠️ Ne jamais ajouter ou supprimer une colonne sans en parler d'abord — cela peut casser le dashboard.
 
 ### Modifier une colonne : passer en "Allow Nullable"
@@ -151,10 +201,23 @@ Sans elle, l'envoi de reçus par e-mail ne fonctionne plus. En cas de problème 
 
 ---
 
-## 9. En cas de problème inconnu
+## 9. Règle anti-régression
+
+Après toute modification importante du dashboard (nouveau formulaire, nouvelle logique de sauvegarde, correction de bug), tester immédiatement dans cet ordre :
+
+1. **Ajouter un adhérent** → vérifier que nom, montant, mode de paiement s'enregistrent
+2. **Modifier cet adhérent** → vérifier que les champs se pré-remplissent correctement et que la modification se sauvegarde
+3. **Ajouter un donateur** → vérifier que montant et mode de paiement s'enregistrent
+4. **Modifier ce donateur** → vérifier que les champs se pré-remplissent et que la modification se sauvegarde
+
+Ne pas passer à la fonctionnalité suivante avant que ces 4 tests passent.
+
+---
+
+## 10. En cas de problème inconnu
 
 Avant de toucher quoi que ce soit : fais une capture d'écran de ce que tu vois et contacte Ilhame (toi-même via Claude Code 😄) ou ouvre une nouvelle conversation Claude en décrivant le problème.
 
 ---
 
-*Dernière mise à jour : juin 2026 — V2 complète*
+*Dernière mise à jour : juin 2026 — V3 tables complètes + règle anti-régression*
