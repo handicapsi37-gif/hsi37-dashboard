@@ -2418,10 +2418,6 @@ async function ouvrirModaleDonModification(donateur) {
   document.getElementById("don-adresse").value     = donateur.adresse || "";
   document.getElementById("don-type").value        = donateur.type_don || "";
   const dernDon = dernierDon(donateur.id);
-  console.log("[DEBUG] donateur.id:", donateur.id, "| donneesDons.length:", donneesDons.length, "| dernDon:", dernDon, "| donateur.montant_don:", donateur.montant_don);
-  document.getElementById("don-montant").value =
-    (dernDon && dernDon.montant != null) ? dernDon.montant
-    : (donateur.montant_don != null ? donateur.montant_don : "");
   document.getElementById("don-description").value = donateur.description_don || "";
   const modeValDon = ((dernDon && dernDon.mode_paiement) || donateur.mode_paiement || "").toLowerCase().trim();
   document.getElementById("don-numero-cheque").value   = donateur.numero_cheque || "";
@@ -2439,6 +2435,9 @@ async function ouvrirModaleDonModification(donateur) {
   }
 
   majChampsConditionnelsDon();
+  document.getElementById("don-montant").value =
+    (dernDon && dernDon.montant != null) ? dernDon.montant
+    : (donateur.montant_don != null ? donateur.montant_don : "");
   document.getElementById("don-mode").value = modeValDon;
   majCiviliteVisibiliteDon();
 
