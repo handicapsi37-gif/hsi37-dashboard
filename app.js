@@ -529,11 +529,11 @@ function ouvrirModaleModification(adherent) {
     document.getElementById("champ-date-jour").value  = "";
   }
   document.getElementById("champ-type").value      = adherent.type_membre || "";
-  document.getElementById("champ-montant").value        = "";
-  document.getElementById("champ-mode-paiement").value  = "";
-  document.getElementById("champ-montant-don").value =
+  document.getElementById("champ-montant").value =
     (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? adherent.montant_cotisation : "";
+  document.getElementById("champ-mode-paiement").value  = "";
+  document.getElementById("champ-montant-don").value    = "";
 
   const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
   document.getElementById("champ-numero-cheque").value = chequeAdh.numero_cheque || "";
@@ -799,7 +799,7 @@ formulaire.addEventListener("submit", async function(evenement) {
         telephone,
         adresse,
         date_adhesion:      dateAdhesion,
-        montant_cotisation: montantDon,
+        montant_cotisation: montantCotisation,
         type_membre:        typeMembre,
         civilite
       })
