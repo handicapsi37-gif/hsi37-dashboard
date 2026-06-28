@@ -1587,7 +1587,7 @@ function remplirTableauEvenements() {
     : donneesEvenements;
 
   if (!liste.length) {
-    corps.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:1rem;color:#666;">Aucun événement trouvé.</td></tr>';
+    corps.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1rem;color:#666;">Aucun événement trouvé.</td></tr>';
     return;
   }
 
@@ -1662,6 +1662,32 @@ function remplirTableauEvenements() {
       <td>${prix}</td>
       <td>${btnToggle}</td>
       <td>${totalStr}</td>
+      <td>
+        <button type="button" class="btn-icone btn-modifier-evenement"
+                data-ev-id="${ev.id}" title="Modifier" aria-label="Modifier l'événement">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button type="button" class="btn-icone btn-supprimer-evenement"
+                data-ev-id="${ev.id}" title="Supprimer" aria-label="Supprimer l'événement">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17">
+            <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"
+                      fill="none" stroke-linecap="round"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2"
+                  fill="none" stroke-linecap="round"/>
+            <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </td>
     </tr>${lignesParticipants}`;
   }).join("");
 
@@ -1701,6 +1727,21 @@ function remplirTableauEvenements() {
       const btnAjouter = e.target.closest(".btn-ajouter-participant");
       if (btnAjouter) {
         ouvrirModaleParticipant(btnAjouter.dataset.ev, null);
+        return;
+      }
+
+      const btnModifierEv = e.target.closest(".btn-modifier-evenement");
+      if (btnModifierEv) {
+        const ev = donneesEvenements.find(function(e) {
+          return String(e.id) === String(btnModifierEv.dataset.evId);
+        });
+        ouvrirModaleEvenement(ev);
+        return;
+      }
+
+      const btnSupprimerEv = e.target.closest(".btn-supprimer-evenement");
+      if (btnSupprimerEv) {
+        supprimerEvenement(btnSupprimerEv.dataset.evId);
         return;
       }
     });
@@ -1827,6 +1868,116 @@ async function supprimerParticipant(idPart, idEv) {
   if (!confirm("Supprimer ce participant ?")) return;
   const { error } = await clientSupabase
     .from("participants_evenements").delete().eq("id", idPart);
+  if (error) {
+    alert("Erreur lors de la suppression.");
+    return;
+  }
+  await chargerEvenements();
+}
+
+function ouvrirModaleEvenement(evenement) {
+  const modeModif = !!evenement;
+
+  let modale = document.getElementById("modale-evenement");
+  if (modale) modale.remove();
+
+  modale = document.createElement("div");
+  modale.id = "modale-evenement";
+  modale.className = "modale-fond";
+  modale.setAttribute("role", "dialog");
+  modale.setAttribute("aria-modal", "true");
+  modale.setAttribute("aria-labelledby", "titre-modale-evenement");
+  modale.innerHTML = `
+    <div class="modale-boite" style="max-width:480px;">
+      <div class="modale-entete">
+        <h2 class="modale-titre" id="titre-modale-evenement">
+          ${modeModif ? "Modifier l'événement" : "Ajouter un événement"}
+        </h2>
+        <button type="button" class="modale-fermer" id="btn-fermer-evenement" aria-label="Fermer">✕</button>
+      </div>
+      <form id="formulaire-evenement" novalidate>
+        <div class="champ-groupe">
+          <label class="champ-label" for="ev-nom">Nom <span aria-hidden="true">*</span></label>
+          <input type="text" id="ev-nom" class="champ-input"
+                 value="${modeModif ? (evenement.nom || "") : ""}" required>
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="ev-date">Date</label>
+          <input type="date" id="ev-date" class="champ-input"
+                 value="${modeModif && evenement.date ? evenement.date.split("T")[0] : ""}">
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="ev-lieu">Lieu</label>
+          <input type="text" id="ev-lieu" class="champ-input"
+                 value="${modeModif ? (evenement.lieu || "") : ""}">
+        </div>
+        <div class="champ-groupe">
+          <label class="champ-label" for="ev-prix">Prix unitaire (€)</label>
+          <input type="number" id="ev-prix" class="champ-input"
+                 min="0" step="1"
+                 value="${modeModif && evenement.prix_unitaire != null ? evenement.prix_unitaire : ""}">
+        </div>
+        <div id="erreur-evenement" class="message-erreur" role="alert" hidden></div>
+        <div class="modale-actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-evenement">Annuler</button>
+          <button type="submit" class="btn btn--primaire">${modeModif ? "Enregistrer" : "Ajouter"}</button>
+        </div>
+      </form>
+    </div>
+  `;
+
+  document.body.appendChild(modale);
+
+  const fermer = function() { modale.remove(); };
+  document.getElementById("btn-fermer-evenement").addEventListener("click", fermer);
+  document.getElementById("btn-annuler-evenement").addEventListener("click", fermer);
+  modale.addEventListener("click", function(e) { if (e.target === modale) fermer(); });
+
+  document.getElementById("formulaire-evenement").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const zoneErreur = document.getElementById("erreur-evenement");
+    zoneErreur.hidden = true;
+
+    const nom = document.getElementById("ev-nom").value.trim();
+    if (!nom) {
+      zoneErreur.textContent = "Le nom est obligatoire.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    const payload = {
+      nom,
+      date:          document.getElementById("ev-date").value         || null,
+      lieu:          document.getElementById("ev-lieu").value.trim()  || null,
+      prix_unitaire: parseFloat(document.getElementById("ev-prix").value) || null,
+    };
+
+    let erreur;
+    if (modeModif) {
+      ({ error: erreur } = await clientSupabase
+        .from("evenements").update(payload).eq("id", evenement.id));
+    } else {
+      ({ error: erreur } = await clientSupabase
+        .from("evenements").insert([payload]));
+    }
+
+    if (erreur) {
+      zoneErreur.textContent = "Erreur lors de l'enregistrement.";
+      zoneErreur.hidden = false;
+      return;
+    }
+
+    fermer();
+    await chargerEvenements();
+  });
+
+  document.getElementById("ev-nom").focus();
+}
+
+async function supprimerEvenement(idEv) {
+  if (!confirm("Supprimer cet événement et tous ses participants ?")) return;
+  const { error } = await clientSupabase
+    .from("evenements").delete().eq("id", idEv);
   if (error) {
     alert("Erreur lors de la suppression.");
     return;
@@ -3284,6 +3435,9 @@ document.getElementById("tuile-donateurs").addEventListener("click", function() 
 });
 document.getElementById("tuile-evenements").addEventListener("click", function() {
   allerVers("evenements");
+});
+document.getElementById("btn-ajouter-evenement").addEventListener("click", function() {
+  ouvrirModaleEvenement(null);
 });
 document.getElementById("tuile-documents").addEventListener("click", function() {
   allerVers("documents");

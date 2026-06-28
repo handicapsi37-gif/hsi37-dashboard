@@ -462,6 +462,15 @@
             <input type="search" id="recherche-evenements" placeholder="Nom de l'événement…" autocomplete="off">
           </div>
         </div>
+        <div class="barre-actions__droite">
+          <button class="btn btn--primaire" id="btn-ajouter-evenement" type="button">
+            <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+                 viewBox="0 0 24 24" width="16" height="16">
+              <path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+            Ajouter un événement
+          </button>
+        </div>
       </section>
 
       <div id="message-succes-evenements" class="message-succes" role="status" aria-live="polite" hidden></div>
@@ -477,6 +486,7 @@
                 <th scope="col">Prix unitaire</th>
                 <th scope="col">Participants</th>
                 <th scope="col">Total collecté</th>
+                <th scope="col">Actions</th>
               </tr>
             </thead>
             <tbody id="corps-tableau-evenements"></tbody>
