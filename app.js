@@ -3096,6 +3096,9 @@ document.getElementById("tuile-adherents").addEventListener("click", function() 
 document.getElementById("tuile-donateurs").addEventListener("click", function() {
   allerVers("donateurs");
 });
+document.getElementById("tuile-evenements").addEventListener("click", function() {
+  allerVers("evenements");
+});
 document.getElementById("tuile-documents").addEventListener("click", function() {
   allerVers("documents");
 });
