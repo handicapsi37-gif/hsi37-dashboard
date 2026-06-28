@@ -2278,7 +2278,7 @@ function majChampsConditionnelsDon() {
 
 function majChampsChequeDon() {
   const mode     = document.getElementById("don-mode").value;
-  const estCheque = mode === "Chèque";
+  const estCheque = mode === "chèque";
   const groupeMode = document.getElementById("groupe-don-mode");
   document.getElementById("groupe-cheque-don").hidden = groupeMode.hidden || !estCheque;
 }
@@ -2418,7 +2418,6 @@ function ouvrirModaleDonModification(donateur) {
     : (donateur.montant_don != null ? donateur.montant_don : "");
   document.getElementById("don-description").value = donateur.description_don || "";
   const modeValDon = ((dernDon && dernDon.mode_paiement) || donateur.mode_paiement || "").toLowerCase().trim();
-  document.getElementById("don-mode").value = modeValDon;
   document.getElementById("don-numero-cheque").value   = donateur.numero_cheque || "";
   document.getElementById("don-banque-cheque").value   = donateur.banque_cheque || "";
 
@@ -2434,6 +2433,7 @@ function ouvrirModaleDonModification(donateur) {
   }
 
   majChampsConditionnelsDon();
+  document.getElementById("don-mode").value = modeValDon;
   majCiviliteVisibiliteDon();
 
   document.getElementById("zone-recherche-don").hidden     = true;
