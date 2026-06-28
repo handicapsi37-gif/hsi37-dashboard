@@ -536,8 +536,8 @@ function ouvrirModaleModification(adherent) {
     (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? adherent.montant_cotisation : "";
   const dernCotis = derniereCotisation(adherent.id);
-  document.getElementById("champ-mode-paiement").value =
-    (dernCotis && dernCotis.mode_paiement) || adherent.mode_paiement || "";
+  const modeVal   = (dernCotis && dernCotis.mode_paiement) || adherent.mode_paiement || "";
+  document.getElementById("champ-mode-paiement").value = modeVal.toLowerCase().trim();
   document.getElementById("champ-montant-don").value   = "";
 
   const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
