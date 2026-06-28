@@ -14,44 +14,32 @@ Contexte handicap : l'ACCESSIBILITÉ prime sur l'esthétique en cas de conflit.
 
 ## 1. COULEURS OFFICIELLES (codes exacts, à utiliser tels quels)
 
-### Bleus (couleur dominante)
-- Bleu principal : `#2D82C4`  — logo, titres, boutons d'action, aplats principaux
-- Bleu clair / icônes : `#5AA9E6`  — survols, éléments secondaires, icônes
-- Bleu foncé texte/logo : `#1F4E79`  — texte bleu sur fond clair, liens, contours
+Palette HSI37 — 4 couleurs officielles :
 
-### Orange (couleur d'accent — CTA / don)
-- Orange : `#F28C28`  — appels à l'action, accent "don", éléments à mettre en avant
-- Orange foncé : `#D96F00`  — survol des éléments orange, texte orange sur fond clair
+- Bleu principal : `#3B77B5`  — logo, titres, boutons d'action, aplats principaux, en-têtes
+- Jaune/or (accent) : `#F7CD46`  — accents, éléments à mettre en avant, CTA secondaires
+- Fond clair : `#FAFBF9`  — fond général, fonds de section, zones de respiration
+- Encre (texte) : `#403E3E`  — tout le texte courant principal
 
-### Neutres
-- Gris texte : `#333333`  — texte courant principal
-- Gris secondaire : `#666666`  — texte secondaire, légendes
-- Fond clair : `#F8F9FA`  — fonds de section, zones de respiration
-- Blanc : `#FFFFFF`  — fond principal, texte sur fond bleu
+Blanc : `#FFFFFF`  — texte sur fond bleu, zones de contraste fort
 
 ### Variables CSS recommandées
 ```css
 :root {
-  --bleu: #2D82C4;
-  --bleu-clair: #5AA9E6;
-  --bleu-fonce: #1F4E79;
-  --orange: #F28C28;
-  --orange-fonce: #D96F00;
-  --gris-texte: #333333;
-  --gris-secondaire: #666666;
-  --fond-clair: #F8F9FA;
+  --bleu: #3B77B5;
+  --jaune: #F7CD46;
+  --fond-clair: #FAFBF9;
+  --encre: #403E3E;
   --blanc: #FFFFFF;
 }
 ```
 
 ### Règles d'usage des couleurs (ACCESSIBILITÉ — important)
 - Contraste texte/fond : viser au minimum WCAG AA (ratio 4.5:1 pour le texte normal).
-- Pour du TEXTE coloré sur fond clair : utiliser `--bleu-fonce` (#1F4E79) ou
-  `--orange-fonce` (#D96F00). NE JAMAIS utiliser l'orange vif #F28C28 ni le bleu clair
-  #5AA9E6 pour du texte normal (contraste insuffisant).
-- Texte sur fond bleu (#2D82C4 ou #1F4E79) : toujours en blanc.
-- L'orange est un ACCENT : à doser, ne pas en faire la couleur dominante. La dominante
-  reste le bleu.
+- Texte courant : toujours `--encre` (#403E3E) sur `--fond-clair` (#FAFBF9) ou blanc.
+- Texte sur fond bleu (#3B77B5) : toujours en blanc (#FFFFFF).
+- Le jaune #F7CD46 NE PEUT PAS être utilisé pour du texte (contraste insuffisant ~1.8:1).
+  Usage autorisé : fond de bouton ou badge avec texte encre (#403E3E) dessus, ou élément décoratif.
 - Ne jamais coder une information uniquement par la couleur : toujours doubler d'un
   texte ou d'une icône (ex. statut adhérent = pastille + libellé écrit).
 
@@ -60,35 +48,37 @@ Contexte handicap : l'ACCESSIBILITÉ prime sur l'esthétique en cas de conflit.
 ## 2. TYPOGRAPHIE
 
 ### Polices officielles (gratuites, Google Fonts)
-- **Titres** : `Oswald` — sans-serif condensée, grasse, impactante.
-  Utilisée pour les grands titres, en majuscules de préférence (ex. "DONNEZ UNE SECONDE VIE").
-- **Texte courant** : `Open Sans` — sans-serif très lisible, neutre, accessible.
+- **Titres** : `Bebas Neue` — sans-serif display, très impactante, toute en capitales.
+  Utilisée pour les grands titres uniquement (ex. "DONNEZ UNE SECONDE VIE").
+- **Texte courant** : `Montserrat` — sans-serif géométrique, lisible, moderne, accessible.
 
 ### Import (pour le web / HTML)
 ```html
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
 ```
 
 ### Application CSS
 ```css
-h1, h2, h3, .titre { font-family: 'Oswald', sans-serif; }
-body, p, .texte    { font-family: 'Open Sans', sans-serif; }
+h1, h2, h3, .titre { font-family: 'Bebas Neue', sans-serif; }
+body, p, .texte    { font-family: 'Montserrat', sans-serif; }
 ```
 
 ### Règles de typographie
-- Titres : Oswald, gras, lettres larges ; possibilité de majuscules pour l'impact.
-- Texte courant : Open Sans régulier, taille confortable (≥ 16px sur écran pour la lisibilité).
-- Mots-clés importants dans le texte : peuvent être mis en bleu (`--bleu` ou `--bleu-fonce`)
+- Bebas Neue : titres uniquement, grandes tailles (≥ 24px) ; ne pas utiliser pour le texte courant.
+- Montserrat : texte courant, taille ≥ 16px, poids 400 (normal) et 600 (semi-gras).
+- Mots-clés importants dans le texte : peuvent être mis en bleu (`--bleu`)
   pour les valoriser, comme sur les affiches.
 - Garder une bonne taille et un bon interlignage (lisibilité = priorité, contexte handicap).
+- Le jaune #F7CD46 est un accent dosé : max 1 élément par écran, jamais utilisé en couleur
+  dominante sur le dashboard.
 
 ---
 
 ## 3. LOGO
 
-- Logo principal : "hsi37" en blanc sur fond bleu (#2D82C4), avec la baseline
+- Logo principal : "hsi37" en blanc sur fond bleu (#3B77B5), avec la baseline
   "Handicap Solidarité pour l'Inclusion".
 - Fichiers disponibles : version carrée 512x512 et version horizontale.
 - Toujours laisser de l'espace autour du logo (zone de respiration).
@@ -101,8 +91,8 @@ body, p, .texte    { font-family: 'Open Sans', sans-serif; }
 ## 4. ÉLÉMENTS GRAPHIQUES SIGNATURE (style des affiches)
 
 - **Formes arrondies organiques** : bandeaux en "vague / nuage" (comme les sections
-  "NOS ACTIONS" des affiches), souvent en orange ou bleu, pour délimiter les sections.
-- **Ligne ondulée fine** orange/dorée en séparation.
+  "NOS ACTIONS" des affiches), souvent en jaune/or ou bleu, pour délimiter les sections.
+- **Ligne ondulée fine** jaune/dorée en séparation.
 - **Icônes au trait simple et épuré** : fauteuil roulant, déambulateur, sac d'argent (€),
   poignée de main, téléphone, email, web.
 - **Mise en page aérée** : beaucoup d'espace blanc, sections clairement délimitées
@@ -126,6 +116,6 @@ body, p, .texte    { font-family: 'Open Sans', sans-serif; }
 
 ## 6. RÈGLE D'OR
 Cohérence avant tout : tout document ou écran HSI37 doit être immédiatement
-reconnaissable — bleu dominant, orange en accent, Oswald pour les titres,
-Open Sans pour le texte, logo hsi37, formes arrondies, et accessibilité soignée.
+reconnaissable — bleu dominant, jaune/or en accent, Bebas Neue pour les titres,
+Montserrat pour le texte, logo hsi37, formes arrondies, et accessibilité soignée.
 En cas de doute entre "joli" et "lisible/accessible", choisir lisible/accessible.
