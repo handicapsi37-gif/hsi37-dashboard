@@ -245,22 +245,6 @@ function genererBoutonsActions(idAdherent, idTechnique, statutCle) {
   ` : '';
 
   return `
-    <button class="btn-icone btn-icone--cotisations"
-            aria-label="Cotisations de ${idAdherent}"
-            title="Gérer les cotisations"
-            type="button"
-            data-id-technique="${idTechnique}">
-      <svg aria-hidden="true" focusable="false"
-           xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
-           width="17" height="17">
-        <line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        <circle cx="3" cy="6" r="1.5" fill="currentColor"/>
-        <circle cx="3" cy="12" r="1.5" fill="currentColor"/>
-        <circle cx="3" cy="18" r="1.5" fill="currentColor"/>
-      </svg>
-    </button>
     <button class="btn-icone btn-icone--modifier"
             aria-label="Modifier l'adhérent ${idAdherent}"
             title="Modifier"
@@ -953,19 +937,12 @@ formulaire.addEventListener("submit", async function(evenement) {
 
 document.getElementById("corps-tableau").addEventListener("click", function(evenement) {
   /* closest() remonte l'arbre DOM même si le clic a touché le SVG interne */
-  const btnCotisations = evenement.target.closest(".btn-icone--cotisations");
   const btnModifier    = evenement.target.closest(".btn-icone--modifier");
   const btnSupprimer   = evenement.target.closest(".btn-icone--supprimer");
   const btnCarte       = evenement.target.closest(".btn-icone--carte");
   const btnRecuAdh     = evenement.target.closest(".btn-icone--recu-adh");
   const btnAttestation = evenement.target.closest(".btn-icone--attestation");
   const btnRelance     = evenement.target.closest(".btn-icone--relance");
-
-  if (btnCotisations) {
-    const idTechnique = btnCotisations.dataset.idTechnique;
-    const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
-    if (adherent) ouvrirModaleCotisations(adherent);
-  }
 
   if (btnModifier) {
     const idTechnique = btnModifier.dataset.idTechnique;
@@ -1090,119 +1067,6 @@ document.getElementById("btn-confirmer-suppression").addEventListener("click", a
   await chargerAdherents();
   afficherMessageSucces(`Adhérent supprimé : ${nomComplet}.`);
 });
-
-/* =====================================================
-   MODALE COTISATIONS — HISTORIQUE + AJOUT
-   ===================================================== */
-
-let modaleCotisationsAdherent = null;
-
-function ouvrirModaleCotisations(adherent) {
-  modaleCotisationsAdherent = adherent;
-
-  let fond = document.getElementById("cotisations-fond");
-  if (!fond) {
-    fond = document.createElement("div");
-    fond.id = "cotisations-fond";
-    fond.style.cssText = "position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:1000;display:flex;align-items:center;justify-content:center;";
-    fond.innerHTML = `
-      <div id="cotisations-modale" role="dialog" aria-modal="true" tabindex="-1"
-           style="background:#fff;border-radius:8px;padding:28px 32px;max-width:640px;width:95%;max-height:85vh;overflow-y:auto;outline:none;">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;">
-          <h2 id="cotisations-titre" style="font-size:1.15rem;margin:0;color:var(--bleu,#3B77B5);"></h2>
-          <button id="cotisations-fermer" type="button" aria-label="Fermer"
-                  style="background:none;border:none;font-size:1.4rem;cursor:pointer;line-height:1;">&#x2715;</button>
-        </div>
-        <div id="cotisations-erreur" role="alert" style="color:#c0392b;margin-bottom:10px;display:none;"></div>
-        <form id="cotisations-form" style="display:grid;grid-template-columns:1fr 1fr;gap:10px 16px;">
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Année *
-            <input id="cotis-annee" type="number" min="2024" max="2099" value="2026" required
-                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Date de paiement *
-            <input id="cotis-date" type="date" required
-                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Montant (€) *
-            <input id="cotis-montant" type="number" step="1" min="0" required
-                   style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-          </label>
-          <label style="display:flex;flex-direction:column;gap:4px;font-size:.85rem;">
-            Mode de paiement
-            <select id="cotis-mode" style="padding:7px;border:1px solid #ccc;border-radius:4px;">
-              <option value="">—</option>
-              <option value="virement">Virement</option>
-              <option value="chèque">Chèque</option>
-              <option value="espèces">Espèces</option>
-              <option value="carte bancaire">Carte bancaire</option>
-              <option value="payasso">PayAsso</option>
-              <option value="paypal">PayPal</option>
-              <option value="helloasso">HelloAsso</option>
-            </select>
-          </label>
-          <button type="submit"
-                  style="grid-column:1/-1;padding:9px;background:var(--bleu,#3B77B5);color:#fff;border:none;border-radius:4px;cursor:pointer;font-size:.95rem;">
-            Enregistrer
-          </button>
-        </form>
-      </div>
-    `;
-    document.body.appendChild(fond);
-
-    document.getElementById("cotisations-fermer").addEventListener("click", fermerModaleCotisations);
-    fond.addEventListener("click", function(e) { if (e.target === fond) fermerModaleCotisations(); });
-
-    document.getElementById("cotisations-form").addEventListener("submit", async function(e) {
-      e.preventDefault();
-      const zoneErreur = document.getElementById("cotisations-erreur");
-      zoneErreur.style.display = "none";
-
-      const annee    = parseInt(document.getElementById("cotis-annee").value, 10);
-      const date     = document.getElementById("cotis-date").value;
-      const montant  = parseFloat(document.getElementById("cotis-montant").value.replace(",", "."));
-      const mode     = document.getElementById("cotis-mode").value || null;
-
-      if (!annee || !date || isNaN(montant)) {
-        zoneErreur.textContent = "Veuillez remplir les champs obligatoires.";
-        zoneErreur.style.display = "block";
-        return;
-      }
-
-      const { error } = await clientSupabase.from("cotisations").insert([{
-        adherent_id:   modaleCotisationsAdherent.id,
-        annee,
-        date_paiement: date,
-        montant,
-        mode_paiement: mode
-      }]);
-
-      if (error) {
-        zoneErreur.textContent = "Enregistrement échoué. Vérifiez votre connexion.";
-        zoneErreur.style.display = "block";
-        return;
-      }
-
-      await chargerAdherents();
-      document.getElementById("cotisations-form").reset();
-    });
-  }
-
-  fond.style.display = "flex";
-  document.getElementById("cotisations-form").reset();
-  document.getElementById("cotisations-erreur").style.display = "none";
-  document.getElementById("cotisations-titre").textContent =
-    "Cotisation — " + (adherent.prenom || "") + " " + (adherent.nom || "");
-  document.getElementById("cotisations-modale").focus();
-}
-
-function fermerModaleCotisations() {
-  const fond = document.getElementById("cotisations-fond");
-  if (fond) fond.style.display = "none";
-  modaleCotisationsAdherent = null;
-}
 
 /* =====================================================
    MODALE DONS — HISTORIQUE + AJOUT
