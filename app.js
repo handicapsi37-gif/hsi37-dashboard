@@ -532,8 +532,8 @@ function ouvrirModaleModification(adherent) {
   document.getElementById("champ-montant").value        = "";
   document.getElementById("champ-mode-paiement").value  = "";
   document.getElementById("champ-montant-don").value =
-    (adherent.montant_don !== null && adherent.montant_don !== undefined)
-      ? adherent.montant_don : "";
+    (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
+      ? adherent.montant_cotisation : "";
 
   const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
   document.getElementById("champ-numero-cheque").value = chequeAdh.numero_cheque || "";
@@ -798,8 +798,9 @@ formulaire.addEventListener("submit", async function(evenement) {
         email,
         telephone,
         adresse,
-        date_adhesion: dateAdhesion,
-        type_membre:   typeMembre,
+        date_adhesion:      dateAdhesion,
+        montant_cotisation: montantDon,
+        type_membre:        typeMembre,
         civilite
       })
       .eq("id", adherentEnCours.id);
