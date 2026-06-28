@@ -2729,6 +2729,29 @@ formulaireDon.addEventListener("submit", async function(evenement) {
       }]);
     }
 
+    if (montantDon && typeDon && typeDon.toLowerCase().includes("financier")) {
+      const anneeEnCours = annee ? parseInt(annee, 10) : new Date().getFullYear();
+      const donExistant = donneesDons.find(function(d) {
+        return String(d.donateur_id) === String(donateurEnCours.id)
+            && Number(d.annee) === anneeEnCours;
+      });
+      if (donExistant) {
+        await clientSupabase.from("dons")
+          .update({ montant: montantDon, mode_paiement: modePaiement || null })
+          .eq("donateur_id", donateurEnCours.id)
+          .eq("annee", anneeEnCours);
+      } else {
+        await clientSupabase.from("dons").insert([{
+          donateur_id:   donateurEnCours.id,
+          annee:         anneeEnCours,
+          date_don:      dateDon,
+          montant:       montantDon,
+          mode_paiement: modePaiement || null,
+          type_don:      typeDon
+        }]);
+      }
+    }
+
     fermerModaleDon();
     await chargerDonateurs();
     afficherSuccesDon(`Donateur modifié : ${prenom ? prenom + " " : ""}${nom}.`);
