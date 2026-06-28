@@ -421,6 +421,24 @@ def construire_contenu(s):
     ]:
         story.append(fleche(etape, s['liste']))
 
+    story.append(Paragraph("4.1  Envoyer la carte par e-mail", s['sous_section']))
+    story.append(Paragraph(
+        "Le Dashboard ne peut pas envoyer la carte directement par mail — "
+        "il faut la télécharger d'abord, puis l'envoyer manuellement depuis Gmail :",
+        s['corps'],
+    ))
+    for etape in [
+        "Téléchargez la carte (bouton <b>« Télécharger la carte »</b>) — "
+        "le fichier PNG se sauvegarde dans votre dossier <b>Téléchargements</b>.",
+        "<b>Sur Mac :</b> ouvrez Gmail dans Safari → Composer → "
+        "cliquez sur l'icône trombone (pièce jointe) → sélectionnez le fichier PNG.",
+        "<b>Sur PC :</b> ouvrez Gmail dans Chrome → Composer → "
+        "cliquez sur l'icône trombone → sélectionnez le fichier PNG.",
+        "Ajoutez l'adresse e-mail de l'adhérent dans le champ <b>« À »</b> et cliquez sur <b>Envoyer</b>.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+    story.append(espacement(0.3))
+
     # ── SECTION 5 — REÇU D'ADHÉSION ──────────────────────────────
     story.append(Paragraph("5. Générer un reçu d'adhésion", s['section']))
     story.append(filet_bleu())
@@ -482,14 +500,33 @@ def construire_contenu(s):
         s['corps'],
     ))
 
-    story.append(Paragraph("6.4  Don financier", s['sous_section']))
+    story.append(Paragraph("6.4  Rechercher avant de créer", s['sous_section']))
+    story.append(Paragraph(
+        "Avant d'ajouter un nouveau donateur, vérifiez toujours s'il existe déjà "
+        "dans la liste pour éviter les doublons. Tapez son nom ou e-mail dans la barre "
+        "de recherche au-dessus du tableau. Si la fiche existe, utilisez la modification "
+        "(icône crayon ✏) plutôt que d'en créer une nouvelle.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("6.5  Ajouter un don à une fiche existante", s['sous_section']))
+    story.append(Paragraph(
+        "Si un donateur déjà enregistré refait un don, inutile de créer une nouvelle fiche. "
+        "Depuis le tableau, cliquez sur l'icône <b>crayon ✏</b> de sa ligne. "
+        "En bas du formulaire, un bloc <b>« Ajout d'un don »</b> permet de saisir "
+        "le montant, le mode de paiement et le type du nouveau don. "
+        "Cliquez sur <b>« Enregistrer les modifications »</b> — le don s'ajoute à son historique.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("6.6  Don financier", s['sous_section']))
     story.append(Paragraph(
         "Choisissez <b>« Don financier »</b> comme type de don. "
         "Renseignez le <b>montant</b> en euros et le <b>mode de paiement</b>.",
         s['corps'],
     ))
 
-    story.append(Paragraph("6.5  Don de matériel", s['sous_section']))
+    story.append(Paragraph("6.7  Don de matériel", s['sous_section']))
     story.append(Paragraph(
         "Choisissez <b>« Don de matériel »</b>. "
         "Décrivez le matériel dans le champ <b>Description</b> "
@@ -497,14 +534,14 @@ def construire_contenu(s):
         s['corps'],
     ))
 
-    story.append(Paragraph("6.6  Modifier ou supprimer", s['sous_section']))
+    story.append(Paragraph("6.8  Modifier ou supprimer", s['sous_section']))
     story.append(Paragraph(
         "Même principe que les adhérents : "
         "icône <b>crayon ✏</b> pour modifier, icône <b>poubelle 🗑</b> pour supprimer.",
         s['corps'],
     ))
 
-    story.append(Paragraph("6.7  Générer un reçu de don", s['sous_section']))
+    story.append(Paragraph("6.9  Générer un reçu de don", s['sous_section']))
     story.append(Paragraph(
         "Cliquez sur l'icône reçu sur la ligne du donateur, "
         "choisissez un signataire (président, trésorière ou secrétaire).",
@@ -523,7 +560,7 @@ def construire_contenu(s):
     ))
 
     story.append(Spacer(1, 12))
-    story.append(Paragraph("6.8  Ajouter un adhérent avec don", s['sous_section']))
+    story.append(Paragraph("6.10  Ajouter un adhérent avec don", s['sous_section']))
     story.append(Paragraph(
         "Un adhérent peut aussi être donateur. Si la personne verse une cotisation "
         "ET effectue un don (financier ou matériel) au moment de son adhésion, "
@@ -615,8 +652,61 @@ def construire_contenu(s):
 
     story.append(PageBreak())
 
-    # ── SECTION 8 — EXPORTER LES DONNÉES ─────────────────────────
-    story.append(Paragraph("8. Exporter les données", s['section']))
+    # ── SECTION 8 — ÉVÉNEMENTS ────────────────────────────────────
+    story.append(Paragraph("8. Module Événements", s['section']))
+    story.append(filet_bleu())
+
+    story.append(Paragraph(
+        "Le module Événements permet de gérer les événements organisés par HSI37 "
+        "(sorties, ateliers, repas, assemblées générales…) et de suivre les participants.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("8.1  Créer un événement", s['sous_section']))
+    story.append(Paragraph(
+        "Depuis la page d'accueil, cliquez sur la tuile <b>« Événements »</b>. "
+        "Cliquez sur le bouton <b>« + Nouvel événement »</b>. Remplissez :",
+        s['corps'],
+    ))
+    for champ in [
+        "<b>Nom</b> : intitulé de l'événement (ex : Sortie pique-nique juillet 2026).",
+        "<b>Date</b> : jour, mois et année de l'événement.",
+        "<b>Lieu</b> : adresse ou nom du lieu.",
+        "<b>Prix unitaire</b> : tarif par participant en euros (laisser vide si gratuit).",
+    ]:
+        story.append(fleche(champ, s['liste']))
+    story.append(Paragraph(
+        "Cliquez sur <b>« Enregistrer »</b>. L'événement apparaît dans la liste.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("8.2  Ajouter des participants", s['sous_section']))
+    story.append(Paragraph(
+        "Cliquez sur l'icône <b>crayon ✏</b> de l'événement pour l'ouvrir. "
+        "Dans la section <b>Participants</b>, cliquez sur <b>« + Ajouter »</b>. "
+        "Renseignez le nom, le prénom, l'e-mail, le téléphone et le nombre de places. "
+        "Le montant total est calculé automatiquement (quantité × prix unitaire). "
+        "Cliquez sur <b>« Enregistrer »</b>.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("8.3  Modifier ou supprimer", s['sous_section']))
+    story.append(Paragraph(
+        "Pour modifier un événement ou un participant : icône <b>crayon ✏</b>. "
+        "Pour supprimer : icône <b>poubelle 🗑</b> puis confirmer. "
+        "La suppression d'un événement supprime aussi tous ses participants.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "⚠️  La suppression est définitive. En cas d'erreur, contactez Ilhame immédiatement.",
+        s['note'],
+    ))
+    story.append(espacement(0.3))
+
+    story.append(PageBreak())
+
+    # ── SECTION 9 — EXPORTER LES DONNÉES ─────────────────────────
+    story.append(Paragraph("9. Exporter les données", s['section']))
     story.append(filet_bleu())
     story.append(Paragraph(
         "Le Dashboard permet d'exporter la liste des adhérents et la liste des donateurs "
@@ -632,7 +722,7 @@ def construire_contenu(s):
     ]:
         story.append(fleche(raison, s['liste']))
     story.append(espacement(0.25))
-    story.append(Paragraph("8.1  Exporter la liste des adhérents", s['sous_section']))
+    story.append(Paragraph("9.1  Exporter la liste des adhérents", s['sous_section']))
     story.append(espacement(0.15))
     for etape in [
         "Depuis la page d'accueil, cliquez sur la tuile <b>« Adhérents »</b>.",
@@ -660,7 +750,7 @@ def construire_contenu(s):
         s['corps'],
     ))
     story.append(espacement(0.25))
-    story.append(Paragraph("8.2  Exporter la liste des donateurs", s['sous_section']))
+    story.append(Paragraph("9.2  Exporter la liste des donateurs", s['sous_section']))
     story.append(espacement(0.15))
     for etape in [
         "Depuis la page d'accueil, cliquez sur la tuile <b>« Donateurs »</b>.",
@@ -676,8 +766,8 @@ def construire_contenu(s):
     ))
     story.append(espacement(0.4))
 
-    # ── SECTION 8 — LES DOCUMENTS DE L'ASSOCIATION ───────────────
-    story.append(Paragraph("9. Les documents de l'association", s['section']))
+    # ── SECTION 10 — LES DOCUMENTS DE L'ASSOCIATION ──────────────
+    story.append(Paragraph("10. Les documents de l'association", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -719,8 +809,8 @@ def construire_contenu(s):
         story.append(Paragraph(desc_doc, s['corps']))
         story.append(espacement(0.1))
 
-    # ── SECTION 9 — ENVOYER PAR MAIL ──────────────────────────────
-    story.append(Paragraph("10. Envoyer un document par mail", s['section']))
+    # ── SECTION 11 — ENVOYER PAR MAIL ────────────────────────────
+    story.append(Paragraph("11. Envoyer un document par mail", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -740,8 +830,8 @@ def construire_contenu(s):
 
     story.append(PageBreak())
 
-    # ── SECTION 10 — SE DÉCONNECTER ───────────────────────────────
-    story.append(Paragraph("11. Se déconnecter", s['section']))
+    # ── SECTION 12 — SE DÉCONNECTER ──────────────────────────────
+    story.append(Paragraph("12. Se déconnecter", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -757,8 +847,8 @@ def construire_contenu(s):
     ]:
         story.append(fleche(etape, s['liste']))
 
-    # ── SECTION 11 — EN CAS DE PROBLÈME ──────────────────────────
-    story.append(Paragraph("12. En cas de problème", s['section']))
+    # ── SECTION 13 — EN CAS DE PROBLÈME ──────────────────────────
+    story.append(Paragraph("13. En cas de problème", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(

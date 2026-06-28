@@ -158,6 +158,18 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 | montant | numeric | Montant total payé en € |
 | created_at | timestamp | Date de création de la ligne |
 
+### Contraintes de valeurs acceptées
+
+**`mode_paiement`** — valeurs acceptées (tables `adherents`, `cotisations`, `donateurs`, `dons`) :
+
+`virement` · `chèque` · `espèces` · `carte bancaire` · `paypal` · `helloasso` · `payasso`
+
+> ⚠️ Ces valeurs sont en minuscules dans le code. Saisir une variante avec majuscule (ex. "Virement") casserait le pré-remplissage des formulaires.
+
+**`type_don`** — valeurs acceptées (tables `donateurs`, `dons`) :
+
+`Don financier` · `Contribution solidaire` · `Repas événement` · `Don de matériel`
+
 > ⚠️ Ne jamais ajouter ou supprimer une colonne sans en parler d'abord — cela peut casser le dashboard.
 
 ### Modifier une colonne : passer en "Allow Nullable"
