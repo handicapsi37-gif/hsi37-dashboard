@@ -1608,11 +1608,21 @@ function remplirTableauDonateurs(donateurs) {
   donateurs.forEach(function(don) {
     const ligne = document.createElement("tr");
 
-    const estDonMat     = (don.type_don || "").toLowerCase().includes("mat");
-    const dernierDonObj = dernierDon(don.id);
-    const montant = (!estDonMat && dernierDonObj)
-      ? Number(dernierDonObj.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+    const donsDuDonateur = donneesDons.filter(function(d) {
+      return String(d.donateur_id) === String(don.id);
+    });
+    const totalDons = donsDuDonateur.reduce(function(acc, d) {
+      return acc + (Number(d.montant) || 0);
+    }, 0);
+    const montant = donsDuDonateur.length > 0
+      ? totalDons.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
+    const btnToggle = donsDuDonateur.length > 0
+      ? `<button class="btn-dons-toggle" data-id="${don.id}"
+                style="margin-left:8px;font-size:.75rem;padding:2px 6px;border:1px solid #aaa;border-radius:3px;background:#f0f0f0;cursor:pointer;">
+           ${donsDuDonateur.length} don${donsDuDonateur.length > 1 ? "s" : ""}
+         </button>`
+      : "";
 
     const nomAffiche = don.nom ? don.nom.toUpperCase() : "—";
     let prenomOrgAffiche;
@@ -1632,13 +1642,52 @@ function remplirTableauDonateurs(donateurs) {
       <td>${prenomOrgAffiche}</td>
       <td>${don.email || "—"}</td>
       <td>${don.type_don || "—"}</td>
-      <td>${montant}</td>
+      <td>${montant}${btnToggle}</td>
       <td>${don.description_don || "—"}</td>
       <td>${formaterDate(don.date_don)}</td>
       <td>${don.mode_paiement || "—"}</td>
       <td class="col-actions">${genererBoutonsActionsDonateur(don.id_donateur || don.id, don.id)}</td>
     `;
     corps.appendChild(ligne);
+
+    const sousLigne = document.createElement("tr");
+    sousLigne.id = `dons-sous-${don.id}`;
+    sousLigne.hidden = true;
+    const lignesDons = donsDuDonateur
+      .slice().sort(function(a, b) { return b.annee - a.annee; })
+      .map(function(d) {
+        return `<tr>
+          <td style="padding:4px 8px;">${d.annee}</td>
+          <td style="padding:4px 8px;">${formaterDate(d.date_don)}</td>
+          <td style="padding:4px 8px;text-align:right;">${Number(d.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</td>
+          <td style="padding:4px 8px;">${d.mode_paiement || "—"}</td>
+          <td style="padding:4px 8px;">${d.type_don || "—"}</td>
+        </tr>`;
+      }).join("");
+    sousLigne.innerHTML = `
+      <td colspan="10" style="padding:0 16px 12px 32px;background:#f7f8fa;">
+        <table style="width:100%;font-size:.85rem;border-collapse:collapse;">
+          <thead>
+            <tr style="color:#666;">
+              <th style="padding:4px 8px;text-align:left;">Année</th>
+              <th style="padding:4px 8px;text-align:left;">Date</th>
+              <th style="padding:4px 8px;text-align:right;">Montant</th>
+              <th style="padding:4px 8px;text-align:left;">Mode</th>
+              <th style="padding:4px 8px;text-align:left;">Type</th>
+            </tr>
+          </thead>
+          <tbody>${lignesDons}</tbody>
+        </table>
+      </td>
+    `;
+    corps.appendChild(sousLigne);
+  });
+
+  corps.addEventListener("click", function(e) {
+    const btn = e.target.closest(".btn-dons-toggle");
+    if (!btn) return;
+    const sl = document.getElementById("dons-sous-" + btn.dataset.id);
+    if (sl) sl.hidden = !sl.hidden;
   });
 }
 
@@ -1765,7 +1814,8 @@ function ouvrirModaleDonAjout() {
   majChampsConditionnelsDon();
   majCiviliteVisibiliteDon();
 
-  document.getElementById("groupe-id-don").hidden = true;
+  document.getElementById("groupe-id-don").hidden    = true;
+  document.getElementById("groupe-ajout-don").hidden  = true;
   document.getElementById("modale-don-titre").textContent = "Ajouter un donateur";
   document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer";
   document.getElementById("btn-fermer-modale-don").setAttribute("aria-label", "Fermer la fenêtre d'ajout de donateur");
@@ -1816,6 +1866,11 @@ function ouvrirModaleDonModification(donateur) {
 
   majChampsConditionnelsDon();
   majCiviliteVisibiliteDon();
+
+  document.getElementById("groupe-ajout-don").hidden = false;
+  document.getElementById("don-ajout-montant").value = "";
+  document.getElementById("don-ajout-mode").value    = "";
+  document.getElementById("don-ajout-type").value    = "";
 
   document.getElementById("modale-don-titre").textContent = "Modifier un donateur";
   document.querySelector("#formulaire-donateur [type='submit']").textContent = "Enregistrer les modifications";
@@ -2052,6 +2107,18 @@ formulaireDon.addEventListener("submit", async function(evenement) {
       zoneErreur.textContent = "La modification a échoué. Vérifiez votre connexion et réessayez.";
       zoneErreur.hidden = false;
       return;
+    }
+
+    const montantAjout = document.getElementById("don-ajout-montant").value.trim();
+    if (montantAjout && donateurEnCours) {
+      await clientSupabase.from("dons").insert([{
+        donateur_id:   donateurEnCours.id,
+        annee:         new Date().getFullYear(),
+        date_don:      new Date().toISOString().split("T")[0],
+        montant:       parseFloat(montantAjout.replace(",", ".")),
+        mode_paiement: document.getElementById("don-ajout-mode").value || null,
+        type_don:      document.getElementById("don-ajout-type").value || null
+      }]);
     }
 
     fermerModaleDon();

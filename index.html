@@ -1188,6 +1188,36 @@
 
         <p class="mention-rgpd-form">Les données saisies sont collectées et conservées 3 ans par l'Association HSI37, uniquement pour la gestion des adhésions et des dons. Conformément au RGPD, vous pouvez exercer vos droits en écrivant à handicapsi37@gmail.com.</p>
 
+        <fieldset id="groupe-ajout-don" hidden style="border:1px solid #ddd;border-radius:4px;padding:10px 14px;margin-top:6px;">
+          <legend style="font-size:.85rem;color:#666;padding:0 4px;">Ajouter un don</legend>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px;">
+            <label class="champ-label" style="font-size:.85rem;">Montant (€)
+              <input id="don-ajout-montant" type="number" step="1" min="0" class="champ-input"
+                     style="width:100%;margin-top:2px;">
+            </label>
+            <label class="champ-label" style="font-size:.85rem;">Mode
+              <select id="don-ajout-mode" class="champ-input champ-select" style="width:100%;margin-top:2px;">
+                <option value="">—</option>
+                <option value="virement">Virement</option>
+                <option value="chèque">Chèque</option>
+                <option value="espèces">Espèces</option>
+                <option value="carte bancaire">Carte bancaire</option>
+                <option value="paypal">PayPal</option>
+                <option value="helloasso">HelloAsso</option>
+                <option value="payasso">PayAsso</option>
+              </select>
+            </label>
+            <label class="champ-label" style="font-size:.85rem;">Type
+              <select id="don-ajout-type" class="champ-input champ-select" style="width:100%;margin-top:2px;">
+                <option value="">—</option>
+                <option value="don">Don</option>
+                <option value="repas">Repas</option>
+                <option value="evenement">Événement</option>
+              </select>
+            </label>
+          </div>
+        </fieldset>
+
         <div class="modale__actions">
           <button type="button" class="btn btn--secondaire" id="btn-annuler-modale-don">
             Annuler
