@@ -2735,7 +2735,7 @@ formulaireDon.addEventListener("submit", async function(evenement) {
       return;
     }
 
-    const { error } = await clientSupabase
+    const { data: insertedDon, error } = await clientSupabase
       .from("donateurs")
       .insert([{
         id_donateur: idDonateur,
@@ -2745,12 +2745,24 @@ formulaireDon.addEventListener("submit", async function(evenement) {
         mode_paiement: modePaiement,
         numero_cheque: modePaiement === "Chèque" ? numeroCheque : null,
         banque_cheque: modePaiement === "Chèque" ? banqueCheque : null
-      }]);
+      }])
+      .select();
 
-    if (error) {
+    if (error || !insertedDon || !insertedDon[0]) {
       zoneErreur.textContent = "L'enregistrement a échoué. Vérifiez votre connexion et réessayez.";
       zoneErreur.hidden = false;
       return;
+    }
+
+    if (montantDon && typeDon && typeDon.toLowerCase().includes("financier")) {
+      await clientSupabase.from("dons").insert([{
+        donateur_id:   insertedDon[0].id,
+        annee:         annee ? parseInt(annee, 10) : new Date().getFullYear(),
+        date_don:      dateDon,
+        montant:       montantDon,
+        mode_paiement: modePaiement || null,
+        type_don:      typeDon
+      }]);
     }
 
     fermerModaleDon();
