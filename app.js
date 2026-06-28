@@ -2435,9 +2435,13 @@ async function ouvrirModaleDonModification(donateur) {
   }
 
   majChampsConditionnelsDon();
+  console.log("[DEBUG] don-type:", document.getElementById("don-type").value);
+  console.log("[DEBUG] groupe-don-montant hidden:", document.getElementById("groupe-don-montant").hidden);
+  console.log("[DEBUG] don-montant avant assignation:", document.getElementById("don-montant").value);
   document.getElementById("don-montant").value =
     (dernDon && dernDon.montant != null) ? dernDon.montant
     : (donateur.montant_don != null ? donateur.montant_don : "");
+  console.log("[DEBUG] don-montant après assignation:", document.getElementById("don-montant").value);
   document.getElementById("don-mode").value = modeValDon;
   majCiviliteVisibiliteDon();
 
