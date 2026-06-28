@@ -2395,9 +2395,14 @@ document.getElementById("don-nouvelle-fiche").addEventListener("click", function
  * Ouvre la modale en mode MODIFICATION : champs pré-remplis.
  * @param {Object} donateur
  */
-function ouvrirModaleDonModification(donateur) {
+async function ouvrirModaleDonModification(donateur) {
   donateurEnCours       = donateur;
   elementAvantModaleDon = document.activeElement;
+
+  if (!donneesDons.length) {
+    const { data } = await clientSupabase.from("dons").select("*");
+    if (data) donneesDons = data;
+  }
 
   formulaireDon.reset();
   reinitialiserErreursDon();
