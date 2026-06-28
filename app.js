@@ -830,7 +830,8 @@ formulaire.addEventListener("submit", async function(evenement) {
         resCotis = await clientSupabase
           .from("cotisations")
           .update({ montant: montantCotisation, mode_paiement: modePaiement || null, date_paiement: aujourdhui })
-          .eq("id", cotisExistante.id)
+          .eq("adherent_id", adherentEnCours.id)
+          .eq("annee", anneeEnCours)
           .select();
       } else {
         resCotis = await clientSupabase
@@ -877,7 +878,7 @@ formulaire.addEventListener("submit", async function(evenement) {
       telephone,
       adresse,
       date_adhesion:      dateAdhesion,
-      montant_cotisation: montantDon,
+      montant_cotisation: montantCotisation,
       type_membre:        typeMembre,
       saison
     };
@@ -895,13 +896,16 @@ formulaire.addEventListener("submit", async function(evenement) {
     }
 
     if (dataInsert && montantCotisation) {
-      await clientSupabase.from("cotisations").insert([{
+      const { error: errCotisAjout } = await clientSupabase.from("cotisations").insert([{
         adherent_id:   dataInsert.id,
         annee:         parseInt(anneeSaisie, 10),
         date_paiement: dateAdhesion,
         montant:       montantCotisation,
         mode_paiement: modePaiement || null
       }]);
+      if (errCotisAjout) {
+        afficherMessageErreur(`Adhérent ajouté (${idAdherent}), mais l'enregistrement de la cotisation a échoué.`);
+      }
     }
 
     fermerModale();
