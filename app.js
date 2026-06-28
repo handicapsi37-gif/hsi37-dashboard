@@ -799,13 +799,13 @@ formulaire.addEventListener("submit", async function(evenement) {
         telephone,
         adresse,
         date_adhesion: dateAdhesion,
-        montant_don:   montantDon,
         type_membre:   typeMembre,
         civilite
       })
       .eq("id", adherentEnCours.id);
 
     if (error) {
+      console.error("[adherent UPDATE] Erreur Supabase:", JSON.stringify(error));
       zoneErreurModale.textContent = "La modification a échoué. Vérifiez votre connexion et réessayez.";
       zoneErreurModale.hidden = false;
       return;
