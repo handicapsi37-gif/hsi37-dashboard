@@ -536,7 +536,8 @@ function ouvrirModaleModification(adherent) {
     (adherent.montant_cotisation !== null && adherent.montant_cotisation !== undefined)
       ? adherent.montant_cotisation : "";
   const dernCotis = derniereCotisation(adherent.id);
-  document.getElementById("champ-mode-paiement").value = (dernCotis && dernCotis.mode_paiement) || "";
+  document.getElementById("champ-mode-paiement").value =
+    (dernCotis && dernCotis.mode_paiement) || adherent.mode_paiement || "";
   document.getElementById("champ-montant-don").value   = "";
 
   const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
@@ -804,6 +805,7 @@ formulaire.addEventListener("submit", async function(evenement) {
         adresse,
         date_adhesion:      dateAdhesion,
         montant_cotisation: montantCotisation,
+        mode_paiement:      modePaiement || null,
         type_membre:        typeMembre,
         civilite
       })
@@ -879,6 +881,7 @@ formulaire.addEventListener("submit", async function(evenement) {
       adresse,
       date_adhesion:      dateAdhesion,
       montant_cotisation: montantCotisation,
+      mode_paiement:      modePaiement || null,
       type_membre:        typeMembre,
       saison
     };
