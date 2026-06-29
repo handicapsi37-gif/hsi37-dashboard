@@ -2483,6 +2483,13 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   text-overflow: ellipsis;
 }
 
+.sig-carte__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
 .sigs-info {
   margin-top: 22px;
   padding: 14px 16px;
