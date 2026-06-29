@@ -124,6 +124,7 @@ let donneesCotisations = [];
 let donneesEvenements    = [];
 let donneesParticipants  = [];
 var filtreAdherents    = "";
+var filtreAnneeAdherents = String(new Date().getFullYear());
 var triAdherents     = { colonne: null, sens: "asc" };
 
 /* ---------- ÉTAT DE LA MODALE ---------- */
@@ -1576,6 +1577,7 @@ document.getElementById("onglet-evenements").addEventListener("click", function(
    ===================================================== */
 
 var filtreEvenements = "";
+var filtreAnneeEvenements = String(new Date().getFullYear());
 
 async function chargerEvenements() {
   const [resEv, resPart] = await Promise.all([
@@ -1607,11 +1609,12 @@ function remplirTableauEvenements() {
   const corps = document.getElementById("corps-tableau-evenements");
   if (!corps) return;
 
-  const liste = filtreEvenements
-    ? donneesEvenements.filter(function(ev) {
-        return (ev.nom || "").toLowerCase().includes(filtreEvenements);
-      })
-    : donneesEvenements;
+  const liste = donneesEvenements.filter(function(ev) {
+    if (filtreAnneeEvenements && ev.date &&
+        new Date(ev.date).getFullYear() !== Number(filtreAnneeEvenements)) return false;
+    if (filtreEvenements && !(ev.nom || "").toLowerCase().includes(filtreEvenements)) return false;
+    return true;
+  });
 
   if (!liste.length) {
     corps.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:1rem;color:#666;">Aucun événement trouvé.</td></tr>';
@@ -2099,6 +2102,7 @@ async function supprimerEvenement(idEv) {
 let donneesDonateurs      = [];
 let donneesDons           = [];
 var filtreDonateurs       = "";
+var filtreAnneeDonateurs  = String(new Date().getFullYear());
 var triDonateurs          = { colonne: null, sens: "asc" };
 let donateurEnCours          = null;
 let donateurExistantPourDon  = null;
@@ -5357,6 +5361,8 @@ document.getElementById("btn-export-zip").addEventListener("click", async functi
 function appliquerFiltreAdherents() {
   var f = filtreAdherents.toLowerCase();
   var liste = donneesAdherents.filter(function(a) {
+    if (filtreAnneeAdherents && a.date_adhesion &&
+        new Date(a.date_adhesion).getFullYear() !== Number(filtreAnneeAdherents)) return false;
     return (a.nom||"").toLowerCase().includes(f) || (a.prenom||"").toLowerCase().includes(f) || (a.email||"").toLowerCase().includes(f) || (a.telephone||"").toLowerCase().includes(f) || (a.type_membre||"").toLowerCase().includes(f);
   });
   if (triAdherents.colonne) {
@@ -5373,6 +5379,8 @@ function appliquerFiltreAdherents() {
 function appliquerFiltreDonateurs() {
   var f = filtreDonateurs.toLowerCase();
   var liste = donneesDonateurs.filter(function(d) {
+    if (filtreAnneeDonateurs && d.date_don &&
+        new Date(d.date_don).getFullYear() !== Number(filtreAnneeDonateurs)) return false;
     return (d.nom||"").toLowerCase().includes(f) || (d.prenom||"").toLowerCase().includes(f) || (d.organisme||"").toLowerCase().includes(f) || (d.email||"").toLowerCase().includes(f) || (d.type_don||"").toLowerCase().includes(f);
   });
   if (triDonateurs.colonne) {
@@ -5395,8 +5403,17 @@ document.addEventListener("DOMContentLoaded", function() {
   var inputAdh = document.getElementById("recherche-adherents");
   if (inputAdh) inputAdh.addEventListener("input", function() { filtreAdherents=this.value; appliquerFiltreAdherents(); });
 
+  var selAnneeAdh = document.getElementById("filtre-annee-adherents");
+  if (selAnneeAdh) selAnneeAdh.addEventListener("change", function() { filtreAnneeAdherents=this.value; appliquerFiltreAdherents(); });
+
   var inputDon = document.getElementById("recherche-donateurs");
   if (inputDon) inputDon.addEventListener("input", function() { filtreDonateurs=this.value; appliquerFiltreDonateurs(); });
+
+  var selAnneeDon = document.getElementById("filtre-annee-donateurs");
+  if (selAnneeDon) selAnneeDon.addEventListener("change", function() { filtreAnneeDonateurs=this.value; appliquerFiltreDonateurs(); });
+
+  var selAnneeEv = document.getElementById("filtre-annee-evenements");
+  if (selAnneeEv) selAnneeEv.addEventListener("change", function() { filtreAnneeEvenements=this.value; remplirTableauEvenements(); });
 
   var theadAdh = document.querySelector("#tableau-adherents thead");
   if (theadAdh) theadAdh.addEventListener("click", function(e) {
