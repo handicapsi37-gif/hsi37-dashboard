@@ -3526,13 +3526,15 @@ document.addEventListener("click", async function(e) {
   const fichier = btn.dataset.fichier;
   const labelOriginal = btn.textContent;
   try {
-    const res  = await fetch(fichier);
+    const res = await fetch(fichier);
+    if (!res.ok) throw new Error(`fetch échoué : ${res.status} ${fichier}`);
     const html = await res.text();
-    await navigator.clipboard.write([
-      new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }) })
-    ]);
+    const blob = new Blob([html], { type: "text/html" });
+    const item = new ClipboardItem({ "text/html": blob });
+    await navigator.clipboard.write([item]);
     btn.textContent = "✓ Signature copiée !";
-  } catch (_) {
+  } catch (err) {
+    console.error("[Signature] Erreur copie :", err);
     btn.textContent = "❌ Erreur copie";
   }
   setTimeout(function() { btn.textContent = labelOriginal; }, 2000);
