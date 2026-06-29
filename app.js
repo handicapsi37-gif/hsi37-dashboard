@@ -5394,10 +5394,29 @@ function appliquerFiltreDonateurs() {
   remplirTableauDonateurs(liste);
 }
 
+/* ---------- FILTRES ANNÉE (options dynamiques) ---------- */
+function initialiserFiltresAnnee() {
+  var anneeActuelle = new Date().getFullYear();
+  ["filtre-annee-adherents", "filtre-annee-donateurs", "filtre-annee-evenements"].forEach(function(id) {
+    var sel = document.getElementById(id);
+    if (!sel) return;
+    for (var a = 2024; a <= anneeActuelle; a++) {
+      var opt = document.createElement("option");
+      opt.value = String(a);
+      opt.textContent = String(a);
+      if (a === anneeActuelle) opt.selected = true;
+      sel.appendChild(opt);
+    }
+  });
+  var spanFooter = document.getElementById("footer-annee");
+  if (spanFooter) spanFooter.textContent = String(anneeActuelle);
+}
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();
   initialiserSelectsDateDon();
+  initialiserFiltresAnnee();
   verifierSession();
 
   var inputAdh = document.getElementById("recherche-adherents");

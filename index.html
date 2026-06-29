@@ -334,9 +334,6 @@
           </div>
           <select id="filtre-annee-adherents" class="champ-input champ-select" aria-label="Filtrer par année">
             <option value="">Toutes les années</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026" selected>2026</option>
           </select>
           <select id="tri-adherents" class="champ-input champ-select" aria-label="Trier les adhérents par…">
             <option value="">⇅ Trier par…</option>
@@ -407,9 +404,6 @@
           </div>
           <select id="filtre-annee-donateurs" class="champ-input champ-select" aria-label="Filtrer par année">
             <option value="">Toutes les années</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026" selected>2026</option>
           </select>
           <select id="tri-donateurs" class="champ-input champ-select" aria-label="Trier les donateurs par…">
             <option value="">⇅ Trier par…</option>
@@ -476,9 +470,6 @@
           </div>
           <select id="filtre-annee-evenements" class="champ-input champ-select" aria-label="Filtrer par année">
             <option value="">Toutes les années</option>
-            <option value="2024">2024</option>
-            <option value="2025">2025</option>
-            <option value="2026" selected>2026</option>
           </select>
         </div>
         <div class="barre-actions__droite">
@@ -2428,7 +2419,7 @@
   <!-- ========== PIED DE PAGE ========== -->
   <!-- hidden : masqué par défaut, affiché par app.js après connexion -->
   <footer class="pied-de-page" role="contentinfo" hidden>
-    <p>© 2026 HSI37 — Handicap Solidarité pour l'Inclusion 37 &bull; Saint-Pierre-des-Corps</p>
+    <p>© <span id="footer-annee"></span> HSI37 — Handicap Solidarité pour l'Inclusion 37 &bull; Saint-Pierre-des-Corps</p>
     <p>
       <button type="button" class="pied-rgpd-lien" id="btn-ouvrir-rgpd"
               aria-haspopup="dialog" aria-controls="modale-rgpd">
