@@ -1714,6 +1714,16 @@ function remplirTableauEvenements() {
                   stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
         </button>
+        <button type="button" class="btn-icone btn-inviter-evenement"
+                data-ev-id="${ev.id}" title="Envoyer invitations" aria-label="Envoyer les invitations">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <polyline points="22,6 12,13 2,6"
+                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
       </td>
     </tr>${lignesParticipants}`;
   }).join("");
