@@ -4757,6 +4757,100 @@ async function exporterListeDonnateursPDF() {
   doc.save('liste-donateurs-HSI37-' + annee + '.pdf');
 }
 
+async function exporterListeEvenementsPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc     = new jsPDF({ unit: 'mm', format: 'a4' });
+  const BLEU    = [59, 119, 180];
+  const JAUNE   = [247, 205, 70];
+  const ENCRE   = [64, 62, 62];
+  const BLANC   = [255, 255, 255];
+  const BLEU_CL = [232, 241, 250];
+  const ROW_H   = 7;
+  const Y_MAX   = 270;
+  const annee   = new Date().getFullYear();
+  const dateExp = new Date().toLocaleDateString('fr-FR');
+  const logo    = await chargerLogoBase64PDF('assets/hsi37-redim-demi.png');
+
+  function pdfEnTete(titre) {
+    doc.setFillColor(...BLEU);  doc.rect(0, 0, 210, 28, 'F');
+    doc.setFillColor(...JAUNE); doc.rect(0, 28, 210, 2, 'F');
+    if (logo) doc.addImage(logo, 'PNG', 8, 4, 20, 20);
+    doc.setTextColor(...BLANC);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
+    doc.text("HSI37 — Handicap Solidarité pour l'Inclusion 37", 32, 14);
+    doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text('17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps', 32, 21);
+    doc.setTextColor(...BLEU);
+    doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
+    doc.text(titre, 105, 38, { align: 'center' });
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.7);
+    doc.line(30, 41, 180, 41);
+  }
+
+  const C = { x: 12, nom: 12, date: 80, prix: 108, part: 138, total: 165, fin: 198 };
+
+  function enTeteTab(y) {
+    doc.setFillColor(...BLEU); doc.rect(C.x, y, C.fin - C.x, ROW_H, 'F');
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'bold'); doc.setFontSize(8);
+    doc.text('Nom',             C.nom   + 1, y + 5);
+    doc.text('Date',            C.date  + 1, y + 5);
+    doc.text('Prix unitaire',   C.prix  + 1, y + 5);
+    doc.text('Participants',    C.part  + 1, y + 5);
+    doc.text('Total collecté',  C.total + 1, y + 5);
+    return y + ROW_H;
+  }
+
+  function bord(yD, yF) {
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.3);
+    doc.rect(C.x, yD, C.fin - C.x, yF - yD);
+  }
+
+  const tronc = (s, mm) => doc.splitTextToSize(String(s || '—'), mm)[0];
+
+  pdfEnTete('Liste des événements ' + annee);
+  let y = enTeteTab(50);
+  let yD = 50;
+
+  donneesEvenements.forEach((ev, idx) => {
+    if (y > Y_MAX) {
+      bord(yD, y);
+      doc.addPage();
+      pdfEnTete('Liste des événements ' + annee);
+      y = enTeteTab(50); yD = 50;
+    }
+
+    const parts = donneesParticipants.filter(p => String(p.evenement_id) === String(ev.id));
+    const nbPart = parts.reduce((s, p) => s + (p.quantite || 1), 0);
+    const total  = parts.reduce((s, p) => s + (parseFloat(p.montant) || 0), 0);
+    const date   = ev.date ? new Date(ev.date).toLocaleDateString('fr-FR') : '—';
+    const prix   = ev.prix_unitaire != null
+      ? parseFloat(ev.prix_unitaire).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €' : '—';
+    const totalStr = total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+
+    if (idx % 2 === 0) { doc.setFillColor(...BLEU_CL); doc.rect(C.x, y, C.fin - C.x, ROW_H, 'F'); }
+    doc.setTextColor(...ENCRE); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text(tronc(ev.nom,   C.date  - C.nom   - 2), C.nom   + 1, y + 5);
+    doc.text(tronc(date,     C.prix  - C.date  - 2), C.date  + 1, y + 5);
+    doc.text(tronc(prix,     C.part  - C.prix  - 2), C.prix  + 1, y + 5);
+    doc.text(String(nbPart),                          C.part  + 1, y + 5);
+    doc.text(tronc(totalStr, C.fin   - C.total - 2), C.total + 1, y + 5);
+    y += ROW_H;
+  });
+  bord(yD, y);
+
+  const total = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= total; p++) {
+    doc.setPage(p);
+    doc.setFillColor(...BLEU); doc.rect(0, 278, 210, 19, 'F');
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.5); doc.line(0, 278, 210, 278);
+    doc.setTextColor(...BLANC); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
+    doc.text('Exporté le ' + dateExp + ' — HSI37', 15, 285);
+    doc.text('Page ' + p + ' / ' + total, 195, 285, { align: 'right' });
+  }
+
+  doc.save('liste-evenements-HSI37-' + annee + '.pdf');
+}
+
 async function exporterRapportAnnuelPDF() {
   const { jsPDF } = window.jspdf;
   const doc     = new jsPDF({ unit: 'mm', format: 'a4' });
@@ -4973,6 +5067,36 @@ document.addEventListener("DOMContentLoaded", function() {
   var btnListeDonPDF = document.getElementById("btn-export-donateurs-pdf");
   if (btnListeDonPDF) {
     btnListeDonPDF.addEventListener("click", function() { exporterListeDonnateursPDF(); });
+  }
+
+  var btnEv = document.getElementById("btn-export-evenements");
+  if (btnEv) {
+    btnEv.addEventListener("click", function() {
+      var annee = new Date().getFullYear();
+      var donnees = donneesEvenements.map(function(ev) {
+        var parts = donneesParticipants.filter(function(p) {
+          return String(p.evenement_id) === String(ev.id);
+        });
+        return {
+          nom:          ev.nom || "",
+          date:         ev.date ? new Date(ev.date).toLocaleDateString("fr-FR") : "",
+          prix:         ev.prix_unitaire != null ? ev.prix_unitaire : "",
+          participants: parts.reduce(function(s, p) { return s + (p.quantite || 1); }, 0),
+          total:        parts.reduce(function(s, p) { return s + (parseFloat(p.montant) || 0); }, 0).toFixed(2)
+        };
+      });
+      exporterCSV(
+        donnees,
+        ["nom", "date", "prix", "participants", "total"],
+        ["Nom", "Date", "Prix unitaire", "Participants", "Total collecté"],
+        "evenements_HSI37_" + annee + ".csv"
+      );
+    });
+  }
+
+  var btnEvPDF = document.getElementById("btn-export-evenements-pdf");
+  if (btnEvPDF) {
+    btnEvPDF.addEventListener("click", function() { exporterListeEvenementsPDF(); });
   }
 
   var btnRapportPDF = document.getElementById("btn-rapport-annuel-pdf");
