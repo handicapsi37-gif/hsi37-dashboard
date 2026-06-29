@@ -22,10 +22,10 @@ from reportlab.platypus import (
 # ──────────────────────────────────────────────────────────────────
 #  Couleurs officielles HSI37
 # ──────────────────────────────────────────────────────────────────
-BLEU        = HexColor('#2D82C4')
-BLEU_FONCE  = HexColor('#1F4E79')
-ORANGE      = HexColor('#F28C28')
-GRIS_TEXTE  = HexColor('#333333')
+BLEU        = HexColor('#3B77B4')
+BLEU_FONCE  = HexColor('#3B77B4')
+ORANGE      = HexColor('#F7CD46')
+GRIS_TEXTE  = HexColor('#403E3E')
 GRIS_SECOND = HexColor('#666666')
 
 # ──────────────────────────────────────────────────────────────────
