@@ -4462,11 +4462,11 @@ async function chargerLogoBase64PDF(src) {
 async function exporterListeAdherentsPDF() {
   const { jsPDF } = window.jspdf;
   const doc     = new jsPDF({ unit: 'mm', format: 'a4' });
-  const BLEU    = [45, 130, 196];
-  const CORAIL  = [242, 140, 40];
-  const ENCRE   = [51, 51, 51];
+  const BLEU    = [59, 119, 180];
+  const JAUNE   = [247, 205, 70];
+  const ENCRE   = [64, 62, 62];
   const BLANC   = [255, 255, 255];
-  const BLEU_CL = [235, 244, 251];
+  const BLEU_CL = [232, 241, 250];
   const ROW_H   = 7;
   const Y_MAX   = 270;
   const annee   = new Date().getFullYear();
@@ -4475,7 +4475,7 @@ async function exporterListeAdherentsPDF() {
 
   function pdfEnTete(titre) {
     doc.setFillColor(...BLEU);  doc.rect(0, 0, 210, 28, 'F');
-    doc.setFillColor(...CORAIL); doc.rect(0, 28, 210, 2, 'F');
+    doc.setFillColor(...JAUNE); doc.rect(0, 28, 210, 2, 'F');
     if (logo) doc.addImage(logo, 'PNG', 8, 4, 20, 20);
     doc.setTextColor(...BLANC);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(12);
@@ -4485,7 +4485,7 @@ async function exporterListeAdherentsPDF() {
     doc.setTextColor(...BLEU);
     doc.setFont('helvetica', 'bold'); doc.setFontSize(13);
     doc.text(titre, 105, 38, { align: 'center' });
-    doc.setDrawColor(...CORAIL); doc.setLineWidth(0.7);
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.7);
     doc.line(30, 41, 180, 41);
   }
 
@@ -4539,7 +4539,7 @@ async function exporterListeAdherentsPDF() {
   for (let p = 1; p <= total; p++) {
     doc.setPage(p);
     doc.setFillColor(...BLEU); doc.rect(0, 278, 210, 19, 'F');
-    doc.setDrawColor(...CORAIL); doc.setLineWidth(0.5); doc.line(0, 278, 210, 278);
+    doc.setDrawColor(...BLEU); doc.setLineWidth(0.5); doc.line(0, 278, 210, 278);
     doc.setTextColor(...BLANC); doc.setFont('helvetica', 'normal'); doc.setFontSize(8);
     doc.text('Exporté le ' + dateExp + ' — HSI37', 15, 285);
     doc.text('Page ' + p + ' / ' + total, 195, 285, { align: 'right' });
