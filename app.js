@@ -3529,9 +3529,18 @@ document.addEventListener("click", async function(e) {
     const res = await fetch(fichier);
     if (!res.ok) throw new Error(`fetch échoué : ${res.status} ${fichier}`);
     const html = await res.text();
-    const blob = new Blob([html], { type: "text/html" });
-    const item = new ClipboardItem({ "text/html": blob });
-    await navigator.clipboard.write([item]);
+    const el = document.createElement("div");
+    el.innerHTML = html;
+    el.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;";
+    document.body.appendChild(el);
+    const range = document.createRange();
+    range.selectNodeContents(el);
+    const sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+    document.execCommand("copy");
+    sel.removeAllRanges();
+    document.body.removeChild(el);
     btn.textContent = "✓ Signature copiée !";
   } catch (err) {
     console.error("[Signature] Erreur copie :", err);
