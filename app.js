@@ -3516,19 +3516,45 @@ document.getElementById("btn-ajouter-evenement").addEventListener("click", funct
 document.getElementById("tuile-documents").addEventListener("click", function() {
   allerVers("documents");
 });
+const cacheSignatures = {};
+const FICHIERS_SIGNATURES = [
+  "signatures/signature-president.html",
+  "signatures/signature-secretaire.html",
+  "signatures/signature-tresoriere.html",
+  "signatures/signature-institutionnelle.html",
+  "signatures/signature-recrutement.html",
+  "signatures/signature-dons.html"
+];
+
+function prechargerSignatures() {
+  FICHIERS_SIGNATURES.forEach(async function(f) {
+    if (cacheSignatures[f]) return;
+    try {
+      const res = await fetch(f);
+      if (res.ok) cacheSignatures[f] = await res.text();
+    } catch(e) {
+      console.warn("[Signature] Pré-chargement échoué :", f, e);
+    }
+  });
+}
+
 document.getElementById("tuile-signatures").addEventListener("click", function() {
+  prechargerSignatures();
   allerVers("signatures");
 });
 
-document.addEventListener("click", async function(e) {
+document.addEventListener("click", function(e) {
   const btn = e.target.closest(".btn-copier-signature");
   if (!btn) return;
   const fichier = btn.dataset.fichier;
   const labelOriginal = btn.textContent;
+  const html = cacheSignatures[fichier];
+  if (!html) {
+    btn.textContent = "⏳ Chargement…";
+    setTimeout(function() { btn.textContent = labelOriginal; }, 2000);
+    return;
+  }
   try {
-    const res = await fetch(fichier);
-    if (!res.ok) throw new Error(`fetch échoué : ${res.status} ${fichier}`);
-    const html = await res.text();
     const el = document.createElement("div");
     el.innerHTML = html;
     el.style.cssText = "position:fixed;left:-9999px;top:0;opacity:0;";
