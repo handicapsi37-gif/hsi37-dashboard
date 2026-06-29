@@ -3519,6 +3519,24 @@ document.getElementById("tuile-documents").addEventListener("click", function() 
 document.getElementById("tuile-signatures").addEventListener("click", function() {
   allerVers("signatures");
 });
+
+document.addEventListener("click", async function(e) {
+  const btn = e.target.closest(".btn-copier-signature");
+  if (!btn) return;
+  const fichier = btn.dataset.fichier;
+  const labelOriginal = btn.textContent;
+  try {
+    const res  = await fetch(fichier);
+    const html = await res.text();
+    await navigator.clipboard.write([
+      new ClipboardItem({ "text/html": new Blob([html], { type: "text/html" }) })
+    ]);
+    btn.textContent = "✓ Signature copiée !";
+  } catch (_) {
+    btn.textContent = "❌ Erreur copie";
+  }
+  setTimeout(function() { btn.textContent = labelOriginal; }, 2000);
+});
 document.getElementById("tuile-aide").addEventListener("click", function() {
   const lien = document.createElement("a");
   lien.href = "docs/mode-emploi-HSI37.pdf";
