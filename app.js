@@ -1810,11 +1810,10 @@ function remplirTableauEvenements() {
 
       const btnExportPart = e.target.closest(".btn-export-participants");
       if (btnExportPart) {
-        document.querySelectorAll(".menu-export-participants").forEach(function(m) {
-          m.hidden = m.dataset.evId !== btnExportPart.dataset.evId;
-        });
         const menu = btnExportPart.nextElementSibling;
-        if (menu) menu.hidden = !menu.hidden;
+        const etaitFerme = !menu || menu.hidden;
+        document.querySelectorAll(".menu-export-participants").forEach(function(m) { m.hidden = true; });
+        if (menu) menu.hidden = !etaitFerme;
         return;
       }
 
