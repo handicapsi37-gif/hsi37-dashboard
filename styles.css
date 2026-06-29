@@ -1603,6 +1603,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   align-items: center;
   gap: 0.75rem;
   flex-wrap: wrap;
+  flex-shrink: 0;
 }
 
 @media (max-width: 768px) {
