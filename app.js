@@ -4003,18 +4003,24 @@ document.getElementById("invitation-fond").addEventListener("click", function(ev
 
 function mettreAJourCompteInvitation(evenement_id) {
   const vus = new Set();
+
+  const adh = donneesAdherents.filter(function(a) { return calculerStatutAdherent(a) === "ajour" && a.email; });
+  const don = donneesDonateurs.filter(function(d) { return d.email; });
+  const part = donneesParticipants.filter(function(p) { return String(p.evenement_id) === String(evenement_id) && p.email; });
+
+  console.log("[invitation] donneesAdherents total:", donneesAdherents.length, "→ à jour avec email:", adh.length, "(cochée:", document.getElementById("inv-liste-adherents").checked, ")");
+  console.log("[invitation] donneesDonateurs total:", donneesDonateurs.length, "→ avec email:", don.length, "(cochée:", document.getElementById("inv-liste-donateurs").checked, ")");
+  console.log("[invitation] donneesParticipants total:", donneesParticipants.length, "→ événement", evenement_id, "avec email:", part.length, "(cochée:", document.getElementById("inv-liste-participants").checked, ")");
+
   if (document.getElementById("inv-liste-adherents").checked)
-    donneesAdherents
-      .filter(function(a) { return calculerStatutAdherent(a) === "ajour" && a.email; })
-      .forEach(function(a) { vus.add(a.email.trim().toLowerCase()); });
+    adh.forEach(function(a) { vus.add(a.email.trim().toLowerCase()); });
   if (document.getElementById("inv-liste-donateurs").checked)
-    donneesDonateurs
-      .filter(function(d) { return d.email; })
-      .forEach(function(d) { vus.add(d.email.trim().toLowerCase()); });
+    don.forEach(function(d) { vus.add(d.email.trim().toLowerCase()); });
   if (document.getElementById("inv-liste-participants").checked)
-    donneesParticipants
-      .filter(function(p) { return String(p.evenement_id) === String(evenement_id) && p.email; })
-      .forEach(function(p) { vus.add(p.email.trim().toLowerCase()); });
+    part.forEach(function(p) { vus.add(p.email.trim().toLowerCase()); });
+
+  console.log("[invitation] total après déduplication:", vus.size);
+
   const n = vus.size;
   document.getElementById("inv-compte").textContent =
     n + " destinataire" + (n > 1 ? "s" : "");
