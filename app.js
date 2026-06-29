@@ -1781,6 +1781,12 @@ function remplirTableauEvenements() {
         supprimerEvenement(btnSupprimerEv.dataset.evId);
         return;
       }
+
+      const btnInviterEv = e.target.closest(".btn-inviter-evenement");
+      if (btnInviterEv) {
+        console.log("clic invitation", btnInviterEv.dataset.evId);
+        return;
+      }
     });
   }
 }
