@@ -21,6 +21,24 @@ TEXTE     = RGBColor(0x40, 0x3E, 0x3E)
 JAUNE_HEX = 'F7CD46'
 
 DIR    = os.path.dirname(os.path.abspath(__file__))
+
+
+def detecter_police():
+    """Retourne 'Montserrat' si installée sur le système, sinon 'Helvetica'."""
+    dirs = [
+        '/Library/Fonts',
+        os.path.expanduser('~/Library/Fonts'),
+        '/System/Library/Fonts',
+    ]
+    for d in dirs:
+        try:
+            if any('Montserrat' in f for f in os.listdir(d)):
+                return 'Montserrat'
+        except OSError:
+            pass
+    return 'Helvetica'
+
+POLICE_CORPS = detecter_police()
 LOGO   = os.path.join(DIR, 'assets', 'hsi37-redim-demi.png')
 OUTPUT = os.path.join(DIR, 'docs', 'modeles', 'papier-entete-HSI37.docx')
 
@@ -88,33 +106,30 @@ def espacement(para, avant=0, apres=0):
     pPr.append(sp)
 
 
-def run_txt(para, texte, taille=10, couleur=None, gras=False):
+def run_txt(para, texte, taille=10, couleur=None, gras=False, police=None):
     run = para.add_run(texte)
     run.font.size = Pt(taille)
     run.bold = gras
+    run.font.name = police or POLICE_CORPS
     if couleur:
         run.font.color.rgb = couleur
     return run
 
 
 # ──────────────────────────────────────────────────────────────────
-#  Filet jaune
+#  Filet jaune — bordure de paragraphe (plus fiable que tableau dans Word)
 # ──────────────────────────────────────────────────────────────────
-def filet_jaune(container, hauteur_pt=3, largeur_emu=None):
-    if largeur_emu is None:
-        largeur_emu = Cm(16)
-    table = container.add_table(rows=1, cols=1, width=largeur_emu)
-    supprimer_bordures_tableau(table)
-    row = table.rows[0]
-    trPr = row._tr.get_or_add_trPr()
-    trH = OxmlElement('w:trHeight')
-    trH.set(qn('w:val'), str(int(hauteur_pt * 20)))
-    trH.set(qn('w:hRule'), 'exact')
-    trPr.append(trH)
-    cell = row.cells[0]
-    fond_cellule(cell, JAUNE_HEX)
-    largeur_cellule(cell, largeur_emu)
-    espacement(cell.paragraphs[0], 0, 0)
+def bordure_jaune(para, position='bottom', epaisseur_pt=2):
+    """Ajoute une bordure jaune en haut ou en bas d'un paragraphe."""
+    pPr = para._p.get_or_add_pPr()
+    pBdr = OxmlElement('w:pBdr')
+    el = OxmlElement(f'w:{position}')
+    el.set(qn('w:val'), 'single')
+    el.set(qn('w:sz'), str(int(epaisseur_pt * 8)))  # unités 1/8 pt
+    el.set(qn('w:space'), '0')
+    el.set(qn('w:color'), JAUNE_HEX)
+    pBdr.append(el)
+    pPr.append(pBdr)
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -160,16 +175,10 @@ def construire_entete(section):
         espacement(p, 0, 20)
         run_txt(p, texte, taille=taille, couleur=TEXTE)
 
-    # Espace avant le filet
-    p_esp = header.add_paragraph()
-    espacement(p_esp, 60, 0)
-
-    # Filet jaune
-    filet_jaune(header, hauteur_pt=4)
-
-    # Paragraphe vide final (requis par Word)
-    p_fin = header.add_paragraph()
-    espacement(p_fin, 0, 0)
+    # Filet jaune sous l'en-tête — bordure basse 2pt
+    p_filet = header.add_paragraph()
+    espacement(p_filet, 80, 0)
+    bordure_jaune(p_filet, position='bottom', epaisseur_pt=2)
 
 
 # ──────────────────────────────────────────────────────────────────
@@ -180,8 +189,10 @@ def construire_pied(section):
     footer.is_linked_to_previous = False
     vider_container(footer)
 
-    # Filet jaune
-    filet_jaune(footer, hauteur_pt=3)
+    # Filet jaune au-dessus du pied — bordure haute 2pt
+    p_filet = footer.add_paragraph()
+    espacement(p_filet, 0, 40)
+    bordure_jaune(p_filet, position='top', epaisseur_pt=2)
 
     # Coordonnées complètes centrées
     p = footer.add_paragraph()
@@ -237,6 +248,7 @@ def main():
     para = doc.add_paragraph()
     espacement(para, 0, 200)
     run = para.add_run()
+    run.font.name = POLICE_CORPS
     run.font.size = Pt(11)
     run.font.color.rgb = TEXTE
 
