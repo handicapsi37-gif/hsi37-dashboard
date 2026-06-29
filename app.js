@@ -1785,10 +1785,13 @@ function remplirTableauEvenements() {
       const btnInviterEv = e.target.closest(".btn-inviter-evenement");
       if (btnInviterEv) {
         const id = btnInviterEv.dataset.evId;
-        console.log("clic invitation", id);
         console.log("étape 1 — id événement:", id);
+        document.getElementById("formulaire-invitation").reset();
+        document.getElementById("inv-evenement-id").value = id;
+        document.getElementById("inv-message").hidden = true;
         console.log("étape 2 — ouverture modale");
-        console.log("étape 3 — appel Edge Function");
+        document.getElementById("invitation-fond").hidden = false;
+        document.getElementById("modale-invitation").focus();
         return;
       }
     });
@@ -3979,6 +3982,55 @@ function fermerModaleConvocation() {
   document.removeEventListener('keydown', trapConvocation);
   if (elementAvantConvocation) elementAvantConvocation.focus();
 }
+
+/* ── Modale invitation ── */
+function fermerModaleInvitation() {
+  document.getElementById("invitation-fond").hidden = true;
+}
+
+document.getElementById("btn-fermer-invitation").addEventListener("click", fermerModaleInvitation);
+document.getElementById("btn-annuler-invitation").addEventListener("click", fermerModaleInvitation);
+document.getElementById("invitation-fond").addEventListener("click", function(ev) {
+  if (ev.target === this) fermerModaleInvitation();
+});
+
+document.getElementById("formulaire-invitation").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const btn = document.getElementById("btn-envoyer-invitation");
+  const msg = document.getElementById("inv-message");
+  btn.disabled = true;
+  btn.textContent = "Envoi en cours…";
+  msg.hidden = true;
+
+  const evenement_id = document.getElementById("inv-evenement-id").value;
+  const objet_email  = document.getElementById("inv-objet").value.trim();
+  const corps_email  = document.getElementById("inv-corps").value.trim();
+
+  console.log("étape 3 — appel Edge Function");
+  try {
+    const res = await fetch(SUPABASE_URL + "/functions/v1/envoyer-invitation", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + SUPABASE_KEY,
+      },
+      body: JSON.stringify({ evenement_id, objet_email, corps_email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || "Erreur inconnue");
+
+    msg.textContent = `✓ ${data.envoyes} invitation(s) envoyée(s) — ${data.exclus} contact(s) sans email exclus.`;
+    msg.className = "modale-succes";
+    msg.hidden = false;
+  } catch (err) {
+    msg.textContent = "Erreur : " + err.message;
+    msg.className = "modale-erreur";
+    msg.hidden = false;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "✉ Envoyer les invitations";
+  }
+});
 
 document.getElementById('btn-convocation').addEventListener('click', ouvrirModaleConvocation);
 document.getElementById('btn-fermer-convocation').addEventListener('click', fermerModaleConvocation);
