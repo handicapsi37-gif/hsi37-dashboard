@@ -6,13 +6,13 @@
 
 /* ---------- Variables CSS (charte HSI37) ---------- */
 :root {
-  --bleu-hsi: #3B77B5;        /* Bleu principal officiel : aplats, en-têtes, boutons */
-  --bleu-clair: #3B77B5;      /* Bleu clair : survols, icônes, éléments secondaires */
-  --bleu-fonce: #3B77B5;      /* Bleu foncé : texte bleu sur fond clair, liens */
-  --corail: #F7CD46;          /* Orange officiel : accent, CTA */
-  --corail-fonce: #F7CD46;    /* Orange foncé : survol orange, texte orange sur fond clair */
+  --bleu-hsi: #3B77B4;        /* Bleu principal officiel : aplats, en-têtes, boutons */
+  --bleu-clair: #3B77B4;      /* Bleu clair : survols, icônes, éléments secondaires */
+  --bleu-fonce: #3B77B4;      /* Bleu foncé : texte bleu sur fond clair, liens */
+  --corail: #F7CD46;          /* Jaune accent officiel : accent, CTA */
+  --corail-fonce: #F7CD46;    /* Jaune accent officiel : survol, texte accent sur fond clair */
   --encre: #403E3E;           /* Gris texte officiel : texte courant principal */
-  --gris-fond: #FAFBF9;       /* Fond clair officiel : fonds de section */
+  --gris-fond: #FAFBFE;       /* Fond clair officiel : fonds de section */
   --blanc: #ffffff;
 
   /* Tons neutres complémentaires */
@@ -1105,7 +1105,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Bouton "Générer la carte" dans le tableau */
 .btn-icone--carte:hover,
 .btn-icone--carte:focus-visible {
-  color: #3B77B5;
+  color: #3B77B4;
   background-color: #e8f2fb;
 }
 
@@ -1149,7 +1149,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Bande bleue en haut */
 .carte__bandeau-haut {
   height: 8px;
-  background-color: #3B77B5;
+  background-color: #3B77B4;
   flex-shrink: 0;
 }
 
@@ -1201,7 +1201,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 1.3rem;
   font-weight: 700;
-  color: #3B77B5;
+  color: #3B77B4;
   letter-spacing: 0.07em;
   text-transform: uppercase;
   line-height: 1.2;
@@ -1211,7 +1211,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .carte__sous-titre {
   font-family: 'Montserrat', sans-serif;
   font-size: 0.73rem;
-  color: #3B77B5;
+  color: #3B77B4;
   font-weight: 600;
   letter-spacing: 0.02em;
   margin: 0;
@@ -1251,14 +1251,14 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .carte__info-valeur {
   font-size: 0.95rem;
   font-weight: 600;
-  color: #3B77B5;
+  color: #3B77B4;
 }
 
 /* N° adhérent : monospace + bleu vif pour l'identifiant */
 .carte__info-valeur--id {
   font-family: 'Courier New', Courier, monospace;
   font-size: 0.90rem;
-  color: #3B77B5;
+  color: #3B77B4;
   font-weight: 700;
 }
 
@@ -1716,7 +1716,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 22px;
   font-weight: 700;
-  color: #3B77B5;
+  color: #3B77B4;
   text-transform: uppercase;
   letter-spacing: 0.04em;
   margin: 0 0 10px;
@@ -1743,7 +1743,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Filets colorés */
 .bulletin__filet {
   height: 3px;
-  background: #3B77B5;
+  background: #3B77B4;
   margin: 18px 0;
   border-radius: 2px;
 }
@@ -1799,7 +1799,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   margin: 14px 0;
   padding: 9px 12px;
   background: #F0F5FA;
-  border-left: 3px solid #3B77B5;
+  border-left: 3px solid #3B77B4;
   border-radius: 0 4px 4px 0;
   line-height: 1.55;
 }
@@ -1824,7 +1824,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 
 .bulletin__montant-euro {
   font-weight: 700;
-  color: #3B77B5;
+  color: #3B77B4;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -1842,7 +1842,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .bulletin__paiements-titre {
   font-weight: 700;
   font-size: 14px;
-  color: #3B77B5;
+  color: #3B77B4;
   margin: 0 0 9px;
 }
 
@@ -2240,7 +2240,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 14px;
   font-weight: 600;
-  color: #3B77B5;
+  color: #3B77B4;
   margin: 0 0 4px;
   line-height: 1.3;
 }
@@ -2287,7 +2287,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   font-family: 'Bebas Neue', sans-serif;
   font-size: 17px;
   font-weight: 700;
-  color: #3B77B5;
+  color: #3B77B4;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   text-align: center;
@@ -2325,7 +2325,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 /* Sous-titre de section */
 .doc-a4__sous-titre-section {
   font-weight: 700;
-  color: #3B77B5;
+  color: #3B77B4;
   font-size: 13px;
   margin: 0;
 }
@@ -2413,7 +2413,7 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
 .doc-a4__sig-nom {
   font-size: 12px;
   font-weight: 600;
-  color: #3B77B5;
+  color: #3B77B4;
   margin: 0;
 }
 

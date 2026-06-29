@@ -20,8 +20,8 @@ async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDes
   });
 
   const signatureHTML = `
-    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
-    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+    <hr style="border:none;border-top:2px solid #F7CD46;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#403E3E;">
       <tr>
         <td style="padding-right:16px;vertical-align:top;">
           <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
@@ -29,13 +29,13 @@ async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDes
         </td>
         <td style="vertical-align:top;">
           <strong style="font-size:14px;">${nomSignataire || ''}</strong><br>
-          <span style="color:#1e79bf;font-weight:600;">${qualiteSignataire || ''} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          <span style="color:#3B77B4;font-weight:600;">${qualiteSignataire || ''} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
           📱 07 43 29 58 30<br>
           ✉ handicapsi37@gmail.com<br>
           🌐 www.hsi37.fr<br><br>
-          <span style="color:#F28C28;font-weight:600;">🏷 Soutenez nos actions :</span>
-          <a href="https://hsi37.fr/don" style="color:#1e79bf;">Faire un don</a> ou
-          <a href="https://hsi37.fr/adhesion" style="color:#1e79bf;">Devenir membre</a>
+          <span style="color:#F7CD46;font-weight:600;">🏷 Soutenez nos actions :</span>
+          <a href="https://hsi37.fr/don" style="color:#3B77B4;">Faire un don</a> ou
+          <a href="https://hsi37.fr/adhesion" style="color:#3B77B4;">Devenir membre</a>
         </td>
       </tr>
     </table>
@@ -3854,8 +3854,8 @@ document.getElementById('btn-mail-relance').addEventListener('click', async func
   const qualiteRelance = "La secrétaire";
   const nomSignRelance = NOMS_SIGNATAIRES[qualiteRelance] || "BELHAJ Nawel";
   const signatureHTMLRelance = `
-    <hr style="border:none;border-top:2px solid #F28C28;margin:24px 0 16px;">
-    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#1a2433;">
+    <hr style="border:none;border-top:2px solid #F7CD46;margin:24px 0 16px;">
+    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#403E3E;">
       <tr>
         <td style="padding-right:16px;vertical-align:top;">
           <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
@@ -3863,13 +3863,13 @@ document.getElementById('btn-mail-relance').addEventListener('click', async func
         </td>
         <td style="vertical-align:top;">
           <strong style="font-size:14px;">${nomSignRelance}</strong><br>
-          <span style="color:#1e79bf;font-weight:600;">${qualiteRelance} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
+          <span style="color:#3B77B4;font-weight:600;">${qualiteRelance} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
           📱 07 43 29 58 30<br>
           ✉ handicapsi37@gmail.com<br>
           🌐 www.hsi37.fr<br><br>
-          <span style="color:#F28C28;font-weight:600;">🏷 Soutenez nos actions :</span>
-          <a href="https://hsi37.fr/don" style="color:#1e79bf;">Faire un don</a> ou
-          <a href="https://hsi37.fr/adhesion" style="color:#1e79bf;">Devenir membre</a>
+          <span style="color:#F7CD46;font-weight:600;">🏷 Soutenez nos actions :</span>
+          <a href="https://hsi37.fr/don" style="color:#3B77B4;">Faire un don</a> ou
+          <a href="https://hsi37.fr/adhesion" style="color:#3B77B4;">Devenir membre</a>
         </td>
       </tr>
     </table>
@@ -3986,15 +3986,15 @@ document.getElementById('btn-mail-convocation').addEventListener('click', async 
   const texte  = `Emails de tous les adhérents (${data.length}) :\n\n${emails}`;
 
   const zone = document.createElement('div');
-  zone.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:2px solid #1e79bf;border-radius:8px;padding:24px;max-width:600px;width:90%;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.2);";
+  zone.style.cssText = "position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border:2px solid #3B77B4;border-radius:8px;padding:24px;max-width:600px;width:90%;z-index:9999;box-shadow:0 8px 32px rgba(0,0,0,0.2);";
   zone.innerHTML = `
-    <h3 style="color:#1e79bf;margin:0 0 12px;">📋 Emails adhérents (${data.length})</h3>
-    <p style="color:#1a2433;font-size:13px;margin:0 0 8px;">Copiez les adresses ci-dessous et collez-les dans le champ "Cci" de Gmail :</p>
+    <h3 style="color:#3B77B4;margin:0 0 12px;">📋 Emails adhérents (${data.length})</h3>
+    <p style="color:#403E3E;font-size:13px;margin:0 0 8px;">Copiez les adresses ci-dessous et collez-les dans le champ "Cci" de Gmail :</p>
     <textarea readonly style="width:100%;height:120px;font-size:12px;border:1px solid #ccc;border-radius:4px;padding:8px;box-sizing:border-box;">${emails}</textarea>
     <div style="margin-top:12px;display:flex;gap:8px;justify-content:flex-end;">
-      <button id="btn-ouvrir-gmail" style="background:#1e79bf;color:#fff;border:none;border-radius:4px;padding:8px 16px;cursor:pointer;">✉ Ouvrir dans Gmail</button>
-      <button id="btn-copier-emails" style="background:#f4f6f8;color:#1a2433;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">📋 Copier</button>
-      <button id="btn-fermer-emails" style="background:#f4f6f8;color:#1a2433;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">Fermer</button>
+      <button id="btn-ouvrir-gmail" style="background:#3B77B4;color:#fff;border:none;border-radius:4px;padding:8px 16px;cursor:pointer;">✉ Ouvrir dans Gmail</button>
+      <button id="btn-copier-emails" style="background:#FAFBFE;color:#403E3E;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">📋 Copier</button>
+      <button id="btn-fermer-emails" style="background:#FAFBFE;color:#403E3E;border:1px solid #ccc;border-radius:4px;padding:8px 16px;cursor:pointer;">Fermer</button>
     </div>
   `;
   document.body.appendChild(zone);
