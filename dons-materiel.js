@@ -252,12 +252,12 @@ async function genererAttestation(id) {
   const { jsPDF } = window.jspdf;
   const doc = new jsPDF({ unit: 'mm', format: 'a4' });
 
-  const BLEU    = [45, 130, 196];
-  const CORAIL  = [242, 140, 40];
-  const ENCRE   = [51, 51, 51];
+  const BLEU    = [59, 119, 180];
+  const JAUNE   = [247, 205, 70];
+  const ENCRE   = [64, 62, 62];
   const GRIS    = [102, 102, 102];
   const BLANC   = [255, 255, 255];
-  const BLEU_CL = [235, 244, 251];
+  const BLEU_CL = [232, 241, 250];
 
   async function chargerBase64(src) {
     try {
@@ -286,7 +286,7 @@ async function genererAttestation(id) {
   /* --- En-tête --- */
   doc.setFillColor(...BLEU);
   doc.rect(0, 0, 210, 32, 'F');
-  doc.setFillColor(...CORAIL);
+  doc.setFillColor(...JAUNE);
   doc.rect(0, 32, 210, 2, 'F');
 
   const logoData = await chargerBase64('assets/cropped-HSI37-512x512-1.png');
@@ -308,7 +308,7 @@ async function genererAttestation(id) {
   doc.setFontSize(14);
   doc.text('ATTESTATION DE DON DE MATÉRIEL', 105, y, { align: 'center' });
   y += 3;
-  doc.setDrawColor(...CORAIL);
+  doc.setDrawColor(...BLEU);
   doc.setLineWidth(0.8);
   doc.line(30, y, 180, y);
   y += 10;
@@ -417,7 +417,7 @@ async function genererAttestation(id) {
   /* --- Pied de page P1 --- */
   doc.setFillColor(...BLEU);
   doc.rect(0, 278, 210, 19, 'F');
-  doc.setDrawColor(...CORAIL);
+  doc.setDrawColor(...BLEU);
   doc.setLineWidth(0.6);
   doc.line(0, 278, 210, 278);
   doc.setTextColor(...BLANC);
@@ -449,7 +449,7 @@ async function genererAttestation(id) {
     function enteteAnnexe(titre) {
       doc.setFillColor(...BLEU);
       doc.rect(0, 0, 210, 22, 'F');
-      doc.setFillColor(...CORAIL);
+      doc.setFillColor(...JAUNE);
       doc.rect(0, 22, 210, 2, 'F');
       doc.setTextColor(...BLANC);
       doc.setFont('helvetica', 'bold');
@@ -460,7 +460,7 @@ async function genererAttestation(id) {
     function piedAnnexe() {
       doc.setFillColor(...BLEU);
       doc.rect(0, 278, 210, 19, 'F');
-      doc.setDrawColor(...CORAIL);
+      doc.setDrawColor(...BLEU);
       doc.setLineWidth(0.6);
       doc.line(0, 278, 210, 278);
       doc.setTextColor(...BLANC);
