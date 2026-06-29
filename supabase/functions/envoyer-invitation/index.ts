@@ -51,7 +51,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    const { evenement_id, objet_email, corps_email } = await req.json();
+    const { evenement_id, objet_email, corps_email, listes } = await req.json();
 
     if (!evenement_id || !objet_email || !corps_email) {
       return new Response(
@@ -60,17 +60,21 @@ serve(async (req: Request) => {
       );
     }
 
+    const inclure: string[] = Array.isArray(listes) && listes.length > 0
+      ? listes
+      : ["adherents", "donateurs", "participants"];
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
     const supabaseKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
     const supabase    = createClient(supabaseUrl, supabaseKey);
 
-    // Récupération des 3 listes en parallèle
+    const vide = Promise.resolve({ data: [] as { email: string; nom: string; prenom: string }[], error: null });
+
+    // Récupération des listes sélectionnées en parallèle
     const [resAdh, resDon, resPart] = await Promise.all([
-      supabase.from("adherents").select("email, nom, prenom"),
-      supabase.from("donateurs").select("email, nom, prenom"),
-      supabase.from("participants_evenements")
-               .select("email, nom, prenom")
-               .eq("evenement_id", evenement_id),
+      inclure.includes("adherents")    ? supabase.from("adherents").select("email, nom, prenom")                                              : vide,
+      inclure.includes("donateurs")    ? supabase.from("donateurs").select("email, nom, prenom")                                              : vide,
+      inclure.includes("participants") ? supabase.from("participants_evenements").select("email, nom, prenom").eq("evenement_id", evenement_id) : vide,
     ]);
 
     if (resAdh.error)  throw new Error("Adhérents : "    + resAdh.error.message);

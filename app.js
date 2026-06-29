@@ -1788,7 +1788,14 @@ function remplirTableauEvenements() {
         console.log("étape 1 — id événement:", id);
         document.getElementById("formulaire-invitation").reset();
         document.getElementById("inv-evenement-id").value = id;
+        document.getElementById("inv-liste-participants").checked = true;
         document.getElementById("inv-message").hidden = true;
+        mettreAJourCompteInvitation(id);
+        ["inv-liste-adherents", "inv-liste-donateurs", "inv-liste-participants"].forEach(function(cid) {
+          document.getElementById(cid).addEventListener("change", function() {
+            mettreAJourCompteInvitation(document.getElementById("inv-evenement-id").value);
+          });
+        });
         console.log("étape 2 — ouverture modale");
         document.getElementById("invitation-fond").hidden = false;
         document.getElementById("modale-invitation").focus();
@@ -3994,6 +4001,25 @@ document.getElementById("invitation-fond").addEventListener("click", function(ev
   if (ev.target === this) fermerModaleInvitation();
 });
 
+function mettreAJourCompteInvitation(evenement_id) {
+  const vus = new Set();
+  if (document.getElementById("inv-liste-adherents").checked)
+    donneesAdherents
+      .filter(function(a) { return calculerStatutAdherent(a) === "ajour" && a.email; })
+      .forEach(function(a) { vus.add(a.email.trim().toLowerCase()); });
+  if (document.getElementById("inv-liste-donateurs").checked)
+    donneesDonateurs
+      .filter(function(d) { return d.email; })
+      .forEach(function(d) { vus.add(d.email.trim().toLowerCase()); });
+  if (document.getElementById("inv-liste-participants").checked)
+    donneesParticipants
+      .filter(function(p) { return String(p.evenement_id) === String(evenement_id) && p.email; })
+      .forEach(function(p) { vus.add(p.email.trim().toLowerCase()); });
+  const n = vus.size;
+  document.getElementById("inv-compte").textContent =
+    n + " destinataire" + (n > 1 ? "s" : "");
+}
+
 document.getElementById("formulaire-invitation").addEventListener("submit", async function(e) {
   e.preventDefault();
   const btn = document.getElementById("btn-envoyer-invitation");
@@ -4005,6 +4031,10 @@ document.getElementById("formulaire-invitation").addEventListener("submit", asyn
   const evenement_id = document.getElementById("inv-evenement-id").value;
   const objet_email  = document.getElementById("inv-objet").value.trim();
   const corps_email  = document.getElementById("inv-corps").value.trim();
+  const listes = [];
+  if (document.getElementById("inv-liste-adherents").checked)    listes.push("adherents");
+  if (document.getElementById("inv-liste-donateurs").checked)    listes.push("donateurs");
+  if (document.getElementById("inv-liste-participants").checked) listes.push("participants");
 
   console.log("étape 3 — appel Edge Function");
   try {
@@ -4014,7 +4044,7 @@ document.getElementById("formulaire-invitation").addEventListener("submit", asyn
         "Content-Type": "application/json",
         "Authorization": "Bearer " + SUPABASE_KEY,
       },
-      body: JSON.stringify({ evenement_id, objet_email, corps_email }),
+      body: JSON.stringify({ evenement_id, objet_email, corps_email, listes }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erreur inconnue");

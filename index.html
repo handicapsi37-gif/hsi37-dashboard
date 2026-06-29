@@ -2500,6 +2500,27 @@
         <input type="hidden" id="inv-evenement-id"/>
 
         <div class="champ-groupe">
+          <span class="champ-label">Destinataires</span>
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="inv-liste-adherents">
+              Adhérents à jour
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="inv-liste-donateurs">
+              Donateurs
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input type="checkbox" id="inv-liste-participants" checked>
+              Participants de cet événement
+            </label>
+          </div>
+          <p id="inv-compte" style="margin-top:8px;font-size:.875rem;color:#3B77B4;font-weight:600;">
+            — destinataires
+          </p>
+        </div>
+
+        <div class="champ-groupe">
           <label for="inv-objet" class="champ-label">Objet de l'email <span aria-hidden="true">*</span></label>
           <input type="text" id="inv-objet" class="champ-input" required
                  placeholder="Ex : Invitation — événement HSI37"/>
