@@ -689,7 +689,7 @@
             </button>
           </div>
 
-          <!-- Export CSV des données — adhérents et donateurs -->
+          <!-- Export CSV des données — adhérents, donateurs et événements -->
           <div class="doc-carte">
             <div class="doc-carte__icone" aria-hidden="true">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="22" height="22"
@@ -702,17 +702,14 @@
             </div>
             <div class="doc-carte__info">
               <h3 class="doc-carte__titre">Exporter les données</h3>
-              <p class="doc-carte__desc">Listes complètes adhérents et donateurs en CSV — compatible Excel français</p>
+              <p class="doc-carte__desc">CSV adhérents, donateurs et événements — compatible Excel français</p>
             </div>
-            <button class="bouton-export" id="btn-exporter-donnees"
-                    aria-label="Exporter les données en CSV">
-              <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-                   viewBox="0 0 24 24" width="16" height="16">
-                <path d="M12 15V3M12 15l-4-4M12 15l4-4M3 17v2a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-2"
-                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-              </svg>
-              Exporter
-            </button>
+            <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center;">
+              <button class="bouton-export" id="btn-export-adh-csv">⬇ Adhérents CSV</button>
+              <button class="bouton-export" id="btn-export-don-csv">⬇ Donateurs CSV</button>
+              <button class="bouton-export" id="btn-export-ev-csv">⬇ Événements CSV</button>
+              <button class="bouton-export" id="btn-export-zip">⬇ Tout exporter (ZIP)</button>
+            </div>
           </div>
 
         </div>
@@ -2489,6 +2486,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <!-- QRCode.js — génération de QR codes inline (canvas) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <!-- Clés de configuration (SUPABASE_URL, SUPABASE_KEY) -->
   <script src="config.js"></script>
   <script src="app.js"></script>

@@ -4872,40 +4872,81 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 });
 
-document.getElementById("btn-exporter-donnees").addEventListener("click", async function() {
-  const btn          = this;
-  btn.disabled       = true;
-  const texteOriginal = btn.innerHTML;
-  btn.textContent    = 'Export en cours…';
+function dateStrExport() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
 
+async function exporterTableCSV(table, nomFichier, labelErreur) {
+  const { data, error } = await clientSupabase.from(table).select('*').order('nom', { ascending: true });
+  if (error) throw new Error(labelErreur + ' : ' + error.message);
+  const cols = data.length > 0 ? Object.keys(data[0]) : [];
+  telechargerFichier(genererCSV(data, cols), nomFichier);
+  return { data, cols };
+}
+
+document.getElementById("btn-export-adh-csv").addEventListener("click", async function() {
+  const btn = this; btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Export…';
   try {
-    const [resAdh, resDon] = await Promise.all([
-      clientSupabase.from('adherents').select('*').order('nom', { ascending: true }),
-      clientSupabase.from('donateurs').select('*').order('nom', { ascending: true })
-    ]);
+    await exporterTableCSV('adherents', `export-adherents-${dateStrExport()}.csv`, 'Adhérents');
+    afficherMessageSuccesDoc('Adhérents exportés avec succès.');
+  } catch (e) { afficherMessageErreurDoc('Export échoué : ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+});
 
+document.getElementById("btn-export-don-csv").addEventListener("click", async function() {
+  const btn = this; btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Export…';
+  try {
+    await exporterTableCSV('donateurs', `export-donateurs-${dateStrExport()}.csv`, 'Donateurs');
+    afficherMessageSuccesDoc('Donateurs exportés avec succès.');
+  } catch (e) { afficherMessageErreurDoc('Export échoué : ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+});
+
+document.getElementById("btn-export-ev-csv").addEventListener("click", async function() {
+  const btn = this; btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Export…';
+  try {
+    const { data, error } = await clientSupabase.from('evenements').select('*').order('date', { ascending: false });
+    if (error) throw new Error('Événements : ' + error.message);
+    const cols = data.length > 0 ? Object.keys(data[0]) : [];
+    telechargerFichier(genererCSV(data, cols), `export-evenements-${dateStrExport()}.csv`);
+    afficherMessageSuccesDoc('Événements exportés avec succès.');
+  } catch (e) { afficherMessageErreurDoc('Export échoué : ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
+});
+
+document.getElementById("btn-export-zip").addEventListener("click", async function() {
+  const btn = this; btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Préparation…';
+  try {
+    const dateStr = dateStrExport();
+    const [resAdh, resDon, resEv] = await Promise.all([
+      clientSupabase.from('adherents').select('*').order('nom', { ascending: true }),
+      clientSupabase.from('donateurs').select('*').order('nom', { ascending: true }),
+      clientSupabase.from('evenements').select('*').order('date', { ascending: false })
+    ]);
     if (resAdh.error) throw new Error('Adhérents : ' + resAdh.error.message);
     if (resDon.error) throw new Error('Donateurs : ' + resDon.error.message);
-
-    const d       = new Date();
-    const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    if (resEv.error)  throw new Error('Événements : ' + resEv.error.message);
 
     const colAdh = resAdh.data.length > 0 ? Object.keys(resAdh.data[0]) : [];
     const colDon = resDon.data.length > 0 ? Object.keys(resDon.data[0]) : [];
+    const colEv  = resEv.data.length  > 0 ? Object.keys(resEv.data[0])  : [];
 
-    telechargerFichier(genererCSV(resAdh.data, colAdh), `export-adherents-${dateStr}.csv`);
-    /* Délai court pour éviter le blocage du second téléchargement par le navigateur */
-    setTimeout(function() {
-      telechargerFichier(genererCSV(resDon.data, colDon), `export-donateurs-${dateStr}.csv`);
-    }, 400);
+    const zip = new JSZip();
+    zip.file(`export-adherents-${dateStr}.csv`,  genererCSV(resAdh.data, colAdh));
+    zip.file(`export-donateurs-${dateStr}.csv`,  genererCSV(resDon.data, colDon));
+    zip.file(`export-evenements-${dateStr}.csv`, genererCSV(resEv.data,  colEv));
 
-    afficherMessageSuccesDoc('Données exportées avec succès.');
-  } catch (erreur) {
-    afficherMessageErreurDoc('Export échoué : ' + erreur.message);
-  } finally {
-    btn.disabled    = false;
-    btn.innerHTML   = texteOriginal;
-  }
+    const blob = await zip.generateAsync({ type: 'blob' });
+    const url  = URL.createObjectURL(blob);
+    const lien = document.createElement('a');
+    lien.href = url; lien.download = `export-HSI37-${dateStr}.zip`;
+    document.body.appendChild(lien); lien.click();
+    setTimeout(function() { document.body.removeChild(lien); URL.revokeObjectURL(url); }, 200);
+
+    afficherMessageSuccesDoc('Export ZIP généré avec succès (3 fichiers CSV).');
+  } catch (e) { afficherMessageErreurDoc('Export échoué : ' + e.message); }
+  finally { btn.disabled = false; btn.textContent = orig; }
 });
 
 function appliquerFiltreAdherents() {
