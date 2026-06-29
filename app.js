@@ -1784,7 +1784,11 @@ function remplirTableauEvenements() {
 
       const btnInviterEv = e.target.closest(".btn-inviter-evenement");
       if (btnInviterEv) {
-        console.log("clic invitation", btnInviterEv.dataset.evId);
+        const id = btnInviterEv.dataset.evId;
+        console.log("clic invitation", id);
+        console.log("étape 1 — id événement:", id);
+        console.log("étape 2 — ouverture modale");
+        console.log("étape 3 — appel Edge Function");
         return;
       }
     });
