@@ -1791,11 +1791,6 @@ function remplirTableauEvenements() {
         document.getElementById("inv-liste-participants").checked = true;
         document.getElementById("inv-message").hidden = true;
         mettreAJourCompteInvitation(id);
-        ["inv-liste-adherents", "inv-liste-donateurs", "inv-liste-participants"].forEach(function(cid) {
-          document.getElementById(cid).addEventListener("change", function() {
-            mettreAJourCompteInvitation(document.getElementById("inv-evenement-id").value);
-          });
-        });
         console.log("étape 2 — ouverture modale");
         document.getElementById("invitation-fond").hidden = false;
         document.getElementById("modale-invitation").focus();
@@ -3999,6 +3994,12 @@ document.getElementById("btn-fermer-invitation").addEventListener("click", ferme
 document.getElementById("btn-annuler-invitation").addEventListener("click", fermerModaleInvitation);
 document.getElementById("invitation-fond").addEventListener("click", function(ev) {
   if (ev.target === this) fermerModaleInvitation();
+});
+
+["inv-liste-adherents", "inv-liste-donateurs", "inv-liste-participants"].forEach(function(cid) {
+  document.getElementById(cid).addEventListener("change", function() {
+    mettreAJourCompteInvitation(document.getElementById("inv-evenement-id").value);
+  });
 });
 
 function mettreAJourCompteInvitation(evenement_id) {
