@@ -11,6 +11,40 @@ interface Contact {
   nom:   string;
 }
 
+function construireHTML(corps: string): string {
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#FAFBFE;">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:6px;overflow:hidden;">
+
+    <div style="background:#3B77B4;padding:24px 32px 0;">
+      <img src="https://tafxmyylkzmxeyzztejw.supabase.co/storage/v1/object/public/assets/hsi37-redim-demi.png"
+           height="56" alt="HSI37" style="display:block;"/>
+      <div style="background:#F7CD46;height:3px;margin-top:20px;"></div>
+    </div>
+
+    <div style="padding:32px;color:#403E3E;font-family:Arial,sans-serif;font-size:15px;line-height:1.6;">
+      ${corps}
+    </div>
+
+    <div style="padding:0 32px 32px;font-family:Arial,sans-serif;font-size:14px;color:#403E3E;border-top:1px solid #e8edf4;margin:0 32px;">
+      <p style="margin:24px 0 4px;">Cordialement,</p>
+      <strong>Mohammed BELHAJ</strong><br/>
+      Président — HSI37<br/>
+      <span style="color:#3B77B4;">handicapsi37@gmail.com &nbsp;·&nbsp; hsi37.fr</span>
+    </div>
+
+    <div style="background:#3B77B4;padding:14px 32px;text-align:center;
+                font-family:Arial,sans-serif;font-size:11px;color:#ffffff;">
+      HSI37 &nbsp;·&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps
+    </div>
+
+  </div>
+</body>
+</html>`;
+}
+
 serve(async (req: Request) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: CORS });
@@ -62,7 +96,7 @@ serve(async (req: Request) => {
         continue;
       }
 
-      if (vus.has(email)) continue; // doublon inter-tables, non comptabilisé en exclus
+      if (vus.has(email)) continue;
 
       vus.add(email);
       valides.push({
@@ -71,8 +105,30 @@ serve(async (req: Request) => {
       });
     }
 
+    // Envoi unique Brevo avec tous les destinataires
+    const apiKey = Deno.env.get("BREVO_API_KEY");
+    if (!apiKey) throw new Error("Clé Brevo manquante");
+
+    const destinataires = valides.map(c => ({ email: c.email, name: c.nom }));
+
+    const brevo = await fetch("https://api.brevo.com/v3/smtp/email", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "api-key": apiKey },
+      body: JSON.stringify({
+        sender:      { name: "HSI37", email: "handicapsi37@gmail.com" },
+        to:          destinataires,
+        subject:     objet_email,
+        htmlContent: construireHTML(corps_email),
+      }),
+    });
+
+    if (!brevo.ok) {
+      const err = await brevo.json().catch(() => ({}));
+      throw new Error(err.message || `Erreur Brevo ${brevo.status}`);
+    }
+
     return new Response(
-      JSON.stringify({ envoyes: valides.length, exclus }),
+      JSON.stringify({ envoyes: valides.length, exclus, erreurs: 0 }),
       { headers: { ...CORS, "Content-Type": "application/json" } }
     );
 
