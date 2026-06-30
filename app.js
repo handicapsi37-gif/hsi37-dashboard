@@ -1594,6 +1594,7 @@ async function chargerEvenements() {
   donneesParticipants = resPart.data || [];
 
   remplirTableauEvenements();
+  mettreAJourStats();
 
   const inputRecherche = document.getElementById("recherche-evenements");
   if (inputRecherche && !inputRecherche._listenerEv) {
@@ -4587,6 +4588,16 @@ function mettreAJourStats() {
   var elDons = document.getElementById("val-dons");
   if (elTotalDon) elTotalDon.textContent = totalDon;
   if (elDons) elDons.textContent = totalDons.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
+
+  var annee = new Date().getFullYear();
+  var totalEv = donneesParticipants
+    .filter(function(p) {
+      var ev = donneesEvenements.find(function(e) { return String(e.id) === String(p.evenement_id); });
+      return ev && ev.date && new Date(ev.date).getFullYear() === annee;
+    })
+    .reduce(function(acc, p) { return acc + (parseFloat(p.montant) || 0); }, 0);
+  var elEv = document.getElementById("val-evenements");
+  if (elEv) elEv.textContent = totalEv.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €";
 }
 
 // --- Export CSV ---
@@ -5044,6 +5055,10 @@ async function exporterRapportAnnuelPDF() {
   if (dmData) donsMateriel = dmData;
 
   /* ---- Helpers ---- */
+  function fmt(n) {
+    return Number(n).toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' €';
+  }
+
   function pdfEnTete(titre) {
     doc.setFillColor(...BLEU);  doc.rect(0, 0, 210, 28, 'F');
     doc.setFillColor(...JAUNE); doc.rect(0, 28, 210, 2, 'F');
@@ -5135,10 +5150,8 @@ async function exporterRapportAnnuelPDF() {
   carteStat(12,  52,  totalAdh,  'Adhérents total',       BLEU);
   carteStat(112, 52,  aJour,     'À jour',                [34, 139, 34]);
   carteStat(12,  90,  expires,   'Expirés',               [200, 50, 50]);
-  carteStat(112, 90,  totalCotis.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €',
-                                 'Total cotisations', BLEU);
-  carteStat(12,  128, totalDonsF.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €',
-                                 'Total dons financiers',  [180, 100, 0]);
+  carteStat(112, 90,  fmt(totalCotis), 'Total cotisations', BLEU);
+  carteStat(12,  128, fmt(totalDonsF), 'Total dons financiers',  [180, 100, 0]);
   carteStat(112, 128, nbDonsMat, 'Dons de matériel',      BLEU);
 
   /* ---- Page 2 : tableau des adhérents ---- */
@@ -5170,7 +5183,7 @@ async function exporterRapportAnnuelPDF() {
     { x: 36, fin: 76, label: 'Nom',        valeur: d => (d.nom || '') + ' ' + (d.prenom || '') },
     { x: 76, fin: 120,label: 'Organisme',  valeur: d => d.organisme },
     { x: 120,fin: 162,label: 'Type de don',valeur: d => d.type_don },
-    { x: 162,fin: 198,label: 'Montant',    valeur: d => d.montant_don != null ? Number(d.montant_don).toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €' : '—' },
+    { x: 162,fin: 198,label: 'Montant',    valeur: d => d.montant_don != null ? fmt(d.montant_don) : '—' },
   ];
   dessinerTableau(colsDonFin, donsFin, y, () => 'Rapport annuel ' + annee);
 
@@ -5210,7 +5223,7 @@ async function exporterRapportAnnuelPDF() {
         const total = donneesParticipants
           .filter(p => String(p.evenement_id) === String(ev.id))
           .reduce((s, p) => s + (parseFloat(p.montant) || 0), 0);
-        return total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+        return fmt(total);
       }
     },
   ];
