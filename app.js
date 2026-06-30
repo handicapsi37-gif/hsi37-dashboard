@@ -2262,16 +2262,19 @@ function remplirTableauDonateurs(donateurs) {
     const donsDuDonateur = donneesDons.filter(function(d) {
       return String(d.donateur_id) === String(don.id);
     });
-    const totalDons = donsDuDonateur.reduce(function(acc, d) {
+    const donsFiltresAnnee = filtreAnneeDonateurs
+      ? donsDuDonateur.filter(function(d) { return Number(d.annee) === Number(filtreAnneeDonateurs); })
+      : donsDuDonateur;
+    const totalDons = donsFiltresAnnee.reduce(function(acc, d) {
       return acc + (Number(d.montant) || 0);
     }, 0);
-    const montant = donsDuDonateur.length > 0
+    const montant = donsFiltresAnnee.length > 0
       ? totalDons.toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
-    const btnToggle = donsDuDonateur.length > 0
+    const btnToggle = donsFiltresAnnee.length > 0
       ? `<button class="btn-dons-toggle" data-id="${don.id}"
                 style="margin-left:8px;font-size:.75rem;padding:2px 6px;border:1px solid #aaa;border-radius:3px;background:#f0f0f0;cursor:pointer;">
-           ${donsDuDonateur.length} don${donsDuDonateur.length > 1 ? "s" : ""}
+           ${donsFiltresAnnee.length} don${donsFiltresAnnee.length > 1 ? "s" : ""}
          </button>`
       : "";
 
@@ -5555,8 +5558,15 @@ function appliquerFiltreAdherents() {
 function appliquerFiltreDonateurs() {
   var f = filtreDonateurs.toLowerCase();
   var liste = donneesDonateurs.filter(function(d) {
-    if (filtreAnneeDonateurs && d.date_don &&
-        new Date(d.date_don).getFullYear() !== Number(filtreAnneeDonateurs)) return false;
+    if (filtreAnneeDonateurs) {
+      var anneeFiltre = Number(filtreAnneeDonateurs);
+      var aDon = donneesDons.some(function(don) {
+        return String(don.donateur_id) === String(d.id) && Number(don.annee) === anneeFiltre;
+      });
+      if (!aDon) {
+        if (!d.date_don || new Date(d.date_don).getFullYear() !== anneeFiltre) return false;
+      }
+    }
     return (d.nom||"").toLowerCase().includes(f) || (d.prenom||"").toLowerCase().includes(f) || (d.organisme||"").toLowerCase().includes(f) || (d.email||"").toLowerCase().includes(f) || (d.type_don||"").toLowerCase().includes(f);
   });
   if (triDonateurs.colonne) {
