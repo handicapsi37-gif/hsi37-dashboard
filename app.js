@@ -27,7 +27,7 @@ async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDes
           <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
                alt="Logo HSI37" width="80" style="display:block;">
         </td>
-        <td style="vertical-align:top;">
+        <td style="vertical-align:top;border-left:4px solid #F7CD46;padding-left:14px;">
           <strong style="font-size:14px;">${nomSignataire || ''}</strong><br>
           <span style="color:#3B77B4;font-weight:600;">${qualiteSignataire || ''} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
           📱 07 43 29 58 30<br>
@@ -3964,7 +3964,7 @@ document.getElementById('btn-mail-relance').addEventListener('click', async func
           <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
                alt="Logo HSI37" width="80" style="display:block;">
         </td>
-        <td style="vertical-align:top;">
+        <td style="vertical-align:top;border-left:4px solid #F7CD46;padding-left:14px;">
           <strong style="font-size:14px;">${nomSignRelance}</strong><br>
           <span style="color:#3B77B4;font-weight:600;">${qualiteRelance} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
           📱 07 43 29 58 30<br>

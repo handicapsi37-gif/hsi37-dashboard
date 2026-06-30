@@ -28,10 +28,12 @@ function construireHTML(corps: string, signataire: string, nomSignataire: string
     </div>
 
     <div style="padding:0 32px 32px;font-family:Arial,sans-serif;font-size:14px;color:#403E3E;border-top:1px solid #e8edf4;margin:0 32px;">
-      <p style="margin:24px 0 4px;">Cordialement,</p>
-      <strong>${nomSignataire}</strong><br/>
-      ${signataire} — HSI37<br/>
-      <span style="color:#3B77B4;">handicapsi37@gmail.com &nbsp;·&nbsp; hsi37.fr</span>
+      <p style="margin:24px 0 8px;">Cordialement,</p>
+      <div style="border-left:4px solid #F7CD46;padding-left:14px;">
+        <strong>${nomSignataire}</strong><br/>
+        ${signataire} — HSI37<br/>
+        <span style="color:#3B77B4;">handicapsi37@gmail.com &nbsp;·&nbsp; hsi37.fr</span>
+      </div>
     </div>
 
     <div style="background:#3B77B4;padding:14px 32px;text-align:center;
