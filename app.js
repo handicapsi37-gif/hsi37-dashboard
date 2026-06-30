@@ -5187,6 +5187,35 @@ async function exporterRapportAnnuelPDF() {
   ];
   dessinerTableau(colsDonMat, donsMateriel, y, () => 'Rapport annuel ' + annee);
 
+  /* ---- Page suivante : événements ---- */
+  doc.addPage();
+  pdfEnTete('Rapport annuel ' + annee);
+  y = titreSec('ÉVÉNEMENTS DE L\'ANNÉE', 50);
+
+  const evenementsAnnee = donneesEvenements.filter(function(ev) {
+    return ev.date && new Date(ev.date).getFullYear() === annee;
+  });
+
+  const colsEv = [
+    { x: 12,  fin: 90,  label: 'Événement',        valeur: ev => ev.nom },
+    { x: 90,  fin: 120, label: 'Date',              valeur: ev => formaterDate(ev.date) },
+    { x: 120, fin: 158, label: 'Participants',      valeur: ev => {
+        const nb = donneesParticipants
+          .filter(p => String(p.evenement_id) === String(ev.id))
+          .reduce((s, p) => s + (p.quantite || 1), 0);
+        return String(nb);
+      }
+    },
+    { x: 158, fin: 198, label: 'Total collecté',   valeur: ev => {
+        const total = donneesParticipants
+          .filter(p => String(p.evenement_id) === String(ev.id))
+          .reduce((s, p) => s + (parseFloat(p.montant) || 0), 0);
+        return total.toLocaleString('fr-FR', { minimumFractionDigits: 2 }) + ' €';
+      }
+    },
+  ];
+  dessinerTableau(colsEv, evenementsAnnee.length ? evenementsAnnee : [{ nom: 'Aucun événement enregistré pour cette année', date: null }], y, () => 'Rapport annuel ' + annee);
+
   /* ---- Pied de page (2 passes) ---- */
   const total = doc.internal.getNumberOfPages();
   for (let p = 1; p <= total; p++) {
