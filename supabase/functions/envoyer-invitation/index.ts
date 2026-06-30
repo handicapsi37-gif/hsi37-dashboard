@@ -38,7 +38,9 @@ function construireHTML(corps: string, signataire: string, nomSignataire: string
 
     <div style="background:#3B77B4;padding:14px 32px;text-align:center;
                 font-family:Arial,sans-serif;font-size:11px;color:#ffffff;">
-      HSI37 &nbsp;·&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps
+      <span style="color:#ffffff !important;">
+        HSI37 &nbsp;·&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps
+      </span>
     </div>
 
   </div>
