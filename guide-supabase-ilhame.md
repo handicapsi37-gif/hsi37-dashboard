@@ -110,6 +110,10 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 
 ### Structure de la table `cotisations`
 
+**Rôle** : historique des cotisations par année. Chaque adhérent a une ligne par année de cotisation — jamais deux lignes pour la même année.
+
+**Règle** : un adhérent ne peut avoir qu'une seule cotisation par année (contrainte unique sur `adherent_id` + `annee`).
+
 | Colonne | Type | Rôle |
 |---|---|---|
 | id | uuid | Identifiant technique (généré automatiquement) |
@@ -279,4 +283,70 @@ Avant de toucher quoi que ce soit : fais une capture d'écran de ce que tu vois 
 
 ---
 
-*Dernière mise à jour : juin 2026 — V4 IDs séquentiels + Edge Functions + import masse*
+## 13. Filtre adhérents par année — fonctionnement technique
+
+Le filtre par année dans l'onglet Adhérents **ne se base pas sur `date_adhesion`**. Il cherche dans la table `cotisations`.
+
+- Un adhérent apparaît pour l'année X s'il possède **au moins une ligne** dans `cotisations` avec `annee = X`.
+- Si aucune cotisation n'est enregistrée pour un adhérent, le filtre utilise l'année de `date_adhesion` comme fallback.
+
+**Conséquence pratique** : un adhérent inscrit en 2024 qui renouvelle en 2026 apparaît dans les deux filtres (2024 et 2026) — ce qui est le comportement attendu.
+
+---
+
+## 14. Scripts d'import PayAsso (dossier `scripts/import-payasso/`)
+
+Ces scripts Python lisent un fichier Excel exporté depuis PayAsso et importent les données dans Supabase, avec validation manuelle ligne par ligne.
+
+### `import_adherents.py` — import des adhésions
+
+```bash
+python3 scripts/import-payasso/import_adherents.py fichier.xlsx            # dry-run
+python3 scripts/import-payasso/import_adherents.py fichier.xlsx --confirmer # écriture réelle
+```
+
+**Fonctionnement** :
+1. Lit chaque ligne du fichier Excel (Date + Prénom Nom)
+2. Recherche un doublon dans `adherents` via fuzzy matching (seuil 85%)
+3. Affiche le résultat et demande une réponse :
+   - **G** = nouveau adhérent → insère dans `adherents` + cotisations manquantes
+   - **I** = doublon confirmé → ajoute uniquement les cotisations manquantes sur la fiche existante
+   - **Q** = arrêt propre, comptabilise les lignes sautées
+4. Affiche un récapitulatif final (nouveaux / complétés / cotisations créées / skippés)
+
+### `import_dons.py` — import des dons
+
+```bash
+python3 scripts/import-payasso/import_dons.py fichier.xlsx            # dry-run
+python3 scripts/import-payasso/import_dons.py fichier.xlsx --confirmer # écriture réelle
+```
+
+**Fonctionnement** :
+1. Lit chaque ligne du fichier Excel PayAsso dons (Nom, Prénom, email, Adresse, Montant, Date, Moyen de paiement)
+2. Recherche un doublon dans `donateurs` via fuzzy matching (seuil 85%)
+3. Affiche le résultat et demande une réponse :
+   - **G** = nouveau donateur → insère dans `donateurs` + insère le don dans `dons`
+   - **I** = doublon confirmé → insère uniquement le don sur le donateur existant
+   - **Q** = arrêt propre
+4. Affiche un récapitulatif final (nouveaux donateurs / existants complétés / dons créés au total)
+
+> ⚠️ Les deux scripts utilisent `secrets_import.py` pour les clés Supabase — ne jamais mettre les clés en dur dans le code.
+
+---
+
+## 15. Règle anti-doublon (fuzzy matching)
+
+Avant toute insertion d'adhérent ou de donateur, les scripts vérifient si la personne existe déjà en base via une **comparaison approximative des noms** (fuzzy matching).
+
+**Seuil** : 85% de ressemblance minimum pour considérer un doublon probable.
+
+**Méthode** :
+- Normalisation : minuscules, sans accents, sans tirets
+- Test dans les deux sens : "Prénom Nom" et "Nom Prénom" — le score le plus élevé est retenu
+- Pour les organismes (noms multi-mots) : comparaison du nom seul en cas d'échec de la comparaison complète
+
+**Règle absolue** : même à 100% de ressemblance, la validation est toujours manuelle. Aucune insertion automatique sans confirmation G / I / Q.
+
+---
+
+*Dernière mise à jour : juin 2026 — V5 cotisations + filtre année + scripts PayAsso + anti-doublon*
