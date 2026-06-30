@@ -381,12 +381,22 @@ function remplirTableau(adherents) {
 
   adherents.forEach(function(adherent) {
     const ligne       = document.createElement("tr");
-    const derniere    = derniereCotisation(adherent.id);
+    const cotisDuAdherent = donneesCotisations
+      .filter(function(c) { return String(c.adherent_id) === String(adherent.id); })
+      .sort(function(a, b) { return b.annee - a.annee; });
+    const derniere    = cotisDuAdherent.length > 0 ? cotisDuAdherent[0] : null;
     const montant     = derniere
       ? Number(derniere.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
     const modePmt     = derniere ? (derniere.mode_paiement || "—") : "—";
     const statut      = calculerStatutAdherent(adherent);
+    const btnToggle   = cotisDuAdherent.length > 0
+      ? `<button class="btn-cotis-toggle" data-id="${adherent.id}"
+             style="margin-left:8px;font-size:.75rem;padding:2px 6px;border:1px solid #aaa;border-radius:3px;background:#f0f0f0;cursor:pointer;"
+             aria-expanded="false">
+           ${cotisDuAdherent.length} cotis.
+         </button>`
+      : "";
 
     ligne.innerHTML = `
       <td class="col-select"><input type="checkbox" class="case-selection-adh" data-id="${adherent.id}" aria-label="Sélectionner ${adherent.prenom || ""} ${adherent.nom || ""}"></td>
@@ -403,13 +413,40 @@ function remplirTableau(adherents) {
       <td class="col-telephone">${adherent.telephone || "—"}</td>
       <td>${genererCelluleType(adherent.type_membre)}</td>
       <td>${formaterDate(adherent.date_adhesion)}</td>
-      <td>${montant}</td>
+      <td>${montant}${btnToggle}</td>
       <td>${modePmt}</td>
       <td>${genererBadge(statut)}</td>
       <td class="col-actions">${genererBoutonsActions(adherent.id_adherent || adherent.id, adherent.id, statut)}</td>
     `;
-
     corps.appendChild(ligne);
+
+    const sousLigne = document.createElement("tr");
+    sousLigne.id = `cotis-sous-${adherent.id}`;
+    sousLigne.hidden = true;
+    const lignesCotis = cotisDuAdherent.map(function(c) {
+      return `<tr>
+        <td style="padding:4px 8px;">${c.annee}</td>
+        <td style="padding:4px 8px;">${formaterDate(c.date_paiement)}</td>
+        <td style="padding:4px 8px;text-align:right;">${Number(c.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} €</td>
+        <td style="padding:4px 8px;">${c.mode_paiement || "—"}</td>
+      </tr>`;
+    }).join("");
+    sousLigne.innerHTML = `
+      <td colspan="12" style="padding:0 16px 12px 32px;background:#f7f8fa;">
+        <table style="width:100%;font-size:.85rem;border-collapse:collapse;">
+          <thead>
+            <tr style="color:#666;">
+              <th style="padding:4px 8px;text-align:left;">Année</th>
+              <th style="padding:4px 8px;text-align:left;">Date paiement</th>
+              <th style="padding:4px 8px;text-align:right;">Montant</th>
+              <th style="padding:4px 8px;text-align:left;">Mode</th>
+            </tr>
+          </thead>
+          <tbody>${lignesCotis}</tbody>
+        </table>
+      </td>
+    `;
+    corps.appendChild(sousLigne);
   });
 }
 
@@ -5551,6 +5588,16 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var inputAdh = document.getElementById("recherche-adherents");
   if (inputAdh) inputAdh.addEventListener("input", function() { filtreAdherents=this.value; appliquerFiltreAdherents(); });
+
+  var corpsAdh = document.getElementById("corps-tableau-adherents");
+  if (corpsAdh) corpsAdh.addEventListener("click", function(e) {
+    var btn = e.target.closest(".btn-cotis-toggle");
+    if (!btn) return;
+    var sl = document.getElementById("cotis-sous-" + btn.dataset.id);
+    if (!sl) return;
+    sl.hidden = !sl.hidden;
+    btn.setAttribute("aria-expanded", sl.hidden ? "false" : "true");
+  });
 
   var selAnneeAdh = document.getElementById("filtre-annee-adherents");
   if (selAnneeAdh) selAnneeAdh.addEventListener("change", function() { filtreAnneeAdherents=this.value; appliquerFiltreAdherents(); });
