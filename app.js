@@ -1085,6 +1085,15 @@ document.getElementById("corps-tableau").addEventListener("click", function(even
     const adherent = donneesAdherents.find(function(a) { return String(a.id) === idTechnique; });
     if (adherent) ouvrirModaleRelance(adherent);
   }
+
+  const btnCotisToggle = evenement.target.closest(".btn-cotis-toggle");
+  if (btnCotisToggle) {
+    const sl = document.getElementById("cotis-sous-" + btnCotisToggle.dataset.id);
+    if (sl) {
+      sl.hidden = !sl.hidden;
+      btnCotisToggle.setAttribute("aria-expanded", sl.hidden ? "false" : "true");
+    }
+  }
 });
 
 /* =====================================================
@@ -5588,16 +5597,6 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var inputAdh = document.getElementById("recherche-adherents");
   if (inputAdh) inputAdh.addEventListener("input", function() { filtreAdherents=this.value; appliquerFiltreAdherents(); });
-
-  var corpsAdh = document.getElementById("corps-tableau-adherents");
-  if (corpsAdh) corpsAdh.addEventListener("click", function(e) {
-    var btn = e.target.closest(".btn-cotis-toggle");
-    if (!btn) return;
-    var sl = document.getElementById("cotis-sous-" + btn.dataset.id);
-    if (!sl) return;
-    sl.hidden = !sl.hidden;
-    btn.setAttribute("aria-expanded", sl.hidden ? "false" : "true");
-  });
 
   var selAnneeAdh = document.getElementById("filtre-annee-adherents");
   if (selAnneeAdh) selAnneeAdh.addEventListener("change", function() { filtreAnneeAdherents=this.value; appliquerFiltreAdherents(); });
