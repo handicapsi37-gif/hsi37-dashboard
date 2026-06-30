@@ -1631,6 +1631,9 @@ function remplirTableauEvenements() {
   const corps = document.getElementById("corps-tableau-evenements");
   if (!corps) return;
 
+  selectionParticipants.clear();
+  mettreAJourBoutonEnvoyer();
+
   const liste = donneesEvenements.filter(function(ev) {
     if (filtreAnneeEvenements && ev.date &&
         new Date(ev.date).getFullYear() !== Number(filtreAnneeEvenements)) return false;
@@ -1655,12 +1658,13 @@ function remplirTableauEvenements() {
 
     const lignesParticipants = [
       `<tr class="sous-ligne-participant sous-ligne-entete" data-ev="${ev.id}" hidden>
-        <th></th><th>Nom / Prénom</th><th>Email</th><th>Téléphone</th><th>Quantité</th><th>Montant</th><th>Actions</th>
+        <th></th><th class="col-select"></th><th>Nom / Prénom</th><th>Email</th><th>Téléphone</th><th>Quantité</th><th>Montant</th><th>Actions</th>
       </tr>`
     ].concat(participants.map(function(p) {
       const montantP = p.montant != null ? parseFloat(p.montant).toLocaleString("fr-FR", { minimumFractionDigits: 2 }) + " €" : "—";
       return `<tr class="sous-ligne-participant" data-ev="${ev.id}" data-part-id="${p.id}" hidden>
         <td></td>
+        <td class="col-select"><input type="checkbox" class="case-selection-part" data-id="${p.id}" data-ev="${ev.id}" aria-label="Sélectionner ${(p.prenom || "")} ${(p.nom || "")}"></td>
         <td>${(p.prenom || "") + " " + (p.nom || "")}</td>
         <td>${p.email || "—"}</td>
         <td>${p.telephone || "—"}</td>
@@ -1697,7 +1701,7 @@ function remplirTableauEvenements() {
       </tr>`;
     })).concat([
       `<tr class="sous-ligne-participant sous-ligne-ajout" data-ev="${ev.id}" hidden>
-        <td colspan="7" style="padding:0.4rem 0.75rem;">
+        <td colspan="8" style="padding:0.4rem 0.75rem;">
           <button type="button" class="btn btn--secondaire btn-ajouter-participant"
                   data-ev="${ev.id}" style="font-size:0.82rem;padding:0.3rem 0.8rem;">
             + Ajouter un participant
@@ -1737,16 +1741,6 @@ function remplirTableauEvenements() {
                   fill="none" stroke-linecap="round"/>
             <path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"
                   stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-          </svg>
-        </button>
-        <button type="button" class="btn-icone btn-inviter-evenement"
-                data-ev-id="${ev.id}" title="Envoyer invitations" aria-label="Envoyer les invitations">
-          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
-               viewBox="0 0 24 24" width="17" height="17">
-            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
-            <polyline points="22,6 12,13 2,6"
-                      stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
         </button>
         <span style="position:relative;display:inline-block;">
@@ -1862,11 +1856,17 @@ function remplirTableauEvenements() {
         return;
       }
 
-      const btnInviterEv = e.target.closest(".btn-inviter-evenement");
-      if (btnInviterEv) {
-        ouvrirModaleInvitation();
-        return;
-      }
+    });
+  }
+
+  if (!corps._listenerChange) {
+    corps._listenerChange = true;
+    corps.addEventListener("change", function(ev) {
+      var cb = ev.target.closest(".case-selection-part");
+      if (!cb) return;
+      if (cb.checked) selectionParticipants.add(cb.dataset.id);
+      else selectionParticipants.delete(cb.dataset.id);
+      mettreAJourBoutonEnvoyer();
     });
   }
 }
