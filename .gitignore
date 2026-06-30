@@ -1,5 +1,6 @@
-# Fichier de configuration local — contient les clés Supabase, ne jamais envoyer sur GitHub
+# Fichiers de configuration locaux — contiennent les clés Supabase, ne jamais envoyer sur GitHub
 config.js
+secrets_import.py
 
 # Fichiers système macOS (tous les sous-dossiers)
 .DS_Store
