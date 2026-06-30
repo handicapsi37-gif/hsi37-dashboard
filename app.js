@@ -5484,8 +5484,15 @@ document.getElementById("btn-export-zip").addEventListener("click", async functi
 function appliquerFiltreAdherents() {
   var f = filtreAdherents.toLowerCase();
   var liste = donneesAdherents.filter(function(a) {
-    if (filtreAnneeAdherents && a.date_adhesion &&
-        new Date(a.date_adhesion).getFullYear() !== Number(filtreAnneeAdherents)) return false;
+    if (filtreAnneeAdherents) {
+      var anneeFiltre = Number(filtreAnneeAdherents);
+      var aCotisation = donneesCotisations.some(function(c) {
+        return String(c.adherent_id) === String(a.id) && Number(c.annee) === anneeFiltre;
+      });
+      if (!aCotisation) {
+        if (!a.date_adhesion || new Date(a.date_adhesion).getFullYear() !== anneeFiltre) return false;
+      }
+    }
     return (a.nom||"").toLowerCase().includes(f) || (a.prenom||"").toLowerCase().includes(f) || (a.email||"").toLowerCase().includes(f) || (a.telephone||"").toLowerCase().includes(f) || (a.type_membre||"").toLowerCase().includes(f);
   });
   if (triAdherents.colonne) {
