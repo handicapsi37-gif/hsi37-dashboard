@@ -49,12 +49,14 @@ function construireHTML(corps: string, signataire: string, nomSignataire: string
       </div>
     </div>
 
-    <div style="background:#3B77B4;padding:14px 32px;text-align:center;
-                font-family:Arial,sans-serif;font-size:11px;color:#ffffff;">
-      <span style="color:#ffffff !important;">
-        HSI37 &nbsp;·&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps
-      </span>
-    </div>
+    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+      <tr>
+        <td style="background:#3B77B4;padding:14px 32px;text-align:center;
+                   font-family:Arial,sans-serif;font-size:11px;color:#ffffff;">
+          <span style="color:#ffffff;">HSI37 &nbsp;·&nbsp; 17 rue Gabriel Péri, 37700 Saint-Pierre-des-Corps</span>
+        </td>
+      </tr>
+    </table>
 
   </div>
 </body>
