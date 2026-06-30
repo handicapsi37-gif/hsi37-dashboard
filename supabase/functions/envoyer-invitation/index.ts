@@ -11,6 +11,7 @@ interface Contact {
 }
 
 function construireHTML(corps: string, signataire: string, nomSignataire: string): string {
+  const role = signataire.replace(/^Le |^La /, "");
   return `<!DOCTYPE html>
 <html lang="fr">
 <head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
@@ -27,12 +28,24 @@ function construireHTML(corps: string, signataire: string, nomSignataire: string
       ${corps}
     </div>
 
-    <div style="padding:0 32px 32px;font-family:Arial,sans-serif;font-size:14px;color:#403E3E;border-top:1px solid #e8edf4;margin:0 32px;">
-      <p style="margin:24px 0 8px;">Cordialement,</p>
-      <div style="border-left:4px solid #F7CD46;padding-left:14px;">
-        <strong>${nomSignataire}</strong><br/>
-        ${signataire} — HSI37<br/>
-        <span style="color:#3B77B4;">handicapsi37@gmail.com &nbsp;·&nbsp; hsi37.fr</span>
+    <div style="padding:0 32px 32px;border-top:1px solid #e8edf4;margin:0 32px;">
+      <p style="margin:24px 0 16px;font-family:Arial,sans-serif;font-size:14px;color:#403E3E;">Cordialement,</p>
+      <div style="font-family:'Segoe UI',Arial,sans-serif;color:#333333;line-height:1.3;font-size:14px;">
+        <div style="font-weight:700;font-size:16px;color:#3B77B4;margin-bottom:2px;">${nomSignataire}</div>
+        <div style="font-weight:600;color:#3B77B4;margin-bottom:8px;">${role} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</div>
+        <div style="color:#666666;margin-bottom:12px;">
+          📱 <span style="color:#333333;font-weight:600;">07 43 29 58 30</span><br/>
+          ✉️ <a href="mailto:handicapsi37@gmail.com" style="color:#3B77B4;text-decoration:none;font-weight:600;">handicapsi37@gmail.com</a><br/>
+          🌐 <a href="https://www.hsi37.fr" style="color:#3B77B4;text-decoration:none;font-weight:600;">www.hsi37.fr</a>
+        </div>
+        <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 0 0;">
+          <tr><td style="background-color:#F7CD46;height:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
+        </table>
+        <div style="padding-top:8px;font-size:12px;color:#666666;">
+          🤝 <span style="font-weight:600;color:#333333;">Soutenez nos actions :</span>
+          <a href="https://www.hsi37.fr" style="color:#F7CD46;text-decoration:none;font-weight:700;">Faire un don</a> ou
+          <a href="https://www.hsi37.fr" style="color:#3B77B4;text-decoration:none;font-weight:700;">Devenir membre</a>
+        </div>
       </div>
     </div>
 

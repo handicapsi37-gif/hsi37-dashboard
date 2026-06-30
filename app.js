@@ -19,26 +19,25 @@ async function envoyerRecuParMail(pdfBlob, nomFichier, emailDestinataire, nomDes
     reader.readAsDataURL(pdfBlob);
   });
 
+  const roleSignataire = (qualiteSignataire || '').replace(/^Le |^La /, '');
   const signatureHTML = `
-    <hr style="border:none;border-top:2px solid #F7CD46;margin:24px 0 16px;">
-    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#403E3E;">
-      <tr>
-        <td style="padding-right:16px;vertical-align:top;">
-          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
-               alt="Logo HSI37" width="80" style="display:block;">
-        </td>
-        <td style="vertical-align:top;border-left:4px solid #F7CD46;padding-left:14px;">
-          <strong style="font-size:14px;">${nomSignataire || ''}</strong><br>
-          <span style="color:#3B77B4;font-weight:600;">${qualiteSignataire || ''} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
-          📱 07 43 29 58 30<br>
-          ✉ handicapsi37@gmail.com<br>
-          🌐 www.hsi37.fr<br><br>
-          <span style="color:#F7CD46;font-weight:600;">🏷 Soutenez nos actions :</span>
-          <a href="https://hsi37.fr/don" style="color:#3B77B4;">Faire un don</a> ou
-          <a href="https://hsi37.fr/adhesion" style="color:#3B77B4;">Devenir membre</a>
-        </td>
-      </tr>
-    </table>
+    <div style="font-family:'Segoe UI',Arial,sans-serif;color:#333333;line-height:1.3;font-size:14px;margin-top:24px;">
+      <div style="font-weight:700;font-size:16px;color:#3B77B4;margin-bottom:2px;">${nomSignataire || ''}</div>
+      <div style="font-weight:600;color:#3B77B4;margin-bottom:8px;">${roleSignataire} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</div>
+      <div style="color:#666666;margin-bottom:12px;">
+        📱 <span style="color:#333333;font-weight:600;">07 43 29 58 30</span><br>
+        ✉️ <a href="mailto:handicapsi37@gmail.com" style="color:#3B77B4;text-decoration:none;font-weight:600;">handicapsi37@gmail.com</a><br>
+        🌐 <a href="https://www.hsi37.fr" style="color:#3B77B4;text-decoration:none;font-weight:600;">www.hsi37.fr</a>
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 0 0;">
+        <tr><td style="background-color:#F7CD46;height:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
+      </table>
+      <div style="padding-top:8px;font-size:12px;color:#666666;">
+        🤝 <span style="font-weight:600;color:#333333;">Soutenez nos actions :</span>
+        <a href="https://www.hsi37.fr" style="color:#F7CD46;text-decoration:none;font-weight:700;">Faire un don</a> ou
+        <a href="https://www.hsi37.fr" style="color:#3B77B4;text-decoration:none;font-weight:700;">Devenir membre</a>
+      </div>
+    </div>
   `;
 
   const contenuHTML = `
@@ -3956,26 +3955,25 @@ document.getElementById('btn-mail-relance').addEventListener('click', async func
   const sujet = `Renouvellement adhésion HSI37 — Saison ${annee}`;
   const qualiteRelance = "La secrétaire";
   const nomSignRelance = NOMS_SIGNATAIRES[qualiteRelance] || "BELHAJ Nawel";
+  const roleRelance = qualiteRelance.replace(/^Le |^La /, '');
   const signatureHTMLRelance = `
-    <hr style="border:none;border-top:2px solid #F7CD46;margin:24px 0 16px;">
-    <table style="font-family:Open Sans,Arial,sans-serif;font-size:13px;color:#403E3E;">
-      <tr>
-        <td style="padding-right:16px;vertical-align:top;">
-          <img src="https://hsi37-dashboard.pages.dev/assets/hsi37-redim-demi.png"
-               alt="Logo HSI37" width="80" style="display:block;">
-        </td>
-        <td style="vertical-align:top;border-left:4px solid #F7CD46;padding-left:14px;">
-          <strong style="font-size:14px;">${nomSignRelance}</strong><br>
-          <span style="color:#3B77B4;font-weight:600;">${qualiteRelance} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</span><br><br>
-          📱 07 43 29 58 30<br>
-          ✉ handicapsi37@gmail.com<br>
-          🌐 www.hsi37.fr<br><br>
-          <span style="color:#F7CD46;font-weight:600;">🏷 Soutenez nos actions :</span>
-          <a href="https://hsi37.fr/don" style="color:#3B77B4;">Faire un don</a> ou
-          <a href="https://hsi37.fr/adhesion" style="color:#3B77B4;">Devenir membre</a>
-        </td>
-      </tr>
-    </table>
+    <div style="font-family:'Segoe UI',Arial,sans-serif;color:#333333;line-height:1.3;font-size:14px;margin-top:24px;">
+      <div style="font-weight:700;font-size:16px;color:#3B77B4;margin-bottom:2px;">${nomSignRelance}</div>
+      <div style="font-weight:600;color:#3B77B4;margin-bottom:8px;">${roleRelance} de l'Association HSI37 — Handicap Solidarité pour l'Inclusion 37</div>
+      <div style="color:#666666;margin-bottom:12px;">
+        📱 <span style="color:#333333;font-weight:600;">07 43 29 58 30</span><br>
+        ✉️ <a href="mailto:handicapsi37@gmail.com" style="color:#3B77B4;text-decoration:none;font-weight:600;">handicapsi37@gmail.com</a><br>
+        🌐 <a href="https://www.hsi37.fr" style="color:#3B77B4;text-decoration:none;font-weight:600;">www.hsi37.fr</a>
+      </div>
+      <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 0 0;">
+        <tr><td style="background-color:#F7CD46;height:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
+      </table>
+      <div style="padding-top:8px;font-size:12px;color:#666666;">
+        🤝 <span style="font-weight:600;color:#333333;">Soutenez nos actions :</span>
+        <a href="https://www.hsi37.fr" style="color:#F7CD46;text-decoration:none;font-weight:700;">Faire un don</a> ou
+        <a href="https://www.hsi37.fr" style="color:#3B77B4;text-decoration:none;font-weight:700;">Devenir membre</a>
+      </div>
+    </div>
   `;
   const contenuHTML = `
     <p>Madame, Monsieur,</p>
