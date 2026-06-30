@@ -352,6 +352,7 @@
         </div>
 
       <div class="barre-actions__droite">
+        <button class="btn btn--primaire btn-envoyer-selectionnes" id="btn-envoyer-selectionnes-adherents" type="button" hidden>✉ Envoyer aux sélectionnés</button>
         <button class="bouton-export" id="btn-export-adherents" type="button">⬇ Exporter CSV</button>
         <button class="bouton-export" id="btn-export-adherents-pdf" type="button">⬇ Liste PDF</button>
         <button class="btn btn--primaire" id="btn-ajouter"
@@ -375,6 +376,7 @@
           <table class="tableau" id="tableau-adherents">
             <thead>
               <tr>
+                <th scope="col" class="col-select"><input type="checkbox" id="sel-all-adherents" aria-label="Tout sélectionner/désélectionner"></th>
                 <th scope="col">ID</th>
                 <th scope="col" data-colonne="nom">Nom</th>
                 <th scope="col" data-colonne="prenom">Prénom</th>
@@ -420,6 +422,7 @@
           </select>
         </div>
         <div class="barre-actions__droite">
+          <button class="btn btn--primaire btn-envoyer-selectionnes" id="btn-envoyer-selectionnes-donateurs" type="button" hidden>✉ Envoyer aux sélectionnés</button>
           <button class="bouton-export" id="btn-export-donateurs" type="button">⬇ Exporter CSV</button>
           <button class="bouton-export" id="btn-export-donateurs-pdf" type="button">⬇ Liste PDF</button>
           <button class="btn btn--primaire" id="btn-ajouter-don"
@@ -443,6 +446,7 @@
           <table class="tableau" id="tableau-donateurs">
             <thead>
               <tr>
+                <th scope="col" class="col-select"><input type="checkbox" id="sel-all-donateurs" aria-label="Tout sélectionner/désélectionner"></th>
                 <th scope="col">ID</th>
                 <th scope="col" data-colonne="nom">Nom</th>
                 <th scope="col">Prénom / Organisme</th>
@@ -477,6 +481,7 @@
           </select>
         </div>
         <div class="barre-actions__droite">
+          <button class="btn btn--primaire btn-envoyer-selectionnes" id="btn-envoyer-selectionnes-evenements" type="button" hidden>✉ Envoyer aux sélectionnés</button>
           <button class="bouton-export" id="btn-export-evenements" type="button">⬇ Exporter CSV</button>
           <button class="bouton-export" id="btn-export-evenements-pdf" type="button">⬇ Liste PDF</button>
           <button class="btn btn--primaire" id="btn-ajouter-evenement" type="button">
@@ -2493,7 +2498,7 @@
     </div>
   </div>
 
-  <!-- Modale invitation événement -->
+  <!-- Modale invitation (envoi aux sélectionnés) -->
   <div class="modale-fond" id="invitation-fond" role="presentation" hidden>
     <div class="modale"
          id="modale-invitation"
@@ -2502,7 +2507,7 @@
          tabindex="-1">
 
       <div class="modale__entete">
-        <h2 class="modale__titre" id="invitation-titre-modal">Envoyer les invitations</h2>
+        <h2 class="modale__titre" id="invitation-titre-modal">✉ Envoyer aux sélectionnés</h2>
         <button class="modale__fermer" id="btn-fermer-invitation" aria-label="Fermer">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="20" height="20">
@@ -2512,27 +2517,18 @@
       </div>
 
       <form class="modale__formulaire" id="formulaire-invitation" novalidate>
-        <input type="hidden" id="inv-evenement-id"/>
+
+        <p id="inv-compte" style="margin:0 0 16px;font-size:.875rem;color:#3B77B4;font-weight:600;">
+          — destinataires
+        </p>
 
         <div class="champ-groupe">
-          <span class="champ-label">Destinataires</span>
-          <div style="display:flex;flex-direction:column;gap:8px;margin-top:6px;">
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" id="inv-liste-adherents">
-              Adhérents à jour
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" id="inv-liste-donateurs">
-              Donateurs
-            </label>
-            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
-              <input type="checkbox" id="inv-liste-participants" checked>
-              Participants de cet événement
-            </label>
-          </div>
-          <p id="inv-compte" style="margin-top:8px;font-size:.875rem;color:#3B77B4;font-weight:600;">
-            — destinataires
-          </p>
+          <label for="inv-signataire" class="champ-label">Signataire</label>
+          <select id="inv-signataire" class="champ-input champ-select">
+            <option value="Le président">Le président</option>
+            <option value="La trésorière" selected>La trésorière</option>
+            <option value="La secrétaire">La secrétaire</option>
+          </select>
         </div>
 
         <div class="champ-groupe">
@@ -2547,12 +2543,12 @@
                     placeholder="Bonjour,&#10;&#10;Nous avons le plaisir de vous inviter…"></textarea>
         </div>
 
-        <div id="inv-message" class="modale-erreur" hidden></div>
+        <div id="inv-message" hidden></div>
 
         <div class="modale__actions">
           <button type="button" class="btn btn--secondaire" id="btn-annuler-invitation">Annuler</button>
           <button type="submit" class="btn btn--primaire" id="btn-envoyer-invitation">
-            ✉ Envoyer les invitations
+            ✉ Envoyer
           </button>
         </div>
       </form>

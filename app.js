@@ -123,6 +123,21 @@ let donneesAdherents   = [];
 let donneesCotisations = [];
 let donneesEvenements    = [];
 let donneesParticipants  = [];
+
+var selectionAdherents    = new Set();
+var selectionDonateurs    = new Set();
+var selectionParticipants = new Set();
+
+function mettreAJourBoutonEnvoyer() {
+  var total = selectionAdherents.size + selectionDonateurs.size + selectionParticipants.size;
+  document.querySelectorAll(".btn-envoyer-selectionnes").forEach(function(btn) {
+    btn.hidden = total === 0;
+    btn.textContent = total > 0
+      ? "✉ Envoyer aux sélectionnés (" + total + ")"
+      : "✉ Envoyer aux sélectionnés";
+  });
+}
+
 var filtreAdherents    = "";
 var filtreAnneeAdherents = String(new Date().getFullYear());
 var triAdherents     = { colonne: null, sens: "asc" };
@@ -347,12 +362,17 @@ function remplirTableau(adherents) {
   const corps = document.getElementById("corps-tableau");
   if (!corps) return;
 
+  selectionAdherents.clear();
+  var selAll = document.getElementById("sel-all-adherents");
+  if (selAll) { selAll.checked = false; selAll.indeterminate = false; }
+  mettreAJourBoutonEnvoyer();
+
   corps.innerHTML = "";
 
   if (!adherents || adherents.length === 0) {
     corps.innerHTML = `
       <tr>
-        <td colspan="11" class="tableau-message">
+        <td colspan="12" class="tableau-message">
           Aucun adhérent enregistré pour l'instant.
         </td>
       </tr>
@@ -370,6 +390,7 @@ function remplirTableau(adherents) {
     const statut      = calculerStatutAdherent(adherent);
 
     ligne.innerHTML = `
+      <td class="col-select"><input type="checkbox" class="case-selection-adh" data-id="${adherent.id}" aria-label="Sélectionner ${adherent.prenom || ""} ${adherent.nom || ""}"></td>
       <td class="col-id">${adherent.id_adherent || "—"}</td>
       <td class="col-nom">${adherent.nom || "—"}</td>
       <td>${adherent.prenom || "—"}</td>
@@ -1843,16 +1864,7 @@ function remplirTableauEvenements() {
 
       const btnInviterEv = e.target.closest(".btn-inviter-evenement");
       if (btnInviterEv) {
-        const id = btnInviterEv.dataset.evId;
-        console.log("étape 1 — id événement:", id);
-        document.getElementById("formulaire-invitation").reset();
-        document.getElementById("inv-evenement-id").value = id;
-        document.getElementById("inv-liste-participants").checked = true;
-        document.getElementById("inv-message").hidden = true;
-        mettreAJourCompteInvitation(id);
-        console.log("étape 2 — ouverture modale");
-        document.getElementById("invitation-fond").hidden = false;
-        document.getElementById("modale-invitation").focus();
+        ouvrirModaleInvitation();
         return;
       }
     });
@@ -2181,12 +2193,17 @@ function remplirTableauDonateurs(donateurs) {
   const corps = document.getElementById("corps-tableau-donateurs");
   if (!corps) return;
 
+  selectionDonateurs.clear();
+  var selAll = document.getElementById("sel-all-donateurs");
+  if (selAll) { selAll.checked = false; selAll.indeterminate = false; }
+  mettreAJourBoutonEnvoyer();
+
   corps.innerHTML  = "";
 
   if (!donateurs || donateurs.length === 0) {
     corps.innerHTML = `
       <tr>
-        <td colspan="10" class="tableau-message">
+        <td colspan="11" class="tableau-message">
           Aucun donateur enregistré pour l'instant.
         </td>
       </tr>
@@ -2226,6 +2243,7 @@ function remplirTableauDonateurs(donateurs) {
     }
 
     ligne.innerHTML = `
+      <td class="col-select"><input type="checkbox" class="case-selection-don" data-id="${don.id}" aria-label="Sélectionner ${don.prenom || don.organisme || ""} ${don.nom || ""}"></td>
       <td class="col-id">${don.id_donateur || "—"}</td>
       <td class="col-nom">${nomAffiche}</td>
       <td>${prenomOrgAffiche}</td>
@@ -4045,7 +4063,52 @@ function fermerModaleConvocation() {
   if (elementAvantConvocation) elementAvantConvocation.focus();
 }
 
-/* ── Modale invitation ── */
+/* ── Modale invitation (envoi aux sélectionnés) ── */
+
+function ouvrirModaleInvitation() {
+  var emails = [];
+
+  selectionAdherents.forEach(function(id) {
+    var adh = donneesAdherents.find(function(a) { return String(a.id) === String(id); });
+    if (adh && adh.email) emails.push({
+      email: adh.email.trim(),
+      nom: ((adh.prenom || "") + " " + (adh.nom || "")).trim()
+    });
+  });
+  selectionDonateurs.forEach(function(id) {
+    var don = donneesDonateurs.find(function(d) { return String(d.id) === String(id); });
+    if (don && don.email) emails.push({
+      email: don.email.trim(),
+      nom: ((don.prenom || don.organisme || "") + " " + (don.nom || "")).trim()
+    });
+  });
+  selectionParticipants.forEach(function(id) {
+    var part = donneesParticipants.find(function(p) { return String(p.id) === String(id); });
+    if (part && part.email) emails.push({
+      email: part.email.trim(),
+      nom: ((part.prenom || "") + " " + (part.nom || "")).trim()
+    });
+  });
+
+  var vus = new Set();
+  var emailsUniques = emails.filter(function(c) {
+    var k = c.email.toLowerCase();
+    if (!k || vus.has(k)) return false;
+    vus.add(k);
+    return true;
+  });
+
+  var n = emailsUniques.length;
+  document.getElementById("inv-compte").textContent = n + " destinataire" + (n > 1 ? "s" : "");
+  document.getElementById("formulaire-invitation").dataset.emails = JSON.stringify(emailsUniques);
+  document.getElementById("inv-objet").value = "";
+  document.getElementById("inv-corps").value = "";
+  document.getElementById("inv-signataire").value = "La trésorière";
+  document.getElementById("inv-message").hidden = true;
+  document.getElementById("invitation-fond").hidden = false;
+  document.getElementById("modale-invitation").focus();
+}
+
 function fermerModaleInvitation() {
   document.getElementById("invitation-fond").hidden = true;
 }
@@ -4056,36 +4119,59 @@ document.getElementById("invitation-fond").addEventListener("click", function(ev
   if (ev.target === this) fermerModaleInvitation();
 });
 
-["inv-liste-adherents", "inv-liste-donateurs", "inv-liste-participants"].forEach(function(cid) {
-  document.getElementById(cid).addEventListener("change", function() {
-    mettreAJourCompteInvitation(document.getElementById("inv-evenement-id").value);
-  });
+document.querySelectorAll(".btn-envoyer-selectionnes").forEach(function(btn) {
+  btn.addEventListener("click", ouvrirModaleInvitation);
 });
 
-function mettreAJourCompteInvitation(evenement_id) {
-  const vus = new Set();
+/* Checkbox "tout sélectionner" — adhérents */
+document.getElementById("sel-all-adherents").addEventListener("change", function() {
+  var cocher = this.checked;
+  document.querySelectorAll(".case-selection-adh").forEach(function(cb) {
+    cb.checked = cocher;
+    if (cocher) selectionAdherents.add(cb.dataset.id);
+    else selectionAdherents.delete(cb.dataset.id);
+  });
+  mettreAJourBoutonEnvoyer();
+});
 
-  const adh = donneesAdherents.filter(function(a) { return calculerStatutAdherent(a) === "ajour" && a.email; });
-  const don = donneesDonateurs.filter(function(d) { return d.email; });
-  const part = donneesParticipants.filter(function(p) { return String(p.evenement_id) === String(evenement_id) && p.email; });
+/* Checkbox "tout sélectionner" — donateurs */
+document.getElementById("sel-all-donateurs").addEventListener("change", function() {
+  var cocher = this.checked;
+  document.querySelectorAll(".case-selection-don").forEach(function(cb) {
+    cb.checked = cocher;
+    if (cocher) selectionDonateurs.add(cb.dataset.id);
+    else selectionDonateurs.delete(cb.dataset.id);
+  });
+  mettreAJourBoutonEnvoyer();
+});
 
-  console.log("[invitation] donneesAdherents total:", donneesAdherents.length, "→ à jour avec email:", adh.length, "(cochée:", document.getElementById("inv-liste-adherents").checked, ")");
-  console.log("[invitation] donneesDonateurs total:", donneesDonateurs.length, "→ avec email:", don.length, "(cochée:", document.getElementById("inv-liste-donateurs").checked, ")");
-  console.log("[invitation] donneesParticipants total:", donneesParticipants.length, "→ événement", evenement_id, "avec email:", part.length, "(cochée:", document.getElementById("inv-liste-participants").checked, ")");
+/* Délégation de changement — checkboxes adhérents */
+document.getElementById("corps-tableau").addEventListener("change", function(ev) {
+  var cb = ev.target.closest(".case-selection-adh");
+  if (!cb) return;
+  if (cb.checked) selectionAdherents.add(cb.dataset.id);
+  else selectionAdherents.delete(cb.dataset.id);
+  var total  = document.querySelectorAll(".case-selection-adh").length;
+  var coches = document.querySelectorAll(".case-selection-adh:checked").length;
+  var selAll = document.getElementById("sel-all-adherents");
+  selAll.checked       = coches === total && total > 0;
+  selAll.indeterminate = coches > 0 && coches < total;
+  mettreAJourBoutonEnvoyer();
+});
 
-  if (document.getElementById("inv-liste-adherents").checked)
-    adh.forEach(function(a) { vus.add(a.email.trim().toLowerCase()); });
-  if (document.getElementById("inv-liste-donateurs").checked)
-    don.forEach(function(d) { vus.add(d.email.trim().toLowerCase()); });
-  if (document.getElementById("inv-liste-participants").checked)
-    part.forEach(function(p) { vus.add(p.email.trim().toLowerCase()); });
-
-  console.log("[invitation] total après déduplication:", vus.size);
-
-  const n = vus.size;
-  document.getElementById("inv-compte").textContent =
-    n + " destinataire" + (n > 1 ? "s" : "");
-}
+/* Délégation de changement — checkboxes donateurs */
+document.getElementById("corps-tableau-donateurs").addEventListener("change", function(ev) {
+  var cb = ev.target.closest(".case-selection-don");
+  if (!cb) return;
+  if (cb.checked) selectionDonateurs.add(cb.dataset.id);
+  else selectionDonateurs.delete(cb.dataset.id);
+  var total  = document.querySelectorAll(".case-selection-don").length;
+  var coches = document.querySelectorAll(".case-selection-don:checked").length;
+  var selAll = document.getElementById("sel-all-donateurs");
+  selAll.checked       = coches === total && total > 0;
+  selAll.indeterminate = coches > 0 && coches < total;
+  mettreAJourBoutonEnvoyer();
+});
 
 document.getElementById("formulaire-invitation").addEventListener("submit", async function(e) {
   e.preventDefault();
@@ -4095,15 +4181,12 @@ document.getElementById("formulaire-invitation").addEventListener("submit", asyn
   btn.textContent = "Envoi en cours…";
   msg.hidden = true;
 
-  const evenement_id = document.getElementById("inv-evenement-id").value;
-  const objet_email  = document.getElementById("inv-objet").value.trim();
-  const corps_email  = document.getElementById("inv-corps").value.trim();
-  const listes = [];
-  if (document.getElementById("inv-liste-adherents").checked)    listes.push("adherents");
-  if (document.getElementById("inv-liste-donateurs").checked)    listes.push("donateurs");
-  if (document.getElementById("inv-liste-participants").checked) listes.push("participants");
+  const emails         = JSON.parse(this.dataset.emails || "[]");
+  const objet_email    = document.getElementById("inv-objet").value.trim();
+  const corps_email    = document.getElementById("inv-corps").value.trim();
+  const signataire     = document.getElementById("inv-signataire").value;
+  const nom_signataire = NOMS_SIGNATAIRES[signataire] || signataire;
 
-  console.log("étape 3 — appel Edge Function");
   try {
     const res = await fetch(SUPABASE_URL + "/functions/v1/envoyer-invitation", {
       method: "POST",
@@ -4111,7 +4194,7 @@ document.getElementById("formulaire-invitation").addEventListener("submit", asyn
         "Content-Type": "application/json",
         "Authorization": "Bearer " + SUPABASE_KEY,
       },
-      body: JSON.stringify({ evenement_id, objet_email, corps_email, listes }),
+      body: JSON.stringify({ emails, objet_email, corps_email, signataire, nom_signataire }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || "Erreur inconnue");
@@ -4125,7 +4208,7 @@ document.getElementById("formulaire-invitation").addEventListener("submit", asyn
     msg.hidden = false;
   } finally {
     btn.disabled = false;
-    btn.textContent = "✉ Envoyer les invitations";
+    btn.textContent = "✉ Envoyer";
   }
 });
 

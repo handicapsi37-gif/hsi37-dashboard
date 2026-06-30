@@ -392,6 +392,20 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   min-width: 170px;
 }
 
+/* Colonne sélection (checkbox) */
+.tableau .col-select {
+  width: 36px;
+  min-width: 36px;
+  text-align: center;
+  padding: 0 6px;
+}
+.tableau .col-select input[type="checkbox"] {
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+  accent-color: #3B77B4;
+}
+
 /* Colonne actions : centrer les icônes */
 .tableau .col-actions {
   text-align: center;
