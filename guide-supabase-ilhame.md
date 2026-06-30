@@ -213,7 +213,54 @@ Sans elle, l'envoi de reçus par e-mail ne fonctionne plus. En cas de problème 
 
 ---
 
-## 9. Règle anti-régression
+## 9. Edge Function : envoyer-invitation
+
+Une Edge Function nommée `envoyer-invitation` permet d'envoyer des e-mails d'invitation en masse depuis le Dashboard (via les cases à cocher).
+
+### Ce que fait cette fonction
+- Elle reçoit une liste de destinataires (adhérents, donateurs, participants sélectionnés)
+- Elle génère un e-mail HTML personnalisé avec le corps, l'objet et la signature choisis
+- Elle envoie l'e-mail à tous les destinataires via l'API Brevo (service d'envoi d'e-mails)
+- Elle dédoublonne automatiquement les adresses pour éviter les envois en double
+
+### Expéditeur des e-mails
+Tous les e-mails partent de : **handicapsi37@gmail.com**
+
+### Où la trouver sur Supabase
+1. Aller sur [supabase.com](https://supabase.com) → se connecter → ouvrir le projet `hsi37-dashboard`
+2. Menu gauche → **Edge Functions**
+3. La fonction `envoyer-invitation` apparaît dans la liste
+
+### ⚠️ Ne jamais supprimer cette fonction
+Sans elle, l'envoi d'invitations par e-mail ne fonctionne plus. En cas de problème, contacter Ilhame avant toute modification.
+
+---
+
+## 10. IDs séquentiels — Format et renumérotation
+
+### Format des identifiants
+- **Adhérents** : `HSI-2026-0001`, `HSI-2026-0002`… (préfixe `HSI-` + saison + numéro à 4 chiffres)
+- **Donateurs** : `DON-2026-0001`, `DON-2026-0002`… (préfixe `DON-` + année + numéro à 4 chiffres)
+
+Ces colonnes ont une contrainte **UNIQUE** en base — impossible d'avoir deux fois le même ID.
+
+### Import en masse (script Python)
+Pour importer de nombreux adhérents ou donateurs depuis un fichier CSV, utiliser le script `import_masse.py` (à la racine du projet) :
+
+```bash
+# Simulation (dry-run) — vérifier les IDs sans insérer
+python3 import_masse.py --table adherents --fichier nouveaux.csv --dry-run
+
+# Import réel
+python3 import_masse.py --table adherents --fichier nouveaux.csv
+python3 import_masse.py --table donateurs --fichier nouveaux.csv
+```
+
+Le script calcule automatiquement le prochain numéro disponible en base et génère les IDs séquentiels.
+
+---
+
+## 11. Règle anti-régression
 
 Après toute modification importante du dashboard (nouveau formulaire, nouvelle logique de sauvegarde, correction de bug), tester immédiatement dans cet ordre :
 
@@ -226,10 +273,10 @@ Ne pas passer à la fonctionnalité suivante avant que ces 4 tests passent.
 
 ---
 
-## 10. En cas de problème inconnu
+## 12. En cas de problème inconnu
 
 Avant de toucher quoi que ce soit : fais une capture d'écran de ce que tu vois et contacte Ilhame (toi-même via Claude Code 😄) ou ouvre une nouvelle conversation Claude en décrivant le problème.
 
 ---
 
-*Dernière mise à jour : juin 2026 — V3 tables complètes + règle anti-régression*
+*Dernière mise à jour : juin 2026 — V4 IDs séquentiels + Edge Functions + import masse*

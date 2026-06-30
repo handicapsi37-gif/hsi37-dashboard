@@ -399,6 +399,19 @@ def construire_contenu(s):
     ]:
         story.append(fleche(statut, s['liste']))
 
+    story.append(Paragraph("3.6  Filtrer par année", s['sous_section']))
+    story.append(Paragraph(
+        "Un menu déroulant <b>« Année »</b> au-dessus du tableau permet d'afficher "
+        "uniquement les adhérents d'une saison précise (ex : 2025, 2026…). "
+        "Sélectionnez <b>« Toutes les années »</b> pour voir l'ensemble de la liste.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "Le filtre par année fonctionne en combinaison avec la recherche par nom "
+        "et le tri — vous pouvez les utiliser ensemble.",
+        s['corps'],
+    ))
+
     story.append(PageBreak())
 
     # ── SECTION 4 — CARTE D'ADHÉRENT ─────────────────────────────
@@ -592,6 +605,14 @@ def construire_contenu(s):
         s['corps'],
     ))
 
+    story.append(Paragraph("6.11  Filtrer par année", s['sous_section']))
+    story.append(Paragraph(
+        "Un menu déroulant <b>« Année »</b> au-dessus du tableau permet d'afficher "
+        "uniquement les donateurs d'une année précise. "
+        "Sélectionnez <b>« Toutes les années »</b> pour voir l'ensemble de la liste.",
+        s['corps'],
+    ))
+
     story.append(PageBreak())
 
     # ── SECTION 7 — MODULE DONS DE MATÉRIEL ──────────────────────
@@ -701,6 +722,40 @@ def construire_contenu(s):
         "⚠️  La suppression est définitive. En cas d'erreur, contactez Ilhame immédiatement.",
         s['note'],
     ))
+
+    story.append(Paragraph("8.4  Filtrer par année", s['sous_section']))
+    story.append(Paragraph(
+        "Un menu déroulant <b>« Année »</b> au-dessus du tableau permet d'afficher "
+        "uniquement les événements d'une année précise. "
+        "Sélectionnez <b>« Toutes les années »</b> pour voir tous les événements.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("8.5  Exporter les événements (CSV / PDF)", s['sous_section']))
+    story.append(Paragraph(
+        "Deux boutons au-dessus du tableau permettent d'exporter la liste complète des événements :",
+        s['corps'],
+    ))
+    for etape in [
+        "<b>« ⬇ CSV »</b> — exporte un fichier tableur avec tous les événements visibles "
+        "(nom, date, lieu, participants, total collecté).",
+        "<b>« ⬇ PDF »</b> — génère un rapport PDF de la liste des événements "
+        "avec en-tête HSI37.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("8.6  Exporter les participants d'un événement", s['sous_section']))
+    story.append(Paragraph(
+        "Sur chaque ligne d'événement, un bouton <b>« ⬇ »</b> permet d'exporter "
+        "la liste des participants de cet événement spécifique :",
+        s['corps'],
+    ))
+    for etape in [
+        "Cliquez sur le bouton <b>« ⬇ »</b> à droite de la ligne de l'événement.",
+        "Choisissez <b>CSV</b> ou <b>PDF</b> dans le menu qui apparaît.",
+        "Le fichier se télécharge dans votre dossier Téléchargements.",
+    ]:
+        story.append(fleche(etape, s['liste']))
     story.append(espacement(0.3))
 
     story.append(PageBreak())
@@ -830,8 +885,64 @@ def construire_contenu(s):
 
     story.append(PageBreak())
 
-    # ── SECTION 12 — SE DÉCONNECTER ──────────────────────────────
-    story.append(Paragraph("12. Se déconnecter", s['section']))
+    # ── SECTION 12 — INVITATIONS PAR E-MAIL ──────────────────────
+    story.append(Paragraph("12. Envoyer des invitations par e-mail", s['section']))
+    story.append(filet_bleu())
+
+    story.append(Paragraph(
+        "Le Dashboard permet d'envoyer un e-mail groupé à une sélection d'adhérents, "
+        "de donateurs et/ou de participants à un événement. "
+        "L'envoi se fait directement depuis le Dashboard — pas besoin d'ouvrir Gmail.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("12.1  Sélectionner les destinataires", s['sous_section']))
+    story.append(Paragraph(
+        "Dans chaque tableau (Adhérents, Donateurs, Événements → participants), "
+        "une case à cocher apparaît en début de chaque ligne :",
+        s['corps'],
+    ))
+    for etape in [
+        "Cochez la case d'une ligne pour sélectionner cette personne.",
+        "Cochez la case dans l'en-tête du tableau pour tout sélectionner / tout désélectionner.",
+        "Le bouton <b>« ✉ Envoyer aux sélectionnés (N) »</b> apparaît en haut dès qu'une "
+        "personne est cochée — il affiche le nombre total de destinataires sélectionnés.",
+        "Vous pouvez combiner des sélections depuis plusieurs tableaux "
+        "(ex : 5 adhérents + 3 donateurs = 8 destinataires).",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("12.2  Envoyer l'invitation", s['sous_section']))
+    story.append(Paragraph(
+        "Cliquez sur le bouton <b>« ✉ Envoyer aux sélectionnés »</b>. "
+        "Une fenêtre s'ouvre :",
+        s['corps'],
+    ))
+    for champ in [
+        "<b>Signataire</b> : choisissez qui signe l'e-mail "
+        "(La trésorière, Le président ou La secrétaire).",
+        "<b>Objet</b> : tapez l'objet de votre e-mail.",
+        "<b>Corps du message</b> : rédigez le texte de l'invitation. "
+        "La signature officielle HSI37 est ajoutée automatiquement.",
+    ]:
+        story.append(fleche(champ, s['liste']))
+    story.append(Paragraph(
+        "Cliquez sur <b>« Envoyer »</b>. Un message de confirmation s'affiche "
+        "avec le nombre d'e-mails envoyés.",
+        s['corps'],
+    ))
+    story.append(Paragraph(
+        "⚠️  Les adresses e-mail en double sont automatiquement filtrées — "
+        "chaque personne ne reçoit l'e-mail qu'une seule fois. "
+        "Les personnes sans adresse e-mail sont ignorées.",
+        s['note'],
+    ))
+    story.append(espacement(0.3))
+
+    story.append(PageBreak())
+
+    # ── SECTION 13 — SE DÉCONNECTER ──────────────────────────────
+    story.append(Paragraph("13. Se déconnecter", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -847,8 +958,8 @@ def construire_contenu(s):
     ]:
         story.append(fleche(etape, s['liste']))
 
-    # ── SECTION 13 — EN CAS DE PROBLÈME ──────────────────────────
-    story.append(Paragraph("13. En cas de problème", s['section']))
+    # ── SECTION 14 — EN CAS DE PROBLÈME ──────────────────────────
+    story.append(Paragraph("14. En cas de problème", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
