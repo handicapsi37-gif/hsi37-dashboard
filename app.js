@@ -5763,12 +5763,16 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-statut").value        = article.statut        || "";
     document.getElementById("inv-prix-occasion").value = article.prix_occasion != null ? article.prix_occasion : "";
     document.getElementById("inv-prix-neuf").value     = article.prix_neuf     != null ? article.prix_neuf     : "";
-    document.getElementById("inv-prix-neuf").getBoundingClientRect();
     document.getElementById("inv-notes").value         = article.notes         || "";
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
     document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer";
   }
+
+  const modale = document.getElementById("modale-inventaire");
+  modale.classList.remove("modale--visible");
+  void modale.offsetWidth;
+  modale.classList.add("modale--visible");
 
   requestAnimationFrame(function() { document.getElementById("modale-inventaire").focus(); });
 }
