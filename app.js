@@ -5746,6 +5746,7 @@ function ouvrirModaleArticle(article) {
   const form = document.getElementById("formulaire-inventaire");
   form.reset();
   document.getElementById("modale-inventaire-erreur").hidden = true;
+  document.getElementById("modale-fond-inventaire").hidden = false;
 
   if (article) {
     document.getElementById("modale-inventaire-titre").textContent = "Modifier un article";
@@ -5764,7 +5765,6 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-quantite").value = 1;
   }
 
-  document.getElementById("modale-fond-inventaire").hidden = false;
   requestAnimationFrame(function() { document.getElementById("modale-inventaire").focus(); });
 }
 
