@@ -5754,6 +5754,7 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-etat").value           = article.etat           || "";
     document.getElementById("inv-statut").value         = article.statut         || "";
     document.getElementById("inv-prix-occasion").value  = article.prix_occasion  != null ? article.prix_occasion : "";
+    console.log("[prix_neuf] valeur reçue →", article?.prix_neuf, "| id champ →", document.getElementById("inv-prix-neuf"));
     document.getElementById("inv-prix-neuf").value      = article.prix_neuf      != null ? article.prix_neuf : "";
     document.getElementById("inv-notes").value          = article.notes          || "";
   } else {
