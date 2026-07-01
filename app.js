@@ -5682,6 +5682,7 @@ function remplirTableauInventaire(articles) {
     corps.appendChild(ligne);
 
     ligne.querySelector(".btn-icone--modifier").addEventListener("click", function() {
+      console.log("[modifier] clic détecté, art →", art);
       ouvrirModaleArticle(art);
     });
 
