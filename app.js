@@ -5748,6 +5748,12 @@ function ouvrirModaleArticle(article) {
   document.getElementById("modale-inventaire-erreur").hidden = true;
   document.getElementById("modale-fond-inventaire").hidden = false;
 
+  setTimeout(function() {
+    if (article && article.prix_neuf != null) {
+      document.getElementById("inv-prix-neuf").value = article.prix_neuf;
+    }
+  }, 50);
+
   if (article) {
     document.getElementById("modale-inventaire-titre").textContent = "Modifier un article";
     document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer les modifications";
@@ -5756,8 +5762,6 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-etat").value           = article.etat           || "";
     document.getElementById("inv-statut").value         = article.statut         || "";
     document.getElementById("inv-prix-occasion").value  = article.prix_occasion  != null ? article.prix_occasion : "";
-    console.log("[prix_neuf] valeur reçue →", article?.prix_neuf, "| id champ →", document.getElementById("inv-prix-neuf"));
-    document.getElementById("inv-prix-neuf").value      = article.prix_neuf      != null ? article.prix_neuf : "";
     document.getElementById("inv-notes").value          = article.notes          || "";
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
