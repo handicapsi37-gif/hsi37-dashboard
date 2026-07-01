@@ -5814,6 +5814,7 @@ document.getElementById("modale-fond-inventaire").addEventListener("click", func
 });
 
 document.addEventListener("click", function(e) {
+  console.log("[clic tableau]", e.target.tagName, e.target.closest("[data-index]")?.dataset?.index);
   if (e.target.closest("#btn-ajouter-article")) {
     ouvrirModaleArticle(null);
     return;
