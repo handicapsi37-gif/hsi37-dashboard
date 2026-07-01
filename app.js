@@ -5725,7 +5725,7 @@ var articleEnCours = null;
 var elementAvantModaleInventaire = null;
 
 function ouvrirModaleArticle(article) {
-  console.log("[inventaire] ouvrirModaleArticle →", article);
+  console.log("[inventaire] ouvrirModaleArticle →", JSON.stringify(article));
   articleEnCours = article || null;
   elementAvantModaleInventaire = document.activeElement;
 
@@ -5734,7 +5734,6 @@ function ouvrirModaleArticle(article) {
   document.getElementById("modale-inventaire-erreur").hidden = true;
 
   if (article) {
-    console.log("[inventaire] ouvrirModaleArticle →", article);
     document.getElementById("modale-inventaire-titre").textContent = "Modifier un article";
     document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer les modifications";
     document.getElementById("inv-designation").value    = article.designation    || "";
