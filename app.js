@@ -5726,6 +5726,9 @@ var articleEnCours = null;
 var elementAvantModaleInventaire = null;
 
 function ouvrirModaleArticle(article) {
+  console.log("[debug] article reçu complet →", JSON.stringify(article));
+  console.log("[debug] prix_neuf →", article.prix_neuf);
+  console.log("[debug] id champ →", document.getElementById("input-prix-neuf-inventaire")?.value);
   articleEnCours = article || null;
   elementAvantModaleInventaire = document.activeElement;
 
