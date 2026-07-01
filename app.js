@@ -5743,33 +5743,30 @@ function ouvrirModaleArticle(article) {
   articleEnCours = article;
   elementAvantModaleInventaire = document.activeElement;
 
-  const form = document.getElementById("formulaire-inventaire");
-  form.reset();
+  document.getElementById("inv-designation").value   = "";
+  document.getElementById("inv-quantite").value      = 1;
+  document.getElementById("inv-etat").value          = "";
+  document.getElementById("inv-statut").value        = "";
+  document.getElementById("inv-prix-occasion").value = "";
+  document.getElementById("inv-prix-neuf").value     = "";
+  document.getElementById("inv-notes").value         = "";
+
   document.getElementById("modale-inventaire-erreur").hidden = true;
   document.getElementById("modale-fond-inventaire").hidden = false;
-
-  setTimeout(function() {
-    const champ = document.getElementById("inv-prix-neuf");
-    console.log("[setTimeout] article.prix_neuf →", article?.prix_neuf, "| champ →", champ, "| champ.value avant →", champ?.value);
-    if (article && article.prix_neuf != null) {
-      champ.value = article.prix_neuf;
-      console.log("[setTimeout] champ.value après →", champ?.value);
-    }
-  }, 50);
 
   if (article) {
     document.getElementById("modale-inventaire-titre").textContent = "Modifier un article";
     document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer les modifications";
-    document.getElementById("inv-designation").value    = article.designation    || "";
-    document.getElementById("inv-quantite").value       = article.quantite       != null ? article.quantite : 1;
-    document.getElementById("inv-etat").value           = article.etat           || "";
-    document.getElementById("inv-statut").value         = article.statut         || "";
-    document.getElementById("inv-prix-occasion").value  = article.prix_occasion  != null ? article.prix_occasion : "";
-    document.getElementById("inv-notes").value          = article.notes          || "";
+    document.getElementById("inv-designation").value   = article.designation   || "";
+    document.getElementById("inv-quantite").value      = article.quantite      != null ? article.quantite : 1;
+    document.getElementById("inv-etat").value          = article.etat          || "";
+    document.getElementById("inv-statut").value        = article.statut        || "";
+    document.getElementById("inv-prix-occasion").value = article.prix_occasion != null ? article.prix_occasion : "";
+    document.getElementById("inv-prix-neuf").value     = article.prix_neuf     != null ? article.prix_neuf     : "";
+    document.getElementById("inv-notes").value         = article.notes         || "";
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
     document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer";
-    document.getElementById("inv-quantite").value = 1;
   }
 
   requestAnimationFrame(function() { document.getElementById("modale-inventaire").focus(); });
