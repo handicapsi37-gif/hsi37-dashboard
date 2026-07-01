@@ -5742,6 +5742,7 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-statut").value         = article.statut         || "";
     document.getElementById("inv-prix-occasion").value  = article.prix_occasion  != null ? article.prix_occasion : "";
     document.getElementById("inv-prix-neuf").value      = article.prix_neuf      != null ? article.prix_neuf : "";
+    console.log("[inv] prix_neuf dans article:", article.prix_neuf, "| valeur champ après set:", document.getElementById("inv-prix-neuf").value);
     document.getElementById("inv-notes").value          = article.notes          || "";
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
