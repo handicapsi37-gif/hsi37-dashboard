@@ -5770,11 +5770,12 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
     return;
   }
 
+  const estModification = !!articleEnCours;
   fermerModaleArticle();
   await chargerInventaire();
   const msg = document.getElementById("message-succes-inventaire");
   if (msg) {
-    msg.textContent = articleEnCours ? "Article modifié avec succès." : "Article ajouté avec succès.";
+    msg.textContent = estModification ? "Article modifié avec succès." : "Article ajouté avec succès.";
     msg.hidden = false;
     setTimeout(function() { msg.hidden = true; }, 4000);
   }
@@ -5785,11 +5786,12 @@ document.getElementById("btn-annuler-modale-inventaire").addEventListener("click
 document.getElementById("modale-fond-inventaire").addEventListener("click", function(e) {
   if (e.target === this) fermerModaleArticle();
 });
-document.getElementById("btn-ajouter-article").addEventListener("click", function() {
-  ouvrirModaleArticle(null);
-});
 
 document.addEventListener("click", function(e) {
+  if (e.target.closest("#btn-ajouter-article")) {
+    ouvrirModaleArticle(null);
+    return;
+  }
   const btnModif = e.target.closest(".btn-modifier-article");
   if (btnModif) {
     const art = donneesInventaire.find(function(a) { return String(a.id) === btnModif.dataset.id; });
