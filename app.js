@@ -5653,8 +5653,32 @@ function remplirTableauInventaire(articles) {
       <td>${art.statut || "—"}</td>
       <td>${prix}</td>
       <td>
-        <button class="btn-modifier-article" data-id="${art.id}" aria-label="Modifier ${art.designation || ""}">Modifier</button>
-        <button class="btn-supprimer-article" data-id="${art.id}" aria-label="Supprimer ${art.designation || ""}">Supprimer</button>
+        <button class="btn-icone btn-icone--modifier btn-modifier-article"
+                data-id="${art.id}" title="Modifier" type="button"
+                aria-label="Modifier ${art.designation || ""}">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="btn-icone btn-icone--supprimer btn-supprimer-article"
+                data-id="${art.id}" title="Supprimer" type="button"
+                aria-label="Supprimer ${art.designation || ""}">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17">
+            <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"
+                      fill="none" stroke-linecap="round"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2"
+                  fill="none" stroke-linecap="round"/>
+            <path d="M9 3h6" stroke="currentColor" stroke-width="2"
+                  fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
       </td>
     `;
     corps.appendChild(ligne);
