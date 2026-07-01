@@ -5762,7 +5762,10 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-etat").value          = article.etat          || "";
     document.getElementById("inv-statut").value        = article.statut        || "";
     document.getElementById("inv-prix-occasion").value = article.prix_occasion != null ? article.prix_occasion : "";
-    document.getElementById("inv-prix-neuf").value     = article.prix_neuf     != null ? article.prix_neuf     : "";
+    const champPrixNeuf = document.getElementById("inv-prix-neuf");
+    champPrixNeuf.value = article.prix_neuf != null ? String(article.prix_neuf) : "";
+    champPrixNeuf.dispatchEvent(new Event("input", { bubbles: true }));
+    champPrixNeuf.dispatchEvent(new Event("change", { bubbles: true }));
     document.getElementById("inv-notes").value         = article.notes         || "";
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
