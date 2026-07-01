@@ -5749,8 +5749,11 @@ function ouvrirModaleArticle(article) {
   document.getElementById("modale-fond-inventaire").hidden = false;
 
   setTimeout(function() {
+    const champ = document.getElementById("inv-prix-neuf");
+    console.log("[setTimeout] article.prix_neuf →", article?.prix_neuf, "| champ →", champ, "| champ.value avant →", champ?.value);
     if (article && article.prix_neuf != null) {
-      document.getElementById("inv-prix-neuf").value = article.prix_neuf;
+      champ.value = article.prix_neuf;
+      console.log("[setTimeout] champ.value après →", champ?.value);
     }
   }, 50);
 
