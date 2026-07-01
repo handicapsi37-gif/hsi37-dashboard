@@ -5726,10 +5726,8 @@ var articleEnCours = null;
 var elementAvantModaleInventaire = null;
 
 function ouvrirModaleArticle(article) {
-  console.log("[debug] article reçu complet →", JSON.stringify(article));
-  console.log("[debug] prix_neuf →", article.prix_neuf);
-  console.log("[debug] id champ →", document.getElementById("input-prix-neuf-inventaire")?.value);
-  articleEnCours = article || null;
+  if (!article || article === "null") article = null;
+  articleEnCours = article;
   elementAvantModaleInventaire = document.activeElement;
 
   const form = document.getElementById("formulaire-inventaire");
@@ -5823,7 +5821,6 @@ document.addEventListener("click", function(e) {
   const btnModif = e.target.closest(".btn-modifier-article");
   if (btnModif) {
     const idx = parseInt(btnModif.dataset.index, 10);
-    console.log("[debug] idx →", idx, "| dataset.index →", btnModif.dataset.index, "| article →", donneesInventaire[idx]);
     const art = donneesInventaire[idx];
     if (art) ouvrirModaleArticle(art);
     return;
