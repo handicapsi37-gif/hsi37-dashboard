@@ -5660,9 +5660,9 @@ function remplirTableauInventaire(articles) {
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="17" height="17" style="pointer-events:none">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" style="pointer-events:none"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" style="pointer-events:none"/>
           </svg>
         </button>
         <button class="btn-icone btn-icone--supprimer btn-supprimer-article"
@@ -5783,6 +5783,7 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
     notes:         document.getElementById("inv-notes").value.trim()              || null,
   };
 
+  console.log("[debug] payload →", JSON.stringify(payload), "| id article →", articleEnCours?.id);
   let res;
   if (articleEnCours) {
     res = await clientSupabase.from("inventaire").update(payload).eq("id", articleEnCours.id);
@@ -5814,7 +5815,7 @@ document.getElementById("modale-fond-inventaire").addEventListener("click", func
 });
 
 document.addEventListener("click", function(e) {
-  console.log("[clic tableau]", e.target.tagName, e.target.closest("[data-index]")?.dataset?.index);
+  console.log("[clic tableau]", e.target.tagName, e.target.closest(".btn-modifier-article")?.dataset?.index);
   if (e.target.closest("#btn-ajouter-article")) {
     ouvrirModaleArticle(null);
     return;
