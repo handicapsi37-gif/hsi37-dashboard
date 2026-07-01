@@ -5776,8 +5776,8 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
     quantite:      parseInt(document.getElementById("inv-quantite").value, 10) || 1,
     etat:          document.getElementById("inv-etat").value    || null,
     statut:        document.getElementById("inv-statut").value  || null,
-    prix_occasion: parseFloat(document.getElementById("inv-prix-occasion").value) || null,
-    prix_neuf:     parseFloat(document.getElementById("inv-prix-neuf").value)     || null,
+    prix_occasion: document.getElementById("inv-prix-occasion").value !== "" ? parseFloat(document.getElementById("inv-prix-occasion").value) : null,
+    prix_neuf:     document.getElementById("inv-prix-neuf").value     !== "" ? parseFloat(document.getElementById("inv-prix-neuf").value)     : null,
     notes:         document.getElementById("inv-notes").value.trim()              || null,
   };
 
