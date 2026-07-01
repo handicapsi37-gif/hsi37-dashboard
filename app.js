@@ -5642,7 +5642,6 @@ function remplirTableauInventaire(articles) {
   }
 
   articles.forEach(function(art) {
-    const idx = donneesInventaire.indexOf(art);
     const prix = art.prix_occasion != null
       ? Number(art.prix_occasion).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
@@ -5654,19 +5653,17 @@ function remplirTableauInventaire(articles) {
       <td>${art.statut || "—"}</td>
       <td>${prix}</td>
       <td>
-        <button class="btn-icone btn-icone--modifier btn-modifier-article"
-                data-index="${idx}" title="Modifier" type="button"
+        <button class="btn-icone btn-icone--modifier" title="Modifier" type="button"
                 aria-label="Modifier ${art.designation || ""}">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="17" height="17" style="pointer-events:none">
             <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" style="pointer-events:none"/>
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
-                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" style="pointer-events:none"/>
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
           </svg>
         </button>
-        <button class="btn-icone btn-icone--supprimer btn-supprimer-article"
-                data-index="${idx}" title="Supprimer" type="button"
+        <button class="btn-icone btn-icone--supprimer" title="Supprimer" type="button"
                 aria-label="Supprimer ${art.designation || ""}">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="17" height="17" style="pointer-events:none">
@@ -5683,6 +5680,21 @@ function remplirTableauInventaire(articles) {
       </td>
     `;
     corps.appendChild(ligne);
+
+    ligne.querySelector(".btn-icone--modifier").addEventListener("click", function() {
+      ouvrirModaleArticle(art);
+    });
+
+    ligne.querySelector(".btn-icone--supprimer").addEventListener("click", function() {
+      if (!art || !art.id) { alert("Erreur : article introuvable."); return; }
+      if (!confirm("Supprimer cet article ? Cette action est irréversible.")) return;
+      clientSupabase.from("inventaire").delete().eq("id", art.id).then(async function(res) {
+        if (res.error) { alert("Erreur lors de la suppression."); return; }
+        await chargerInventaire();
+        const msg = document.getElementById("message-succes-inventaire");
+        if (msg) { msg.textContent = "Article supprimé."; msg.hidden = false; setTimeout(function() { msg.hidden = true; }, 4000); }
+      });
+    });
   });
 }
 
@@ -5783,7 +5795,6 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
     notes:         document.getElementById("inv-notes").value.trim()              || null,
   };
 
-  console.log("[debug] payload →", JSON.stringify(payload), "| id article →", articleEnCours?.id);
   let res;
   if (articleEnCours) {
     res = await clientSupabase.from("inventaire").update(payload).eq("id", articleEnCours.id);
@@ -5815,29 +5826,8 @@ document.getElementById("modale-fond-inventaire").addEventListener("click", func
 });
 
 document.addEventListener("click", function(e) {
-  console.log("[clic tableau]", e.target.tagName, e.target.closest(".btn-modifier-article")?.dataset?.index);
   if (e.target.closest("#btn-ajouter-article")) {
     ouvrirModaleArticle(null);
-    return;
-  }
-  const btnModif = e.target.closest(".btn-modifier-article");
-  if (btnModif) {
-    const idx = parseInt(btnModif.dataset.index, 10);
-    const art = donneesInventaire[idx];
-    if (art) ouvrirModaleArticle(art);
-    return;
-  }
-  const btnSuppr = e.target.closest(".btn-supprimer-article");
-  if (btnSuppr) {
-    const artSuppr = donneesInventaire[parseInt(btnSuppr.dataset.index, 10)];
-    if (!artSuppr || !artSuppr.id) { alert("Erreur : article introuvable."); return; }
-    if (!confirm("Supprimer cet article ? Cette action est irréversible.")) return;
-    clientSupabase.from("inventaire").delete().eq("id", artSuppr.id).then(async function(res) {
-      if (res.error) { alert("Erreur lors de la suppression."); return; }
-      await chargerInventaire();
-      const msg = document.getElementById("message-succes-inventaire");
-      if (msg) { msg.textContent = "Article supprimé."; msg.hidden = false; setTimeout(function() { msg.hidden = true; }, 4000); }
-    });
   }
 });
 
