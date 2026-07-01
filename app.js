@@ -5822,7 +5822,9 @@ document.addEventListener("click", function(e) {
   }
   const btnModif = e.target.closest(".btn-modifier-article");
   if (btnModif) {
-    const art = donneesInventaire[parseInt(btnModif.dataset.index, 10)];
+    const idx = parseInt(btnModif.dataset.index, 10);
+    console.log("[debug] idx →", idx, "| dataset.index →", btnModif.dataset.index, "| article →", donneesInventaire[idx]);
+    const art = donneesInventaire[idx];
     if (art) ouvrirModaleArticle(art);
     return;
   }
