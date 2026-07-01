@@ -5642,7 +5642,6 @@ function remplirTableauInventaire(articles) {
   }
 
   articles.forEach(function(art) {
-    const idx = donneesInventaire.indexOf(art);
     const prix = art.prix_occasion != null
       ? Number(art.prix_occasion).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
@@ -5654,8 +5653,7 @@ function remplirTableauInventaire(articles) {
       <td>${art.statut || "—"}</td>
       <td>${prix}</td>
       <td>
-        <button class="btn-icone btn-icone--modifier btn-modifier-article"
-                data-index="${idx}" title="Modifier" type="button"
+        <button class="btn-icone btn-icone--modifier" title="Modifier" type="button"
                 aria-label="Modifier ${art.designation || ""}">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="17" height="17" style="pointer-events:none">
@@ -5682,6 +5680,10 @@ function remplirTableauInventaire(articles) {
       </td>
     `;
     corps.appendChild(ligne);
+
+    ligne.querySelector(".btn-icone--modifier").addEventListener("click", function() {
+      ouvrirModaleArticle(art);
+    });
 
     ligne.querySelector(".btn-icone--supprimer").addEventListener("click", function() {
       if (!art || !art.id) { alert("Erreur : article introuvable."); return; }
@@ -5826,13 +5828,6 @@ document.getElementById("modale-fond-inventaire").addEventListener("click", func
 document.addEventListener("click", function(e) {
   if (e.target.closest("#btn-ajouter-article")) {
     ouvrirModaleArticle(null);
-    return;
-  }
-  const btnModif = e.target.closest(".btn-modifier-article");
-  if (btnModif) {
-    const idx = parseInt(btnModif.dataset.index, 10);
-    const art = donneesInventaire[idx];
-    if (art) ouvrirModaleArticle(art);
   }
 });
 
