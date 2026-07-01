@@ -1328,6 +1328,7 @@ function allerVers(vue) {
     document.getElementById("panneau-donateurs").hidden = true;
     document.getElementById("panneau-evenements").hidden = true;
     sectionInventaire.hidden = false;
+    chargerInventaire();
   }
 }
 
@@ -2172,6 +2173,15 @@ var filtreDonateurs       = "";
 var filtreAnneeDonateurs  = String(new Date().getFullYear());
 var triDonateurs          = { colonne: null, sens: "asc" };
 let donateurEnCours          = null;
+
+/* =====================================================
+   SECTION INVENTAIRE — CACHE ET ÉTAT
+   ===================================================== */
+
+let donneesInventaire        = [];
+var filtreInventaire         = "";
+var filtreStatutInventaire   = "";
+var filtreEtatInventaire     = "";
 let donateurExistantPourDon  = null;
 let elementAvantModaleDon = null;
 
@@ -5613,6 +5623,76 @@ function initialiserFiltresAnnee() {
   if (spanFooter) spanFooter.textContent = String(anneeActuelle);
 }
 
+/* =====================================================
+   SECTION INVENTAIRE — AFFICHAGE ET CHARGEMENT
+   ===================================================== */
+
+function remplirTableauInventaire(articles) {
+  const corps = document.getElementById("corps-tableau-inventaire");
+  if (!corps) return;
+  corps.innerHTML = "";
+
+  if (!articles || articles.length === 0) {
+    corps.innerHTML = `
+      <tr>
+        <td colspan="6" class="tableau-message">Aucun article enregistré pour l'instant.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  articles.forEach(function(art) {
+    const prix = art.prix_occasion != null
+      ? Number(art.prix_occasion).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+      : "—";
+    const ligne = document.createElement("tr");
+    ligne.innerHTML = `
+      <td>${art.designation || "—"}</td>
+      <td>${art.quantite != null ? art.quantite : "—"}</td>
+      <td>${art.etat || "—"}</td>
+      <td>${art.statut || "—"}</td>
+      <td>${prix}</td>
+      <td>
+        <button class="btn-modifier-article" data-id="${art.id}" aria-label="Modifier ${art.designation || ""}">Modifier</button>
+        <button class="btn-supprimer-article" data-id="${art.id}" aria-label="Supprimer ${art.designation || ""}">Supprimer</button>
+      </td>
+    `;
+    corps.appendChild(ligne);
+  });
+}
+
+function appliquerFiltreInventaire() {
+  var f = filtreInventaire.toLowerCase();
+  var liste = donneesInventaire.filter(function(art) {
+    if (filtreStatutInventaire && art.statut !== filtreStatutInventaire) return false;
+    if (filtreEtatInventaire   && art.etat   !== filtreEtatInventaire)   return false;
+    return (art.designation || "").toLowerCase().includes(f);
+  });
+  remplirTableauInventaire(liste);
+}
+
+async function chargerInventaire() {
+  const corps = document.getElementById("corps-tableau-inventaire");
+  if (corps) {
+    corps.innerHTML = `<tr><td colspan="6" class="tableau-message">Chargement en cours…</td></tr>`;
+  }
+  const res = await clientSupabase.from("inventaire").select("*");
+  if (res.error) {
+    if (corps) {
+      corps.innerHTML = `
+        <tr>
+          <td colspan="6" class="tableau-message tableau-message--erreur" role="alert">
+            Impossible de charger l'inventaire. Vérifiez votre connexion et réessayez.
+          </td>
+        </tr>
+      `;
+    }
+    return;
+  }
+  donneesInventaire = res.data || [];
+  appliquerFiltreInventaire();
+}
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();
@@ -5631,6 +5711,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var selAnneeDon = document.getElementById("filtre-annee-donateurs");
   if (selAnneeDon) selAnneeDon.addEventListener("change", function() { filtreAnneeDonateurs=this.value; appliquerFiltreDonateurs(); });
+
+  var inputInv = document.getElementById("recherche-inventaire");
+  if (inputInv) inputInv.addEventListener("input", function() { filtreInventaire = this.value; appliquerFiltreInventaire(); });
+
+  var selStatutInv = document.getElementById("filtre-statut-inventaire");
+  if (selStatutInv) selStatutInv.addEventListener("change", function() { filtreStatutInventaire = this.value; appliquerFiltreInventaire(); });
+
+  var selEtatInv = document.getElementById("filtre-etat-inventaire");
+  if (selEtatInv) selEtatInv.addEventListener("change", function() { filtreEtatInventaire = this.value; appliquerFiltreInventaire(); });
 
   var selAnneeEv = document.getElementById("filtre-annee-evenements");
   if (selAnneeEv) selAnneeEv.addEventListener("change", function() { filtreAnneeEvenements=this.value; remplirTableauEvenements(); });

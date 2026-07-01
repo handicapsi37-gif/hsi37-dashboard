@@ -910,7 +910,44 @@
       </div>
 
       <div class="section-hub-page__corps">
-        <p style="color:var(--encre);opacity:0.6;font-style:italic;">Module en construction.</p>
+
+        <div id="message-succes-inventaire" class="message-succes" role="status" aria-live="polite" hidden></div>
+        <div id="message-erreur-inventaire" class="message-erreur" role="alert" aria-live="assertive" hidden></div>
+
+        <div class="barre-actions">
+          <button class="btn btn--primaire" id="btn-ajouter-article" type="button">+ Ajouter un article</button>
+          <input class="champ-recherche" type="search" id="recherche-inventaire"
+                 placeholder="Rechercher un article…" aria-label="Rechercher un article">
+          <select id="filtre-statut-inventaire" aria-label="Filtrer par statut">
+            <option value="">Tous les statuts</option>
+            <option value="Disponible">Disponible</option>
+            <option value="En prêt">En prêt</option>
+            <option value="Hors service">Hors service</option>
+          </select>
+          <select id="filtre-etat-inventaire" aria-label="Filtrer par état">
+            <option value="">Tous les états</option>
+            <option value="Bon état">Bon état</option>
+            <option value="Usé">Usé</option>
+            <option value="Abîmé">Abîmé</option>
+          </select>
+        </div>
+
+        <div class="tableau-conteneur">
+          <table id="tableau-inventaire" class="tableau-donnees">
+            <thead>
+              <tr>
+                <th>Désignation</th>
+                <th>Quantité</th>
+                <th>État</th>
+                <th>Statut</th>
+                <th>Prix occasion</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="corps-tableau-inventaire"></tbody>
+          </table>
+        </div>
+
       </div>
 
     </section>
