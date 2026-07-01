@@ -5693,6 +5693,121 @@ async function chargerInventaire() {
   appliquerFiltreInventaire();
 }
 
+/* =====================================================
+   SECTION INVENTAIRE — MODALE AJOUTER / MODIFIER
+   ===================================================== */
+
+var articleEnCours = null;
+var elementAvantModaleInventaire = null;
+
+function ouvrirModaleArticle(article) {
+  articleEnCours = article || null;
+  elementAvantModaleInventaire = document.activeElement;
+
+  const form = document.getElementById("formulaire-inventaire");
+  form.reset();
+  document.getElementById("modale-inventaire-erreur").hidden = true;
+
+  if (article) {
+    document.getElementById("modale-inventaire-titre").textContent = "Modifier un article";
+    document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer les modifications";
+    document.getElementById("inv-designation").value    = article.designation    || "";
+    document.getElementById("inv-quantite").value       = article.quantite       != null ? article.quantite : 1;
+    document.getElementById("inv-etat").value           = article.etat           || "";
+    document.getElementById("inv-statut").value         = article.statut         || "";
+    document.getElementById("inv-prix-occasion").value  = article.prix_occasion  != null ? article.prix_occasion : "";
+    document.getElementById("inv-prix-neuf").value      = article.prix_neuf      != null ? article.prix_neuf : "";
+    document.getElementById("inv-notes").value          = article.notes          || "";
+  } else {
+    document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
+    document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer";
+    document.getElementById("inv-quantite").value = 1;
+  }
+
+  document.getElementById("modale-fond-inventaire").hidden = false;
+  requestAnimationFrame(function() { document.getElementById("modale-inventaire").focus(); });
+}
+
+function fermerModaleArticle() {
+  document.getElementById("modale-fond-inventaire").hidden = true;
+  articleEnCours = null;
+  if (elementAvantModaleInventaire) elementAvantModaleInventaire.focus();
+}
+
+document.getElementById("formulaire-inventaire").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const zoneErreur = document.getElementById("modale-inventaire-erreur");
+  zoneErreur.hidden = true;
+
+  const designation = document.getElementById("inv-designation").value.trim();
+  if (!designation) {
+    zoneErreur.textContent = "La désignation est obligatoire.";
+    zoneErreur.hidden = false;
+    document.getElementById("inv-designation").focus();
+    return;
+  }
+
+  const payload = {
+    designation:   designation,
+    quantite:      parseInt(document.getElementById("inv-quantite").value, 10) || 1,
+    etat:          document.getElementById("inv-etat").value    || null,
+    statut:        document.getElementById("inv-statut").value  || null,
+    prix_occasion: parseFloat(document.getElementById("inv-prix-occasion").value) || null,
+    prix_neuf:     parseFloat(document.getElementById("inv-prix-neuf").value)     || null,
+    notes:         document.getElementById("inv-notes").value.trim()              || null,
+  };
+
+  let res;
+  if (articleEnCours) {
+    res = await clientSupabase.from("inventaire").update(payload).eq("id", articleEnCours.id);
+  } else {
+    res = await clientSupabase.from("inventaire").insert(payload);
+  }
+
+  if (res.error) {
+    zoneErreur.textContent = "Erreur lors de l'enregistrement. Réessayez.";
+    zoneErreur.hidden = false;
+    return;
+  }
+
+  fermerModaleArticle();
+  await chargerInventaire();
+  const msg = document.getElementById("message-succes-inventaire");
+  if (msg) {
+    msg.textContent = articleEnCours ? "Article modifié avec succès." : "Article ajouté avec succès.";
+    msg.hidden = false;
+    setTimeout(function() { msg.hidden = true; }, 4000);
+  }
+});
+
+document.getElementById("btn-fermer-modale-inventaire").addEventListener("click", fermerModaleArticle);
+document.getElementById("btn-annuler-modale-inventaire").addEventListener("click", fermerModaleArticle);
+document.getElementById("modale-fond-inventaire").addEventListener("click", function(e) {
+  if (e.target === this) fermerModaleArticle();
+});
+document.getElementById("btn-ajouter-article").addEventListener("click", function() {
+  ouvrirModaleArticle(null);
+});
+
+document.addEventListener("click", function(e) {
+  const btnModif = e.target.closest(".btn-modifier-article");
+  if (btnModif) {
+    const art = donneesInventaire.find(function(a) { return String(a.id) === btnModif.dataset.id; });
+    if (art) ouvrirModaleArticle(art);
+    return;
+  }
+  const btnSuppr = e.target.closest(".btn-supprimer-article");
+  if (btnSuppr) {
+    if (!confirm("Supprimer cet article ? Cette action est irréversible.")) return;
+    clientSupabase.from("inventaire").delete().eq("id", btnSuppr.dataset.id).then(async function(res) {
+      if (res.error) { alert("Erreur lors de la suppression."); return; }
+      await chargerInventaire();
+      const msg = document.getElementById("message-succes-inventaire");
+      if (msg) { msg.textContent = "Article supprimé."; msg.hidden = false; setTimeout(function() { msg.hidden = true; }, 4000); }
+    });
+  }
+});
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();
