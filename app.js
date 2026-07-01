@@ -5642,6 +5642,7 @@ function remplirTableauInventaire(articles) {
   }
 
   articles.forEach(function(art) {
+    const idx = donneesInventaire.indexOf(art);
     const prix = art.prix_occasion != null
       ? Number(art.prix_occasion).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
@@ -5654,7 +5655,7 @@ function remplirTableauInventaire(articles) {
       <td>${prix}</td>
       <td>
         <button class="btn-icone btn-icone--modifier btn-modifier-article"
-                data-id="${art.id}" title="Modifier" type="button"
+                data-index="${idx}" title="Modifier" type="button"
                 aria-label="Modifier ${art.designation || ""}">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="17" height="17">
@@ -5665,7 +5666,7 @@ function remplirTableauInventaire(articles) {
           </svg>
         </button>
         <button class="btn-icone btn-icone--supprimer btn-supprimer-article"
-                data-id="${art.id}" title="Supprimer" type="button"
+                data-index="${idx}" title="Supprimer" type="button"
                 aria-label="Supprimer ${art.designation || ""}">
           <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
                viewBox="0 0 24 24" width="17" height="17">
@@ -5725,7 +5726,6 @@ var articleEnCours = null;
 var elementAvantModaleInventaire = null;
 
 function ouvrirModaleArticle(article) {
-  console.log("[inventaire] ouvrirModaleArticle →", JSON.stringify(article));
   articleEnCours = article || null;
   elementAvantModaleInventaire = document.activeElement;
 
@@ -5742,7 +5742,6 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-statut").value         = article.statut         || "";
     document.getElementById("inv-prix-occasion").value  = article.prix_occasion  != null ? article.prix_occasion : "";
     document.getElementById("inv-prix-neuf").value      = article.prix_neuf      != null ? article.prix_neuf : "";
-    console.log("[inv] prix_neuf dans article:", article.prix_neuf, "| valeur champ après set:", document.getElementById("inv-prix-neuf").value);
     document.getElementById("inv-notes").value          = article.notes          || "";
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
@@ -5820,14 +5819,16 @@ document.addEventListener("click", function(e) {
   }
   const btnModif = e.target.closest(".btn-modifier-article");
   if (btnModif) {
-    const art = donneesInventaire.find(function(a) { return String(a.id) === btnModif.dataset.id; });
+    const art = donneesInventaire[parseInt(btnModif.dataset.index, 10)];
     if (art) ouvrirModaleArticle(art);
     return;
   }
   const btnSuppr = e.target.closest(".btn-supprimer-article");
   if (btnSuppr) {
+    const artSuppr = donneesInventaire[parseInt(btnSuppr.dataset.index, 10)];
+    if (!artSuppr || !artSuppr.id) { alert("Erreur : article introuvable."); return; }
     if (!confirm("Supprimer cet article ? Cette action est irréversible.")) return;
-    clientSupabase.from("inventaire").delete().eq("id", btnSuppr.dataset.id).then(async function(res) {
+    clientSupabase.from("inventaire").delete().eq("id", artSuppr.id).then(async function(res) {
       if (res.error) { alert("Erreur lors de la suppression."); return; }
       await chargerInventaire();
       const msg = document.getElementById("message-succes-inventaire");
