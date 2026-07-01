@@ -1263,8 +1263,9 @@ const navOnglets        = document.getElementById("nav-onglets");
 const btnRetourAccueil  = document.getElementById("btn-retour-accueil");
 const sectionDocuments  = document.getElementById("section-documents");
 const sectionSignatures = document.getElementById("section-signatures");
-const sectionRgpd       = document.getElementById("section-rgpd");
-const sectionProfil     = document.getElementById("section-profil");
+const sectionRgpd         = document.getElementById("section-rgpd");
+const sectionInventaire   = document.getElementById("section-inventaire");
+const sectionProfil       = document.getElementById("section-profil");
 
 /* Affiche le hub : masque tout sauf le hub */
 function afficherHub() {
@@ -1276,6 +1277,7 @@ function afficherHub() {
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
+  sectionInventaire.hidden = true;
   if (sectionProfil) sectionProfil.hidden = true;
   btnRetourAccueil.hidden  = true;
 }
@@ -1287,6 +1289,7 @@ function allerVers(vue) {
   sectionDocuments.hidden  = true;
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
+  sectionInventaire.hidden = true;
   if (sectionProfil) sectionProfil.hidden = true;
 
   if (vue === "adherents") {
@@ -1319,6 +1322,12 @@ function allerVers(vue) {
     document.getElementById("panneau-donateurs").hidden = true;
     document.getElementById("panneau-evenements").hidden = true;
     sectionRgpd.hidden = false;
+  } else if (vue === "inventaire") {
+    navOnglets.hidden = true;
+    document.getElementById("panneau-adherents").hidden = true;
+    document.getElementById("panneau-donateurs").hidden = true;
+    document.getElementById("panneau-evenements").hidden = true;
+    sectionInventaire.hidden = false;
   }
 }
 
@@ -3733,6 +3742,12 @@ document.getElementById("tuile-aide").addEventListener("click", function() {
 });
 document.getElementById("tuile-rgpd").addEventListener("click", function() {
   allerVers("rgpd");
+});
+document.getElementById("tuile-inventaire").addEventListener("click", function() {
+  allerVers("inventaire");
+});
+document.getElementById("btn-retour-inventaire").addEventListener("click", function() {
+  afficherHub();
 });
 document.getElementById("btn-retour-accueil").addEventListener("click", function() {
   afficherHub();
