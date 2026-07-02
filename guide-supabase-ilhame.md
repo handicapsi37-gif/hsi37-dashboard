@@ -59,7 +59,7 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 ## 5. Vérifier que la sécurité est active (RLS)
 
 1. Menu gauche → **Authentication** → **Policies**
-2. Tu dois voir les tables **adherents** et **donateurs** avec chacune 4 politiques listées
+2. Tu dois voir les tables **adherents**, **donateurs**, **inventaire** et **prets** avec des politiques RLS listées
 3. Le bouton **Disable RLS** visible = RLS actif (c'est bon)
 
 ---
@@ -161,6 +161,49 @@ Si la personne n'a pas reçu l'email ou n'y a pas accès :
 | quantite | integer | Nombre de places |
 | montant | numeric | Montant total payé en € |
 | created_at | timestamp | Date de création de la ligne |
+
+### Structure de la table `inventaire`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | bigint | Identifiant technique (généré automatiquement) |
+| designation | text | Nom de l'article |
+| quantite | integer | Quantité en stock |
+| etat | text | Bon état / Usé / Abîmé |
+| statut | text | Disponible / En prêt / Hors service |
+| prix_occasion | numeric | Prix de location occasion en € |
+| prix_neuf | numeric | Prix neuf de référence en € |
+| notes | text | Notes libres |
+| photo_url | text | URL publique de la photo (bucket inventaire-photos) |
+| created_at | timestamptz | Date de création |
+
+### Structure de la table `prets`
+
+| Colonne | Type | Rôle |
+|---|---|---|
+| id | bigint | Identifiant technique (généré automatiquement) |
+| article_id | bigint | Lien vers l'article (clé étrangère → inventaire.id, SET NULL si supprimé) |
+| emprunteur_nom | text | Nom de l'emprunteur |
+| emprunteur_prenom | text | Prénom de l'emprunteur |
+| emprunteur_telephone | text | Téléphone de l'emprunteur |
+| emprunteur_email | text | Email de l'emprunteur |
+| date_pret | date | Date du prêt |
+| date_retour_prevue | date | Date de retour prévue |
+| date_retour_effective | date | Date de retour effective |
+| etat_retour | text | État du matériel au retour |
+| statut | text | En cours / Retourné / En retard |
+| created_at | timestamptz | Date de création |
+
+> ⚠️ La colonne `statut` de `prets` a une contrainte CHECK — seules les valeurs `En cours`, `Retourné`, `En retard` sont acceptées.
+
+### Buckets Storage
+
+| Bucket | Visibilité | Usage |
+|---|---|---|
+| `inventaire-photos` | **Public** | Photos des articles du module Inventaire |
+| `dons-materiel` | Privé | Photos des dons de matériel |
+
+> ⚠️ Ne jamais supprimer le bucket `inventaire-photos` — toutes les photos des articles seraient perdues. Les URLs publiques sont stockées dans `inventaire.photo_url`.
 
 ### Contraintes de valeurs acceptées
 
@@ -349,4 +392,4 @@ Avant toute insertion d'adhérent ou de donateur, les scripts vérifient si la p
 
 ---
 
-*Dernière mise à jour : juin 2026 — V5 cotisations + filtre année + scripts PayAsso + anti-doublon*
+*Dernière mise à jour : juillet 2026 — V6 : tables inventaire et prets, RLS, bucket inventaire-photos public, corrections don facultatif*

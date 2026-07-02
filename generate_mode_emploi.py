@@ -293,7 +293,7 @@ def construire_contenu(s):
 
     story.append(Paragraph(
         "Après votre connexion, vous arrivez sur la page d'accueil du Dashboard. "
-        "Vous y voyez <b>4 grandes tuiles</b> (carrés cliquables) :",
+        "Vous y voyez <b>plusieurs tuiles</b> (carrés cliquables) :",
         s['corps'],
     ))
     story.append(espacement(0.2))
@@ -301,6 +301,10 @@ def construire_contenu(s):
     for tuile in [
         "<b>Adhérents</b> — gérer la liste des adhérents, leurs cartes et leurs reçus.",
         "<b>Donateurs</b> — gérer les donateurs et leurs reçus de don.",
+        "<b>Événements</b> — créer et suivre les événements et leurs participants.",
+        "<b>Inventaire</b> — gérer le stock de matériel (photos, prix, statut).",
+        "<b>Prêt local</b> — suivre les prêts de matériel aux emprunteurs.",
+        "<b>Dons de matériel</b> — enregistrer et suivre les dons de matériel reçus.",
         "<b>Documents</b> — générer les bulletins, attestations et courriers.",
         "<b>Signatures email</b> — accéder aux signatures Gmail du bureau.",
     ]:
@@ -760,8 +764,113 @@ def construire_contenu(s):
 
     story.append(PageBreak())
 
-    # ── SECTION 9 — EXPORTER LES DONNÉES ─────────────────────────
-    story.append(Paragraph("9. Exporter les données", s['section']))
+    # ── SECTION 9 — INVENTAIRE ────────────────────────────────────
+    story.append(Paragraph("9. Module Inventaire", s['section']))
+    story.append(filet_bleu())
+
+    story.append(Paragraph(
+        "Le module Inventaire recense tout le matériel de l'association "
+        "(fauteuils roulants, déambulateurs, cannes…) avec leur état, leur statut "
+        "et leur prix.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("9.1  Ajouter un article", s['sous_section']))
+    for etape in [
+        "Depuis la page d'accueil, cliquez sur la tuile <b>« Inventaire »</b>.",
+        "Cliquez sur <b>« + Ajouter un article »</b>.",
+        "Remplissez : désignation, quantité, état (Bon état / Usé / Abîmé), "
+        "statut (Disponible / En prêt / Hors service), prix occasion et prix neuf.",
+        "Ajoutez une photo si besoin (voir 9.3).",
+        "Cliquez sur <b>« Enregistrer »</b>.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("9.2  Modifier ou supprimer un article", s['sous_section']))
+    story.append(Paragraph(
+        "Icône <b>crayon ✏</b> pour modifier, icône <b>poubelle 🗑</b> pour supprimer. "
+        "La suppression est définitive.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("9.3  Ajouter ou remplacer une photo", s['sous_section']))
+    for etape in [
+        "Dans le formulaire d'ajout ou de modification, cliquez sur le champ <b>Photo</b> "
+        "et sélectionnez une image.",
+        "Un aperçu s'affiche immédiatement sous le champ.",
+        "Pour supprimer la photo existante, cliquez sur <b>« Supprimer la photo »</b> "
+        "avant d'enregistrer.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("9.4  Agrandir une photo (lightbox)", s['sous_section']))
+    story.append(Paragraph(
+        "Dans le tableau, cliquez sur la vignette d'un article pour afficher la photo "
+        "en grand à l'écran. Appuyez sur <b>Échap</b> ou cliquez en dehors pour fermer.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("9.5  Rechercher et filtrer", s['sous_section']))
+    story.append(Paragraph(
+        "Utilisez la barre de recherche pour filtrer par désignation. "
+        "Les menus <b>« Tous les statuts »</b> et <b>« Tous les états »</b> "
+        "permettent de restreindre l'affichage.",
+        s['corps'],
+    ))
+
+    story.append(PageBreak())
+
+    # ── SECTION 10 — PRÊT LOCAL ───────────────────────────────────
+    story.append(Paragraph("10. Module Prêt local", s['section']))
+    story.append(filet_bleu())
+
+    story.append(Paragraph(
+        "Le module Prêt local permet de suivre les emprunts de matériel "
+        "par des personnes extérieures à l'association.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("10.1  Enregistrer un nouveau prêt", s['sous_section']))
+    for etape in [
+        "Depuis la page d'accueil, cliquez sur la tuile <b>« Prêt local »</b>.",
+        "Cliquez sur <b>« + Nouveau prêt »</b>.",
+        "Sélectionnez l'<b>article</b> dans la liste (seuls les articles Disponibles "
+        "apparaissent).",
+        "Renseignez le <b>nom</b> et le <b>prénom</b> de l'emprunteur (obligatoires).",
+        "Ajoutez le téléphone, l'e-mail et les dates de prêt et de retour prévu.",
+        "Cliquez sur <b>« Enregistrer »</b>. L'article passe automatiquement en statut "
+        "<b>« En prêt »</b> dans l'Inventaire.",
+    ]:
+        story.append(fleche(etape, s['liste']))
+
+    story.append(Paragraph("10.2  Modifier ou supprimer un prêt", s['sous_section']))
+    story.append(Paragraph(
+        "Icône <b>crayon ✏</b> pour modifier. Icône <b>poubelle 🗑</b> pour supprimer — "
+        "l'article repasse automatiquement en <b>« Disponible »</b> dans l'Inventaire "
+        "si aucun autre prêt en cours ne le concerne.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("10.3  Rechercher un prêt", s['sous_section']))
+    story.append(Paragraph(
+        "La barre de recherche filtre en temps réel par nom/prénom de l'emprunteur "
+        "ou par désignation de l'article.",
+        s['corps'],
+    ))
+
+    story.append(Paragraph("10.4  Statuts d'un prêt", s['sous_section']))
+    for statut in [
+        "<b>En cours</b> — le matériel n'est pas encore rendu.",
+        "<b>Retourné</b> — le matériel a été rendu.",
+        "<b>En retard</b> — la date de retour prévue est dépassée.",
+    ]:
+        story.append(fleche(statut, s['liste']))
+    story.append(espacement(0.3))
+
+    story.append(PageBreak())
+
+    # ── SECTION 11 — EXPORTER LES DONNÉES ─────────────────────────
+    story.append(Paragraph("11. Exporter les données", s['section']))
     story.append(filet_bleu())
     story.append(Paragraph(
         "Le Dashboard permet d'exporter la liste des adhérents et la liste des donateurs "
@@ -777,7 +886,7 @@ def construire_contenu(s):
     ]:
         story.append(fleche(raison, s['liste']))
     story.append(espacement(0.25))
-    story.append(Paragraph("9.1  Exporter la liste des adhérents", s['sous_section']))
+    story.append(Paragraph("11.1  Exporter la liste des adhérents", s['sous_section']))
     story.append(espacement(0.15))
     for etape in [
         "Depuis la page d'accueil, cliquez sur la tuile <b>« Adhérents »</b>.",
@@ -805,7 +914,7 @@ def construire_contenu(s):
         s['corps'],
     ))
     story.append(espacement(0.25))
-    story.append(Paragraph("9.2  Exporter la liste des donateurs", s['sous_section']))
+    story.append(Paragraph("11.2  Exporter la liste des donateurs", s['sous_section']))
     story.append(espacement(0.15))
     for etape in [
         "Depuis la page d'accueil, cliquez sur la tuile <b>« Donateurs »</b>.",
@@ -822,7 +931,7 @@ def construire_contenu(s):
     story.append(espacement(0.4))
 
     # ── SECTION 10 — LES DOCUMENTS DE L'ASSOCIATION ──────────────
-    story.append(Paragraph("10. Les documents de l'association", s['section']))
+    story.append(Paragraph("12. Les documents de l'association", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -865,7 +974,7 @@ def construire_contenu(s):
         story.append(espacement(0.1))
 
     # ── SECTION 11 — ENVOYER PAR MAIL ────────────────────────────
-    story.append(Paragraph("11. Envoyer un document par mail", s['section']))
+    story.append(Paragraph("13. Envoyer un document par mail", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -886,7 +995,7 @@ def construire_contenu(s):
     story.append(PageBreak())
 
     # ── SECTION 12 — INVITATIONS PAR E-MAIL ──────────────────────
-    story.append(Paragraph("12. Envoyer des invitations par e-mail", s['section']))
+    story.append(Paragraph("14. Envoyer des invitations par e-mail", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -896,7 +1005,7 @@ def construire_contenu(s):
         s['corps'],
     ))
 
-    story.append(Paragraph("12.1  Sélectionner les destinataires", s['sous_section']))
+    story.append(Paragraph("14.1  Sélectionner les destinataires", s['sous_section']))
     story.append(Paragraph(
         "Dans chaque tableau (Adhérents, Donateurs, Événements → participants), "
         "une case à cocher apparaît en début de chaque ligne :",
@@ -912,7 +1021,7 @@ def construire_contenu(s):
     ]:
         story.append(fleche(etape, s['liste']))
 
-    story.append(Paragraph("12.2  Envoyer l'invitation", s['sous_section']))
+    story.append(Paragraph("14.2  Envoyer l'invitation", s['sous_section']))
     story.append(Paragraph(
         "Cliquez sur le bouton <b>« ✉ Envoyer aux sélectionnés »</b>. "
         "Une fenêtre s'ouvre :",
@@ -942,7 +1051,7 @@ def construire_contenu(s):
     story.append(PageBreak())
 
     # ── SECTION 13 — SE DÉCONNECTER ──────────────────────────────
-    story.append(Paragraph("13. Se déconnecter", s['section']))
+    story.append(Paragraph("15. Se déconnecter", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
@@ -959,7 +1068,7 @@ def construire_contenu(s):
         story.append(fleche(etape, s['liste']))
 
     # ── SECTION 14 — EN CAS DE PROBLÈME ──────────────────────────
-    story.append(Paragraph("14. En cas de problème", s['section']))
+    story.append(Paragraph("16. En cas de problème", s['section']))
     story.append(filet_bleu())
 
     story.append(Paragraph(
