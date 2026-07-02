@@ -6058,10 +6058,10 @@ function remplirTableauPrets(prets) {
     ligne.innerHTML = `
       <td>${designation}</td>
       <td>${emprunteur}</td>
-      <td>${telephone}</td>
-      <td>${email}</td>
-      <td>${datePret}</td>
-      <td>${dateRetour}</td>
+      <td class="col-telephone">${telephone}</td>
+      <td class="col-email">${email}</td>
+      <td style="white-space:nowrap">${datePret}</td>
+      <td style="white-space:nowrap">${dateRetour}</td>
       <td>${statut}</td>
       <td>
         <button class="btn-icone btn-icone--modifier" title="Modifier" type="button"

@@ -412,17 +412,6 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   white-space: nowrap;
 }
 
-/* ---------- TABLE PRÊT LOCAL : cellules plus compactes ---------- */
-#tableau-prets th,
-#tableau-prets td {
-  padding: 0.55rem 0.65rem;
-  font-size: 0.855rem;
-}
-#tableau-prets td:nth-child(5),
-#tableau-prets td:nth-child(6) {
-  white-space: nowrap;
-}
-
 /* ---------- BADGES DE STATUT ---------- */
 .badge {
   display: inline-flex;
