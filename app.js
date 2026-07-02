@@ -5736,7 +5736,7 @@ function remplirTableauInventaire(articles) {
   if (!articles || articles.length === 0) {
     corps.innerHTML = `
       <tr>
-        <td colspan="6" class="tableau-message">Aucun article enregistré pour l'instant.</td>
+        <td colspan="8" class="tableau-message">Aucun article enregistré pour l'instant.</td>
       </tr>
     `;
     return;
@@ -5749,8 +5749,12 @@ function remplirTableauInventaire(articles) {
     const prixNeuf = art.prix_neuf != null
       ? Number(art.prix_neuf).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
+    const photoCell = art.photo_url
+      ? `<img src="${art.photo_url}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;display:block;">`
+      : `<span aria-hidden="true" style="display:flex;width:40px;height:40px;background:#f0f0f0;border-radius:4px;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ccc" stroke-width="1.5" style="pointer-events:none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>`;
     const ligne = document.createElement("tr");
     ligne.innerHTML = `
+      <td>${photoCell}</td>
       <td>${art.designation || "—"}</td>
       <td>${art.quantite != null ? art.quantite : "—"}</td>
       <td>${art.etat || "—"}</td>
@@ -5817,14 +5821,14 @@ function appliquerFiltreInventaire() {
 async function chargerInventaire() {
   const corps = document.getElementById("corps-tableau-inventaire");
   if (corps) {
-    corps.innerHTML = `<tr><td colspan="6" class="tableau-message">Chargement en cours…</td></tr>`;
+    corps.innerHTML = `<tr><td colspan="8" class="tableau-message">Chargement en cours…</td></tr>`;
   }
   const res = await clientSupabase.from("inventaire").select("*");
   if (res.error) {
     if (corps) {
       corps.innerHTML = `
         <tr>
-          <td colspan="6" class="tableau-message tableau-message--erreur" role="alert">
+          <td colspan="8" class="tableau-message tableau-message--erreur" role="alert">
             Impossible de charger l'inventaire. Vérifiez votre connexion et réessayez.
           </td>
         </tr>
@@ -5842,6 +5846,7 @@ async function chargerInventaire() {
 
 var articleEnCours = null;
 var elementAvantModaleInventaire = null;
+var photoSupprimee = false;
 
 function ouvrirModaleArticle(article) {
   if (!article || article === "null") article = null;
@@ -5854,7 +5859,11 @@ function ouvrirModaleArticle(article) {
   document.getElementById("inv-statut").value        = "";
   document.getElementById("inv-prix-occasion").value = "";
   document.getElementById("inv-prix-neuf").value     = "";
-  document.getElementById("inv-notes").value         = "";
+  document.getElementById("inv-notes").value              = "";
+  document.getElementById("inv-photo").value              = "";
+  document.getElementById("inv-photo-apercu").src         = "";
+  document.getElementById("inv-photo-apercu-bloc").hidden = true;
+  photoSupprimee = false;
   document.getElementById("modale-inventaire-erreur").hidden = true;
 
   if (article) {
@@ -5867,6 +5876,10 @@ function ouvrirModaleArticle(article) {
     document.getElementById("inv-prix-occasion").value = article.prix_occasion != null ? article.prix_occasion : "";
     document.getElementById("inv-prix-neuf").value     = article.prix_neuf     != null ? String(article.prix_neuf) : "";
     document.getElementById("inv-notes").value         = article.notes         || "";
+    if (article.photo_url) {
+      document.getElementById("inv-photo-apercu").src         = article.photo_url;
+      document.getElementById("inv-photo-apercu-bloc").hidden = false;
+    }
   } else {
     document.getElementById("modale-inventaire-titre").textContent = "Ajouter un article";
     document.querySelector("#formulaire-inventaire [type='submit']").textContent = "Enregistrer";
@@ -5895,6 +5908,25 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
     return;
   }
 
+  let photoUrl = articleEnCours ? (articleEnCours.photo_url || null) : null;
+  if (photoSupprimee) photoUrl = null;
+  const fichierPhoto = document.getElementById("inv-photo").files[0];
+  if (fichierPhoto) {
+    const nomFichier = Date.now() + "_" + fichierPhoto.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const { error: uploadError } = await clientSupabase.storage
+      .from("inventaire-photos")
+      .upload(nomFichier, fichierPhoto, { upsert: false });
+    if (uploadError) {
+      zoneErreur.textContent = "Erreur lors de l'upload de la photo. Réessayez.";
+      zoneErreur.hidden = false;
+      return;
+    }
+    const { data: urlData } = clientSupabase.storage
+      .from("inventaire-photos")
+      .getPublicUrl(nomFichier);
+    photoUrl = urlData.publicUrl;
+  }
+
   const payload = {
     designation:   designation,
     quantite:      parseInt(document.getElementById("inv-quantite").value, 10) || 1,
@@ -5903,6 +5935,7 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
     prix_occasion: document.getElementById("inv-prix-occasion").value !== "" ? parseFloat(document.getElementById("inv-prix-occasion").value) : null,
     prix_neuf:     parseFloat(document.getElementById("inv-prix-neuf").value.replace(",", ".")) || null,
     notes:         document.getElementById("inv-notes").value.trim()              || null,
+    photo_url:     photoUrl,
   };
 
   let res;
@@ -5931,6 +5964,11 @@ document.getElementById("formulaire-inventaire").addEventListener("submit", asyn
 
 document.getElementById("btn-fermer-modale-inventaire").addEventListener("click", fermerModaleArticle);
 document.getElementById("btn-annuler-modale-inventaire").addEventListener("click", fermerModaleArticle);
+document.getElementById("inv-btn-supprimer-photo").addEventListener("click", function() {
+  photoSupprimee = true;
+  document.getElementById("inv-photo-apercu-bloc").hidden = true;
+  document.getElementById("inv-photo-apercu").src = "";
+});
 document.getElementById("modale-fond-inventaire").addEventListener("click", function(e) {
   if (e.target === this) fermerModaleArticle();
 });

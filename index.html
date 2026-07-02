@@ -936,13 +936,14 @@
           <table id="tableau-inventaire" class="tableau">
             <thead>
               <tr>
-                <th style="width:33%">Désignation</th>
-                <th style="width:8%">Qté</th>
-                <th style="width:12%">État</th>
-                <th style="width:12%">Statut</th>
+                <th style="width:6%">Photo</th>
+                <th style="width:27%">Désignation</th>
+                <th style="width:7%">Qté</th>
+                <th style="width:11%">État</th>
+                <th style="width:11%">Statut</th>
                 <th style="width:10%">Prix occ.</th>
                 <th style="width:10%">Prix neuf</th>
-                <th style="width:15%">Actions</th>
+                <th style="width:18%">Actions</th>
               </tr>
             </thead>
             <tbody id="corps-tableau-inventaire"></tbody>
@@ -2708,6 +2709,20 @@
             <label for="inv-notes" class="champ-label">Notes</label>
             <textarea id="inv-notes" class="champ-input champ-textarea"
                       rows="3" placeholder="Observations, état détaillé…"></textarea>
+          </div>
+
+          <div class="champ-groupe champ-groupe--large">
+            <label class="champ-label">Photo</label>
+            <div id="inv-photo-apercu-bloc" hidden>
+              <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px;">
+                <img id="inv-photo-apercu" src="" alt="Aperçu de la photo actuelle"
+                     style="width:120px;height:120px;object-fit:cover;border-radius:6px;border:1px solid #ddd;">
+                <button type="button" id="inv-btn-supprimer-photo" class="btn btn--secondaire">
+                  Supprimer la photo
+                </button>
+              </div>
+            </div>
+            <input type="file" id="inv-photo" class="champ-input" accept="image/*">
           </div>
 
         </div>
