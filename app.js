@@ -6134,6 +6134,7 @@ document.getElementById("formulaire-pret").addEventListener("submit", async func
   const nom        = document.getElementById("pret-emprunteur-nom").value.trim();
   const prenom     = document.getElementById("pret-emprunteur-prenom").value.trim();
   const telephone  = document.getElementById("pret-telephone").value.trim();
+  const email      = document.getElementById("pret-email").value.trim();
   const datePret   = document.getElementById("pret-date-pret").value;
   const dateRetour = document.getElementById("pret-date-retour").value;
 
@@ -6161,6 +6162,7 @@ document.getElementById("formulaire-pret").addEventListener("submit", async func
     emprunteur_nom:       nom,
     emprunteur_prenom:    prenom    || null,
     emprunteur_telephone: telephone || null,
+    emprunteur_email:     email     || null,
     date_pret:            datePret,
     date_retour_prevue:   dateRetour || null,
     statut:               "En cours"
