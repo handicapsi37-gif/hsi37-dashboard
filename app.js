@@ -5645,6 +5645,9 @@ function remplirTableauInventaire(articles) {
     const prix = art.prix_occasion != null
       ? Number(art.prix_occasion).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
+    const prixNeuf = art.prix_neuf != null
+      ? Number(art.prix_neuf).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
+      : "—";
     const ligne = document.createElement("tr");
     ligne.innerHTML = `
       <td>${art.designation || "—"}</td>
@@ -5652,6 +5655,7 @@ function remplirTableauInventaire(articles) {
       <td>${art.etat || "—"}</td>
       <td>${art.statut || "—"}</td>
       <td>${prix}</td>
+      <td>${prixNeuf}</td>
       <td>
         <button class="btn-icone btn-icone--modifier" title="Modifier" type="button"
                 aria-label="Modifier ${art.designation || ""}">
