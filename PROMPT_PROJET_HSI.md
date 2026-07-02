@@ -30,18 +30,19 @@
 
 ---
 
-## 3. PÉRIMÈTRE DU 1er LIVRABLE
+## 3. PÉRIMÈTRE ACTUEL (mis à jour)
 
-Gestion des adhérents, et **rien d'autre** :
-- Créer / modifier / supprimer un adhérent (saisie directe).
-- Liste/tableau dynamique des adhérents avec recherche et tri.
-- Enregistrement des paiements **reçus** (date, montant, mode : virement / chèque / espèces) — **sans encaissement en ligne**.
-- Calcul automatique du statut + badges couleur.
-- Identité visuelle HSI.
-- Accessibilité (contexte handicap = exigence forte, voir §7).
+Modules livrés :
+- Adhérents : CRUD (créer/lire/modifier/supprimer) complet, statut auto, cartes
+  virtuelles, reçus, attestations, relances
+- Donateurs : CRUD complet, dons financiers et matériel, reçus
+- Événements : gestion, participants, export
+- Inventaire : CRUD, photos, prix
+- Prêt local : structure posée, formulaire de retour à finir
+- Dons de matériel : module séparé (dons-materiel.html), fusion avec Inventaire prévue
 
-**Hors périmètre (différé en V2)** : encaissement en ligne (Stripe/CB), comptabilité, gouvernance (PV/AG), génération de documents (carte virtuelle, attestations), upload de pièces, vues cloisonnées par rôle, import CSV.
-*(Idées issues des cahiers des charges externes : conservées comme réservoir V2, pas intégrées maintenant.)*
+Hors périmètre (toujours différé) : encaissement en ligne, comptabilité,
+gouvernance avancée.
 
 ---
 
@@ -132,13 +133,11 @@ Ne pas utiliser les anciennes couleurs #1e79bf, #155a8f, #fe5260, #d63a47, #1a24
 
 ---
 
-## 11. PLAN DE PHASES (proposé, à valider)
+## 11. ÉTAT D'AVANCEMENT (mis à jour)
 
-- **Phase 0** — Maquette visuelle statique (HTML/CSS) avec fausses données : tableau adhérents, formulaire, badges, infobulles, identité HSI. Valider le design AVANT toute logique.
-- **Phase 1** — Fondations : choix stockage + authentification.
-- **Phase 2** — Logique CRUD (créer/lire/modifier/supprimer) + calcul statut auto.
-- **Phase 3** — Accessibilité finalisée + RGPD + export.
-- **V2 (différé)** — paiement en ligne, documents générés, rôles, compta, gouvernance.
+Fait : Phases 0 à 3 (maquette, stockage Supabase, CRUD, accessibilité, RGPD, export).
+En cours : Prêt local (retour + photos), fusion onglets Inventaire/Prêt/Dons matériel.
+Reporté : import PayAsso, reçus fiscaux Cerfa (attente rescrit DRFIP 37), CRM.
 
 ---
 
