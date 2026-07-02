@@ -561,7 +561,7 @@ function ouvrirModaleAjout() {
  * Ouvre la modale en mode MODIFICATION : champs pré-remplis, ID affiché en lecture seule.
  * @param {Object} adherent - Objet complet de l'adhérent à modifier
  */
-function ouvrirModaleModification(adherent) {
+async function ouvrirModaleModification(adherent) {
   adherentEnCours = adherent;
   elementAvantModale = document.activeElement;
 
@@ -597,7 +597,28 @@ function ouvrirModaleModification(adherent) {
       : (adherent.montant_cotisation != null ? adherent.montant_cotisation : "");
   const modeVal = (dernCotis && dernCotis.mode_paiement) || adherent.mode_paiement || "";
   document.getElementById("champ-mode-paiement").value = modeVal.toLowerCase().trim();
-  document.getElementById("champ-montant-don").value   = "";
+  document.getElementById("champ-montant-don").value = "";
+  if (adherent.email) {
+    const { data: donateurModif } = await clientSupabase
+      .from("donateurs")
+      .select("id")
+      .eq("email", adherent.email)
+      .maybeSingle();
+    if (donateurModif) {
+      const anneeModif = adherent.date_adhesion
+        ? parseInt(adherent.date_adhesion.split("-")[0], 10)
+        : new Date().getFullYear();
+      const { data: donsModif } = await clientSupabase
+        .from("dons")
+        .select("montant")
+        .eq("donateur_id", donateurModif.id)
+        .eq("annee", anneeModif);
+      if (donsModif && donsModif.length > 0) {
+        const totalDon = donsModif.reduce(function(acc, d) { return acc + (Number(d.montant) || 0); }, 0);
+        if (totalDon > 0) document.getElementById("champ-montant-don").value = totalDon;
+      }
+    }
+  }
 
   const chequeAdh = champsChequesAdherents.get(String(adherent.id)) || {};
   document.getElementById("champ-numero-cheque").value = chequeAdh.numero_cheque || "";
@@ -904,6 +925,76 @@ formulaire.addEventListener("submit", async function(evenement) {
       if (resCotis.error || !resCotis.data || resCotis.data.length === 0) {
         afficherMessageErreur(`Adhérent modifié, mais l'enregistrement de la cotisation a échoué.`);
         return;
+      }
+    }
+
+    if (montantDon && montantDon > 0) {
+      const anneeModifDon  = parseInt(anneeSaisie, 10);
+      const msgErrDonModif = `Adhérent modifié, mais la mise à jour du don a échoué — vérifiez dans le panneau Donateurs.`;
+      let donateurModifExistant = null;
+      if (email) {
+        const { data: dTrouvé } = await clientSupabase
+          .from("donateurs")
+          .select("id")
+          .eq("email", email)
+          .maybeSingle();
+        donateurModifExistant = dTrouvé || null;
+      }
+
+      if (donateurModifExistant) {
+        const { data: lignesDons } = await clientSupabase
+          .from("dons")
+          .select("id")
+          .eq("donateur_id", donateurModifExistant.id)
+          .eq("annee", anneeModifDon);
+        const nbLignes = lignesDons ? lignesDons.length : 0;
+
+        if (nbLignes === 0) {
+          const { error: errInsertDon } = await clientSupabase.from("dons").insert([{
+            donateur_id:   donateurModifExistant.id,
+            annee:         anneeModifDon,
+            date_don:      dateAdhesion,
+            montant:       montantDon,
+            mode_paiement: modePaiement || null,
+            type_don:      "Don financier"
+          }]);
+          if (errInsertDon) { afficherMessageErreur(msgErrDonModif); return; }
+        } else if (nbLignes === 1) {
+          const { error: errUpdateDon } = await clientSupabase.from("dons")
+            .update({ montant: montantDon, mode_paiement: modePaiement || null })
+            .eq("id", lignesDons[0].id);
+          if (errUpdateDon) { afficherMessageErreur(msgErrDonModif); return; }
+        } else {
+          afficherMessageErreur("Plusieurs dons existent pour cette année — modifiez-les directement dans le panneau Donateurs.");
+        }
+      } else {
+        let idDonateurModif;
+        try {
+          idDonateurModif = await genererIdDonateur(anneeSaisie);
+        } catch (_) {
+          afficherMessageErreur(msgErrDonModif);
+          return;
+        }
+        const { data: dataNewDonateurModif, error: errNewDon } = await clientSupabase.from("donateurs").insert([{
+          id_donateur:     idDonateurModif,
+          nom, prenom, civilite, organisme: null, email, telephone, adresse,
+          type_don:        "Don financier",
+          montant_don:     montantDon,
+          date_don:        dateAdhesion,
+          mode_paiement:   modePaiement,
+          description_don: null, numero_cheque: null, banque_cheque: null
+        }]).select("id").single();
+        if (errNewDon) { afficherMessageErreur(msgErrDonModif); return; }
+
+        const { error: errLigneDon } = await clientSupabase.from("dons").insert([{
+          donateur_id:   dataNewDonateurModif.id,
+          annee:         anneeModifDon,
+          date_don:      dateAdhesion,
+          montant:       montantDon,
+          mode_paiement: modePaiement || null,
+          type_don:      "Don financier"
+        }]);
+        if (errLigneDon) { afficherMessageErreur(msgErrDonModif); return; }
       }
     }
 
