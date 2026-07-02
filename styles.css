@@ -2089,6 +2089,13 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   min-width: 150px;
 }
 
+#recherche-prets {
+  flex: 1;
+  min-width: 180px;
+  max-width: 400px;
+  width: auto;
+}
+
 .section-hub-page__entete {
   margin-bottom: 28px;
   padding-bottom: 16px;

@@ -2293,6 +2293,7 @@ var donneesInventaire        = [];
 var filtreInventaire         = "";
 var filtreStatutInventaire   = "";
 var filtreEtatInventaire     = "";
+var filtrePrets              = "";
 let donateurExistantPourDon  = null;
 let elementAvantModaleDon = null;
 
@@ -5842,6 +5843,16 @@ function appliquerFiltreInventaire() {
   remplirTableauInventaire(liste);
 }
 
+function appliquerFiltrePrets() {
+  var f = filtrePrets.toLowerCase();
+  var liste = donneesPrets.filter(function(pret) {
+    var designation = ((pret.inventaire && pret.inventaire.designation) || "").toLowerCase();
+    var emprunteur  = [pret.emprunteur_prenom, pret.emprunteur_nom].filter(Boolean).join(" ").toLowerCase();
+    return designation.includes(f) || emprunteur.includes(f);
+  });
+  remplirTableauPrets(liste);
+}
+
 async function chargerInventaire() {
   const corps = document.getElementById("corps-tableau-inventaire");
   if (corps) {
@@ -6369,6 +6380,9 @@ document.addEventListener("DOMContentLoaded", function() {
 
   var selEtatInv = document.getElementById("filtre-etat-inventaire");
   if (selEtatInv) selEtatInv.addEventListener("change", function() { filtreEtatInventaire = this.value; appliquerFiltreInventaire(); });
+
+  var inputPrets = document.getElementById("recherche-prets");
+  if (inputPrets) inputPrets.addEventListener("input", function() { filtrePrets = this.value; appliquerFiltrePrets(); });
 
   var selAnneeEv = document.getElementById("filtre-annee-evenements");
   if (selAnneeEv) selAnneeEv.addEventListener("change", function() { filtreAnneeEvenements=this.value; remplirTableauEvenements(); });
