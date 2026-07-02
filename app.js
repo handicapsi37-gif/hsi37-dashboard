@@ -6092,6 +6092,114 @@ async function chargerPrets() {
   remplirTableauPrets(donneesPrets);
 }
 
+async function ouvrirModalePret() {
+  const { data: articlesDisponibles } = await clientSupabase
+    .from("inventaire")
+    .select("id, designation")
+    .eq("statut", "Disponible")
+    .order("designation");
+
+  const select = document.getElementById("pret-article");
+  select.innerHTML = '<option value="">— Choisir un article —</option>';
+  (articlesDisponibles || []).forEach(function(art) {
+    const opt = document.createElement("option");
+    opt.value = art.id;
+    opt.textContent = art.designation;
+    select.appendChild(opt);
+  });
+
+  document.getElementById("pret-date-pret").value         = new Date().toISOString().split("T")[0];
+  document.getElementById("pret-date-retour").value       = "";
+  document.getElementById("pret-emprunteur-nom").value    = "";
+  document.getElementById("pret-emprunteur-prenom").value = "";
+  document.getElementById("pret-telephone").value         = "";
+  document.getElementById("modale-pret-erreur").hidden    = true;
+
+  document.getElementById("modale-fond-pret").hidden = false;
+  requestAnimationFrame(function() { document.getElementById("modale-pret").focus(); });
+}
+
+function fermerModalePret() {
+  document.getElementById("modale-fond-pret").hidden = true;
+}
+
+document.getElementById("formulaire-pret").addEventListener("submit", async function(e) {
+  e.preventDefault();
+  const zoneErreur = document.getElementById("modale-pret-erreur");
+  zoneErreur.hidden = true;
+
+  const articleId  = document.getElementById("pret-article").value;
+  const nom        = document.getElementById("pret-emprunteur-nom").value.trim();
+  const prenom     = document.getElementById("pret-emprunteur-prenom").value.trim();
+  const telephone  = document.getElementById("pret-telephone").value.trim();
+  const datePret   = document.getElementById("pret-date-pret").value;
+  const dateRetour = document.getElementById("pret-date-retour").value;
+
+  if (!articleId) {
+    zoneErreur.textContent = "Veuillez sélectionner un article.";
+    zoneErreur.hidden = false;
+    document.getElementById("pret-article").focus();
+    return;
+  }
+  if (!nom) {
+    zoneErreur.textContent = "Le nom de l'emprunteur est obligatoire.";
+    zoneErreur.hidden = false;
+    document.getElementById("pret-emprunteur-nom").focus();
+    return;
+  }
+  if (!datePret) {
+    zoneErreur.textContent = "La date de prêt est obligatoire.";
+    zoneErreur.hidden = false;
+    document.getElementById("pret-date-pret").focus();
+    return;
+  }
+
+  const { error: errPret } = await clientSupabase.from("prets").insert([{
+    article_id:           parseInt(articleId, 10),
+    emprunteur_nom:       nom,
+    emprunteur_prenom:    prenom    || null,
+    emprunteur_telephone: telephone || null,
+    date_pret:            datePret,
+    date_retour_prevue:   dateRetour || null,
+    statut:               "En cours"
+  }]);
+
+  if (errPret) {
+    zoneErreur.textContent = "Erreur lors de l'enregistrement. Réessayez.";
+    zoneErreur.hidden = false;
+    return;
+  }
+
+  const { error: errInv } = await clientSupabase.from("inventaire")
+    .update({ statut: "En prêt" })
+    .eq("id", parseInt(articleId, 10));
+
+  if (errInv) {
+    const msgErr = document.getElementById("message-erreur-prets");
+    if (msgErr) {
+      msgErr.textContent = "Prêt enregistré, mais la mise à jour du statut de l'article a échoué — vérifiez dans l'Inventaire.";
+      msgErr.hidden = false;
+      setTimeout(function() { msgErr.hidden = true; }, 7000);
+    }
+  }
+
+  fermerModalePret();
+  await chargerPrets();
+  const msgSucces = document.getElementById("message-succes-prets");
+  if (msgSucces) {
+    msgSucces.textContent = "Prêt enregistré pour " + (prenom ? prenom + " " : "") + nom + ".";
+    msgSucces.hidden = false;
+    setTimeout(function() { msgSucces.hidden = true; }, 4000);
+  }
+});
+
+document.getElementById("btn-ajouter-pret").addEventListener("click", ouvrirModalePret);
+document.getElementById("btn-fermer-modale-pret").addEventListener("click", fermerModalePret);
+document.getElementById("btn-annuler-modale-pret").addEventListener("click", fermerModalePret);
+document.getElementById("modale-fond-pret").addEventListener("click", function(e) {
+  if (e.target === this) fermerModalePret();
+});
+
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
   initialiserSelectsDate();

@@ -2798,6 +2798,82 @@
     </div>
   </div>
 
+  <!-- ========== MODALE PRÊT LOCAL — AJOUTER UN PRÊT ========== -->
+  <div class="modale-fond" id="modale-fond-pret" role="presentation" hidden>
+    <div class="modale"
+         id="modale-pret"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="modale-pret-titre"
+         tabindex="-1">
+
+      <div class="modale__entete">
+        <h2 class="modale__titre" id="modale-pret-titre">Nouveau prêt</h2>
+        <button class="modale__fermer" id="btn-fermer-modale-pret"
+                aria-label="Fermer la fenêtre">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="20" height="20">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2.5"
+                  stroke-linecap="round"/>
+          </svg>
+        </button>
+      </div>
+
+      <form class="modale__formulaire" id="formulaire-pret" novalidate
+            aria-label="Formulaire d'ajout d'un prêt">
+
+        <div id="modale-pret-erreur" class="modale-erreur"
+             role="alert" aria-live="polite" hidden></div>
+
+        <div class="formulaire__grille">
+
+          <div class="champ-groupe champ-groupe--large">
+            <label for="pret-article" class="champ-label">Article <span aria-hidden="true">*</span></label>
+            <select id="pret-article" class="champ-input champ-select" required>
+              <option value="">— Choisir un article —</option>
+            </select>
+          </div>
+
+          <div class="champ-groupe">
+            <label for="pret-emprunteur-nom" class="champ-label">Nom <span aria-hidden="true">*</span></label>
+            <input type="text" id="pret-emprunteur-nom" class="champ-input" placeholder="Nom" required>
+          </div>
+
+          <div class="champ-groupe">
+            <label for="pret-emprunteur-prenom" class="champ-label">Prénom</label>
+            <input type="text" id="pret-emprunteur-prenom" class="champ-input" placeholder="Prénom">
+          </div>
+
+          <div class="champ-groupe">
+            <label for="pret-telephone" class="champ-label">Téléphone</label>
+            <input type="tel" id="pret-telephone" class="champ-input" placeholder="06 00 00 00 00">
+          </div>
+
+          <div class="champ-groupe">
+            <label for="pret-date-pret" class="champ-label">Date de prêt <span aria-hidden="true">*</span></label>
+            <input type="date" id="pret-date-pret" class="champ-input" required>
+          </div>
+
+          <div class="champ-groupe">
+            <label for="pret-date-retour" class="champ-label">Date de retour prévue</label>
+            <input type="date" id="pret-date-retour" class="champ-input">
+          </div>
+
+        </div>
+
+        <div class="modale__actions">
+          <button type="button" class="btn btn--secondaire" id="btn-annuler-modale-pret">
+            Annuler
+          </button>
+          <button type="submit" class="btn btn--primaire">
+            Enregistrer
+          </button>
+        </div>
+
+      </form>
+    </div>
+  </div>
+
   <!-- ========== LIGHTBOX PHOTO INVENTAIRE ========== -->
   <div id="inv-lightbox" role="dialog" aria-modal="true" aria-label="Agrandissement de la photo"
        style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;">
