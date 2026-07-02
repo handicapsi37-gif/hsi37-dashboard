@@ -2072,7 +2072,8 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   padding: 40px 16px 56px;
   width: 100%;
 }
-#section-prets {
+#section-prets,
+#section-inventaire {
   max-width: none;
 }
 
