@@ -2740,6 +2740,15 @@
     </div>
   </div>
 
+  <!-- ========== LIGHTBOX PHOTO INVENTAIRE ========== -->
+  <div id="inv-lightbox" role="dialog" aria-modal="true" aria-label="Agrandissement de la photo"
+       style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.82);z-index:9999;align-items:center;justify-content:center;">
+    <button id="inv-lightbox-fermer" type="button" aria-label="Fermer"
+            style="position:absolute;top:16px;right:20px;background:none;border:none;color:#fff;font-size:32px;cursor:pointer;line-height:1;">&#x2715;</button>
+    <img id="inv-lightbox-img" src="" alt=""
+         style="max-width:90vw;max-height:88vh;border-radius:6px;box-shadow:0 8px 40px rgba(0,0,0,0.6);display:block;">
+  </div>
+
   <!-- Librairie Supabase (CDN jsDelivr) — doit être chargée avant config.js et app.js -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <!-- html2canvas — capture un élément HTML en image téléchargeable -->

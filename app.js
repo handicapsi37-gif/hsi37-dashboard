@@ -5750,7 +5750,8 @@ function remplirTableauInventaire(articles) {
       ? Number(art.prix_neuf).toLocaleString("fr-FR", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + " €"
       : "—";
     const photoCell = art.photo_url
-      ? `<img src="${art.photo_url}" alt="" style="width:40px;height:40px;object-fit:cover;border-radius:4px;display:block;">`
+      ? `<img src="${art.photo_url}" alt="Voir la photo en grand" data-lightbox="${art.photo_url}"
+             style="width:40px;height:40px;object-fit:cover;border-radius:4px;display:block;cursor:pointer;">`
       : `<span aria-hidden="true" style="display:flex;width:40px;height:40px;background:#f0f0f0;border-radius:4px;align-items:center;justify-content:center;"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#ccc" stroke-width="1.5" style="pointer-events:none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></span>`;
     const ligne = document.createElement("tr");
     ligne.innerHTML = `
@@ -5794,6 +5795,13 @@ function remplirTableauInventaire(articles) {
       console.log("[modifier] clic détecté, art →", art);
       ouvrirModaleArticle(art);
     });
+
+    const vignette = ligne.querySelector("[data-lightbox]");
+    if (vignette) {
+      vignette.addEventListener("click", function() {
+        ouvrirLightbox(vignette.dataset.lightbox);
+      });
+    }
 
     ligne.querySelector(".btn-icone--supprimer").addEventListener("click", function() {
       if (!art || !art.id) { alert("Erreur : article introuvable."); return; }
@@ -5968,6 +5976,29 @@ document.getElementById("inv-btn-supprimer-photo").addEventListener("click", fun
   photoSupprimee = true;
   document.getElementById("inv-photo-apercu-bloc").hidden = true;
   document.getElementById("inv-photo-apercu").src = "";
+});
+
+function ouvrirLightbox(url) {
+  const lb = document.getElementById("inv-lightbox");
+  document.getElementById("inv-lightbox-img").src = url;
+  lb.style.display = "flex";
+  document.addEventListener("keydown", fermerLightboxTouche);
+}
+
+function fermerLightbox() {
+  const lb = document.getElementById("inv-lightbox");
+  lb.style.display = "none";
+  document.getElementById("inv-lightbox-img").src = "";
+  document.removeEventListener("keydown", fermerLightboxTouche);
+}
+
+function fermerLightboxTouche(e) {
+  if (e.key === "Escape") fermerLightbox();
+}
+
+document.getElementById("inv-lightbox-fermer").addEventListener("click", fermerLightbox);
+document.getElementById("inv-lightbox").addEventListener("click", function(e) {
+  if (e.target === this) fermerLightbox();
 });
 document.getElementById("modale-fond-inventaire").addEventListener("click", function(e) {
   if (e.target === this) fermerModaleArticle();
