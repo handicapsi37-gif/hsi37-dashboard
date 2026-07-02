@@ -1011,7 +1011,7 @@ formulaire.addEventListener("submit", async function(evenement) {
           afficherMessageErreur(msgErrDon);
           return;
         }
-        const { error: errorDon } = await clientSupabase.from("donateurs").insert([{
+        const { data: dataNewDon, error: errorDon } = await clientSupabase.from("donateurs").insert([{
           id_donateur:     idDonateur,
           nom,
           prenom,
@@ -1027,8 +1027,18 @@ formulaire.addEventListener("submit", async function(evenement) {
           description_don: null,
           numero_cheque:   null,
           banque_cheque:   null
-        }]);
+        }]).select("id").single();
         if (errorDon) { afficherMessageErreur(msgErrDon); return; }
+
+        const { error: errorLigneDon } = await clientSupabase.from("dons").insert([{
+          donateur_id:   dataNewDon.id,
+          annee:         parseInt(saison, 10),
+          date_don:      dateAdhesion,
+          montant:       montantDon,
+          mode_paiement: modePaiement || null,
+          type_don:      "Don financier"
+        }]);
+        if (errorLigneDon) { afficherMessageErreur(msgErrDon); return; }
       }
     }
 
