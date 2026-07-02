@@ -2799,6 +2799,37 @@
     </div>
   </div>
 
+  <!-- ========== MODALE CONFIRMATION SUPPRESSION PRÊT ========== -->
+  <div class="modale-fond" id="confirmation-fond-pret" role="presentation" hidden>
+    <div class="modale modale--petite"
+         id="modale-confirmation-pret"
+         role="dialog"
+         aria-modal="true"
+         aria-labelledby="confirmation-pret-titre"
+         tabindex="-1">
+
+      <div class="modale__entete modale__entete--danger">
+        <h2 class="modale__titre" id="confirmation-pret-titre">Supprimer un prêt</h2>
+      </div>
+
+      <div class="confirmation__corps">
+        <p class="confirmation__question">Voulez-vous vraiment supprimer ce prêt ?</p>
+        <p class="confirmation__adherent" id="confirmation-pret-info" aria-live="polite"></p>
+        <p class="confirmation__avertissement">Cette action est irréversible.</p>
+      </div>
+
+      <div class="modale__actions confirmation__actions">
+        <button type="button" class="btn btn--secondaire" id="btn-annuler-confirmation-pret">
+          Annuler
+        </button>
+        <button type="button" class="btn btn--danger" id="btn-confirmer-suppression-pret">
+          Supprimer
+        </button>
+      </div>
+
+    </div>
+  </div>
+
   <!-- ========== MODALE PRÊT LOCAL — AJOUTER UN PRÊT ========== -->
   <div class="modale-fond" id="modale-fond-pret" role="presentation" hidden>
     <div class="modale"
@@ -2848,6 +2879,11 @@
           <div class="champ-groupe">
             <label for="pret-telephone" class="champ-label">Téléphone</label>
             <input type="tel" id="pret-telephone" class="champ-input" placeholder="06 00 00 00 00">
+          </div>
+
+          <div class="champ-groupe">
+            <label for="pret-email" class="champ-label">Email</label>
+            <input type="email" id="pret-email" class="champ-input" placeholder="exemple@mail.com">
           </div>
 
           <div class="champ-groupe">

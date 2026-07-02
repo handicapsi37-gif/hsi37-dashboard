@@ -6063,9 +6063,41 @@ function remplirTableauPrets(prets) {
       <td>${datePret}</td>
       <td>${dateRetour}</td>
       <td>${statut}</td>
-      <td>—</td>
+      <td>
+        <button class="btn-icone btn-icone--modifier" title="Modifier" type="button"
+                aria-label="Modifier le prêt de ${emprunteur}">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17" style="pointer-events:none">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <button class="btn-icone btn-icone--supprimer" title="Supprimer" type="button"
+                aria-label="Supprimer le prêt de ${emprunteur}">
+          <svg aria-hidden="true" focusable="false" xmlns="http://www.w3.org/2000/svg"
+               viewBox="0 0 24 24" width="17" height="17" style="pointer-events:none">
+            <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="2"
+                      fill="none" stroke-linecap="round"/>
+            <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"
+                  stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="2"
+                  fill="none" stroke-linecap="round"/>
+            <path d="M9 3h6" stroke="currentColor" stroke-width="2"
+                  fill="none" stroke-linecap="round"/>
+          </svg>
+        </button>
+      </td>
     `;
     corps.appendChild(ligne);
+
+    ligne.querySelector(".btn-icone--modifier").addEventListener("click", function() {
+      ouvrirModalePret(pret);
+    });
+    ligne.querySelector(".btn-icone--supprimer").addEventListener("click", function() {
+      ouvrirConfirmationSuppPret(pret);
+    });
   });
 }
 
@@ -6094,7 +6126,11 @@ async function chargerPrets() {
   remplirTableauPrets(donneesPrets);
 }
 
-async function ouvrirModalePret() {
+var pretEnCours = null;
+
+async function ouvrirModalePret(pret) {
+  pretEnCours = pret || null;
+
   const { data: articlesDisponibles } = await clientSupabase
     .from("inventaire")
     .select("id, designation")
@@ -6110,11 +6146,28 @@ async function ouvrirModalePret() {
     select.appendChild(opt);
   });
 
-  document.getElementById("pret-date-pret").value         = new Date().toISOString().split("T")[0];
-  document.getElementById("pret-date-retour").value       = "";
-  document.getElementById("pret-emprunteur-nom").value    = "";
-  document.getElementById("pret-emprunteur-prenom").value = "";
-  document.getElementById("pret-telephone").value         = "";
+  if (pret && pret.article_id) {
+    const dejaDansSelect = Array.from(select.options).some(function(o) {
+      return String(o.value) === String(pret.article_id);
+    });
+    if (!dejaDansSelect && pret.inventaire) {
+      const opt = document.createElement("option");
+      opt.value = pret.article_id;
+      opt.textContent = pret.inventaire.designation || "Article lié";
+      select.appendChild(opt);
+    }
+    select.value = pret.article_id;
+  }
+
+  document.getElementById("modale-pret-titre").textContent = pret ? "Modifier un prêt" : "Nouveau prêt";
+  document.querySelector("#formulaire-pret [type='submit']").textContent = pret ? "Enregistrer les modifications" : "Enregistrer";
+
+  document.getElementById("pret-emprunteur-nom").value    = pret ? (pret.emprunteur_nom        || "") : "";
+  document.getElementById("pret-emprunteur-prenom").value = pret ? (pret.emprunteur_prenom      || "") : "";
+  document.getElementById("pret-telephone").value         = pret ? (pret.emprunteur_telephone   || "") : "";
+  document.getElementById("pret-email").value             = pret ? (pret.emprunteur_email       || "") : "";
+  document.getElementById("pret-date-pret").value         = pret ? (pret.date_pret              || "") : new Date().toISOString().split("T")[0];
+  document.getElementById("pret-date-retour").value       = pret ? (pret.date_retour_prevue     || "") : "";
   document.getElementById("modale-pret-erreur").hidden    = true;
 
   document.getElementById("modale-fond-pret").hidden = false;
@@ -6123,6 +6176,7 @@ async function ouvrirModalePret() {
 
 function fermerModalePret() {
   document.getElementById("modale-fond-pret").hidden = true;
+  pretEnCours = null;
 }
 
 document.getElementById("formulaire-pret").addEventListener("submit", async function(e) {
@@ -6157,7 +6211,7 @@ document.getElementById("formulaire-pret").addEventListener("submit", async func
     return;
   }
 
-  const { error: errPret } = await clientSupabase.from("prets").insert([{
+  const payload = {
     article_id:           parseInt(articleId, 10),
     emprunteur_nom:       nom,
     emprunteur_prenom:    prenom    || null,
@@ -6165,39 +6219,123 @@ document.getElementById("formulaire-pret").addEventListener("submit", async func
     emprunteur_email:     email     || null,
     date_pret:            datePret,
     date_retour_prevue:   dateRetour || null,
-    statut:               "En cours"
-  }]);
+  };
 
-  if (errPret) {
-    zoneErreur.textContent = "Erreur lors de l'enregistrement. Réessayez.";
-    zoneErreur.hidden = false;
+  if (pretEnCours) {
+    const { error: errUpdate } = await clientSupabase.from("prets")
+      .update(payload)
+      .eq("id", pretEnCours.id);
+    if (errUpdate) {
+      zoneErreur.textContent = "Erreur lors de la modification. Réessayez.";
+      zoneErreur.hidden = false;
+      return;
+    }
+    const ancienId = pretEnCours.article_id;
+    const nouvelId = parseInt(articleId, 10);
+    if (ancienId !== nouvelId) {
+      await clientSupabase.from("inventaire").update({ statut: "Disponible" }).eq("id", ancienId);
+      await clientSupabase.from("inventaire").update({ statut: "En prêt" }).eq("id", nouvelId);
+    }
+    fermerModalePret();
+    await chargerPrets();
+    const msgSuccesMod = document.getElementById("message-succes-prets");
+    if (msgSuccesMod) {
+      msgSuccesMod.textContent = "Prêt modifié.";
+      msgSuccesMod.hidden = false;
+      setTimeout(function() { msgSuccesMod.hidden = true; }, 4000);
+    }
+  } else {
+    const { error: errPret } = await clientSupabase.from("prets").insert([{
+      ...payload,
+      statut: "En cours"
+    }]);
+    if (errPret) {
+      zoneErreur.textContent = "Erreur lors de l'enregistrement. Réessayez.";
+      zoneErreur.hidden = false;
+      return;
+    }
+    const { error: errInv } = await clientSupabase.from("inventaire")
+      .update({ statut: "En prêt" })
+      .eq("id", parseInt(articleId, 10));
+    if (errInv) {
+      const msgErr = document.getElementById("message-erreur-prets");
+      if (msgErr) {
+        msgErr.textContent = "Prêt enregistré, mais la mise à jour du statut de l'article a échoué — vérifiez dans l'Inventaire.";
+        msgErr.hidden = false;
+        setTimeout(function() { msgErr.hidden = true; }, 7000);
+      }
+    }
+    fermerModalePret();
+    await chargerPrets();
+    const msgSucces = document.getElementById("message-succes-prets");
+    if (msgSucces) {
+      msgSucces.textContent = "Prêt enregistré pour " + (prenom ? prenom + " " : "") + nom + ".";
+      msgSucces.hidden = false;
+      setTimeout(function() { msgSucces.hidden = true; }, 4000);
+    }
+  }
+});
+
+var pretASupprimer = null;
+
+function ouvrirConfirmationSuppPret(pret) {
+  pretASupprimer = pret;
+  const emprunteur  = [pret.emprunteur_prenom, pret.emprunteur_nom].filter(Boolean).join(" ");
+  const designation = (pret.inventaire && pret.inventaire.designation) || "article inconnu";
+  document.getElementById("confirmation-pret-info").textContent = emprunteur + " — " + designation;
+  document.getElementById("confirmation-fond-pret").hidden = false;
+  requestAnimationFrame(function() { document.getElementById("modale-confirmation-pret").focus(); });
+}
+
+function fermerConfirmationSuppPret() {
+  document.getElementById("confirmation-fond-pret").hidden = true;
+  pretASupprimer = null;
+}
+
+document.getElementById("btn-annuler-confirmation-pret").addEventListener("click", fermerConfirmationSuppPret);
+document.getElementById("confirmation-fond-pret").addEventListener("click", function(e) {
+  if (e.target === this) fermerConfirmationSuppPret();
+});
+
+document.getElementById("btn-confirmer-suppression-pret").addEventListener("click", async function() {
+  if (!pretASupprimer) return;
+  const pret = pretASupprimer;
+  fermerConfirmationSuppPret();
+
+  const { error: errDel } = await clientSupabase.from("prets").delete().eq("id", pret.id);
+  if (errDel) {
+    const msgErr = document.getElementById("message-erreur-prets");
+    if (msgErr) {
+      msgErr.textContent = "Erreur lors de la suppression. Réessayez.";
+      msgErr.hidden = false;
+      setTimeout(function() { msgErr.hidden = true; }, 5000);
+    }
     return;
   }
 
-  const { error: errInv } = await clientSupabase.from("inventaire")
-    .update({ statut: "En prêt" })
-    .eq("id", parseInt(articleId, 10));
-
-  if (errInv) {
-    const msgErr = document.getElementById("message-erreur-prets");
-    if (msgErr) {
-      msgErr.textContent = "Prêt enregistré, mais la mise à jour du statut de l'article a échoué — vérifiez dans l'Inventaire.";
-      msgErr.hidden = false;
-      setTimeout(function() { msgErr.hidden = true; }, 7000);
+  if (pret.article_id) {
+    const { data: pretsRestants } = await clientSupabase
+      .from("prets")
+      .select("id")
+      .eq("article_id", pret.article_id)
+      .eq("statut", "En cours");
+    if (!pretsRestants || pretsRestants.length === 0) {
+      await clientSupabase.from("inventaire")
+        .update({ statut: "Disponible" })
+        .eq("id", pret.article_id);
     }
   }
 
-  fermerModalePret();
   await chargerPrets();
   const msgSucces = document.getElementById("message-succes-prets");
   if (msgSucces) {
-    msgSucces.textContent = "Prêt enregistré pour " + (prenom ? prenom + " " : "") + nom + ".";
+    msgSucces.textContent = "Prêt supprimé.";
     msgSucces.hidden = false;
     setTimeout(function() { msgSucces.hidden = true; }, 4000);
   }
 });
 
-document.getElementById("btn-ajouter-pret").addEventListener("click", ouvrirModalePret);
+document.getElementById("btn-ajouter-pret").addEventListener("click", function() { ouvrirModalePret(null); });
 document.getElementById("btn-fermer-modale-pret").addEventListener("click", fermerModalePret);
 document.getElementById("btn-annuler-modale-pret").addEventListener("click", fermerModalePret);
 document.getElementById("modale-fond-pret").addEventListener("click", function(e) {
