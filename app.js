@@ -6040,7 +6040,7 @@ function remplirTableauPrets(prets) {
   if (!prets || prets.length === 0) {
     corps.innerHTML = `
       <tr>
-        <td colspan="7" class="tableau-message">Aucun prêt enregistré pour l'instant.</td>
+        <td colspan="8" class="tableau-message">Aucun prêt enregistré pour l'instant.</td>
       </tr>
     `;
     return;
@@ -6050,6 +6050,7 @@ function remplirTableauPrets(prets) {
     const designation = (pret.inventaire && pret.inventaire.designation) || "—";
     const emprunteur  = [pret.emprunteur_prenom, pret.emprunteur_nom].filter(Boolean).join(" ") || "—";
     const telephone   = pret.emprunteur_telephone || "—";
+    const email       = pret.emprunteur_email     || "—";
     const datePret    = pret.date_pret          ? new Date(pret.date_pret).toLocaleDateString("fr-FR")          : "—";
     const dateRetour  = pret.date_retour_prevue ? new Date(pret.date_retour_prevue).toLocaleDateString("fr-FR") : "—";
     const statut      = pret.statut || "—";
@@ -6058,6 +6059,7 @@ function remplirTableauPrets(prets) {
       <td>${designation}</td>
       <td>${emprunteur}</td>
       <td>${telephone}</td>
+      <td>${email}</td>
       <td>${datePret}</td>
       <td>${dateRetour}</td>
       <td>${statut}</td>
@@ -6070,7 +6072,7 @@ function remplirTableauPrets(prets) {
 async function chargerPrets() {
   const corps = document.getElementById("corps-tableau-prets");
   if (corps) {
-    corps.innerHTML = `<tr><td colspan="7" class="tableau-message">Chargement en cours…</td></tr>`;
+    corps.innerHTML = `<tr><td colspan="8" class="tableau-message">Chargement en cours…</td></tr>`;
   }
   const res = await clientSupabase
     .from("prets")
@@ -6080,7 +6082,7 @@ async function chargerPrets() {
     if (corps) {
       corps.innerHTML = `
         <tr>
-          <td colspan="7" class="tableau-message tableau-message--erreur" role="alert">
+          <td colspan="8" class="tableau-message tableau-message--erreur" role="alert">
             Impossible de charger les prêts. Vérifiez votre connexion et réessayez.
           </td>
         </tr>
