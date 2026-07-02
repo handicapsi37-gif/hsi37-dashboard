@@ -2072,6 +2072,9 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   padding: 40px 16px 56px;
   width: 100%;
 }
+#section-prets {
+  max-width: none;
+}
 
 .section-hub-page__entete {
   margin-bottom: 28px;
