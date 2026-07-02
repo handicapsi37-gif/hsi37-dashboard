@@ -686,6 +686,11 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   font-size: 0.88rem;
 }
 
+#inv-prix-neuf {
+  -webkit-text-fill-color: var(--encre);
+  color: var(--encre);
+}
+
 .champ-textarea {
   resize: vertical;
   min-height: 4.5rem;
