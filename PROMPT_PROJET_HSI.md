@@ -87,22 +87,20 @@ Menu déroulant. Chaque valeur affiche une **infobulle** (bulle d'aide au survol
 
 ---
 
-## 7. IDENTITÉ VISUELLE (extraite des sources HSI)
+## 7. IDENTITÉ VISUELLE
 
-Couleurs échantillonnées sur le logo (PDF attestation) + capture du site, **concordantes**.
+Référence unique et à jour : voir `.skills/charte-graphique-hsi37/SKILL.md`.
 
-| Rôle | Code hex | Usage | Contraste sur blanc |
-|---|---|---|---|
-| **Bleu HSI** (primaire) | `#1e79bf` | aplats, en-têtes, boutons | 4.62 — OK texte |
-| **Bleu foncé** (dérivé) | `#155a8f` | texte bleu, liens, survols | 7.26 — excellent |
-| **Rose-corail** (accent) | `#fe5260` | accents, fonds de boutons (texte blanc dessus = UI/gros texte uniquement) | 3.19 — UI/gros texte seulement |
-| **Corail foncé** (dérivé) | `#d63a47` | texte d'accent sur fond clair | 4.61 — OK texte |
-| **Encre** (texte) | `#1a2433` | texte principal | 15.62 — excellent |
-| **Gris fond** | `#f4f6f8` | fonds de section, lignes | — |
-| **Blanc** | `#ffffff` | fond général | — |
+Couleurs officielles :
+- Bleu principal : #3B77B4 — logo, titres, boutons, en-têtes
+- Jaune/or (accent) : #F7CD46 — accents uniquement, jamais en texte (contraste ~1.8:1 insuffisant)
+- Fond clair : #FAFBFE
+- Encre (texte) : #403E3E
 
-**Logo** : « hsi37 » blanc sur pavé bleu, baseline « Handicap Solidarité pour l'Inclusion ».
-**Note accessibilité** : le rose-corail vif `#fe5260` ne passe PAS le seuil texte normal (4.5:1). Pour tout texte coloré, utiliser `#155a8f` (bleu) ou `#d63a47` (corail foncé). Couleurs à ajuster si charte officielle fournie plus tard.
+Polices : Bebas Neue (titres), Montserrat (texte courant).
+
+Ne pas utiliser les anciennes couleurs #1e79bf, #155a8f, #fe5260, #d63a47, #1a2433,
+#f4f6f8 — obsolètes, remplacées par la charte ci-dessus.
 
 ---
 
