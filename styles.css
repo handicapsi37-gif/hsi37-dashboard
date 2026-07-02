@@ -2077,6 +2077,18 @@ th[data-colonne][data-sens="desc"]::after { content: " ▼"; opacity: 1; }
   max-width: none;
 }
 
+#recherche-inventaire {
+  flex: 1;
+  min-width: 180px;
+  max-width: 400px;
+  width: auto;
+}
+#filtre-statut-inventaire,
+#filtre-etat-inventaire {
+  width: auto;
+  min-width: 150px;
+}
+
 .section-hub-page__entete {
   margin-bottom: 28px;
   padding-bottom: 16px;
