@@ -1366,6 +1366,7 @@ const sectionDocuments  = document.getElementById("section-documents");
 const sectionSignatures = document.getElementById("section-signatures");
 const sectionRgpd         = document.getElementById("section-rgpd");
 const sectionInventaire   = document.getElementById("section-inventaire");
+const sectionPrets        = document.getElementById("section-prets");
 const sectionProfil       = document.getElementById("section-profil");
 
 /* Affiche le hub : masque tout sauf le hub */
@@ -1379,6 +1380,7 @@ function afficherHub() {
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
   sectionInventaire.hidden = true;
+  sectionPrets.hidden      = true;
   if (sectionProfil) sectionProfil.hidden = true;
   btnRetourAccueil.hidden  = true;
 }
@@ -1391,6 +1393,7 @@ function allerVers(vue) {
   sectionSignatures.hidden = true;
   sectionRgpd.hidden       = true;
   sectionInventaire.hidden = true;
+  sectionPrets.hidden      = true;
   if (sectionProfil) sectionProfil.hidden = true;
 
   if (vue === "adherents") {
@@ -1430,6 +1433,13 @@ function allerVers(vue) {
     document.getElementById("panneau-evenements").hidden = true;
     sectionInventaire.hidden = false;
     chargerInventaire();
+  } else if (vue === "prets") {
+    navOnglets.hidden = true;
+    document.getElementById("panneau-adherents").hidden = true;
+    document.getElementById("panneau-donateurs").hidden = true;
+    document.getElementById("panneau-evenements").hidden = true;
+    sectionPrets.hidden = false;
+    chargerPrets();
   }
 }
 
@@ -3860,6 +3870,12 @@ document.getElementById("tuile-inventaire").addEventListener("click", function()
 document.getElementById("btn-retour-inventaire").addEventListener("click", function() {
   afficherHub();
 });
+document.getElementById("tuile-prets").addEventListener("click", function() {
+  allerVers("prets");
+});
+document.getElementById("btn-retour-prets").addEventListener("click", function() {
+  afficherHub();
+});
 document.getElementById("btn-retour-accueil").addEventListener("click", function() {
   afficherHub();
 });
@@ -6009,6 +6025,72 @@ document.addEventListener("click", function(e) {
     ouvrirModaleArticle(null);
   }
 });
+
+/* =====================================================
+   SECTION PRÊT LOCAL
+   ===================================================== */
+
+var donneesPrets = [];
+
+function remplirTableauPrets(prets) {
+  const corps = document.getElementById("corps-tableau-prets");
+  if (!corps) return;
+  corps.innerHTML = "";
+
+  if (!prets || prets.length === 0) {
+    corps.innerHTML = `
+      <tr>
+        <td colspan="7" class="tableau-message">Aucun prêt enregistré pour l'instant.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  prets.forEach(function(pret) {
+    const designation = (pret.inventaire && pret.inventaire.designation) || "—";
+    const emprunteur  = [pret.emprunteur_prenom, pret.emprunteur_nom].filter(Boolean).join(" ") || "—";
+    const telephone   = pret.emprunteur_telephone || "—";
+    const datePret    = pret.date_pret          ? new Date(pret.date_pret).toLocaleDateString("fr-FR")          : "—";
+    const dateRetour  = pret.date_retour_prevue ? new Date(pret.date_retour_prevue).toLocaleDateString("fr-FR") : "—";
+    const statut      = pret.statut || "—";
+    const ligne = document.createElement("tr");
+    ligne.innerHTML = `
+      <td>${designation}</td>
+      <td>${emprunteur}</td>
+      <td>${telephone}</td>
+      <td>${datePret}</td>
+      <td>${dateRetour}</td>
+      <td>${statut}</td>
+      <td>—</td>
+    `;
+    corps.appendChild(ligne);
+  });
+}
+
+async function chargerPrets() {
+  const corps = document.getElementById("corps-tableau-prets");
+  if (corps) {
+    corps.innerHTML = `<tr><td colspan="7" class="tableau-message">Chargement en cours…</td></tr>`;
+  }
+  const res = await clientSupabase
+    .from("prets")
+    .select("*, inventaire(designation)")
+    .order("date_pret", { ascending: false });
+  if (res.error) {
+    if (corps) {
+      corps.innerHTML = `
+        <tr>
+          <td colspan="7" class="tableau-message tableau-message--erreur" role="alert">
+            Impossible de charger les prêts. Vérifiez votre connexion et réessayez.
+          </td>
+        </tr>
+      `;
+    }
+    return;
+  }
+  donneesPrets = res.data || [];
+  remplirTableauPrets(donneesPrets);
+}
 
 /* ---------- INITIALISATION ---------- */
 document.addEventListener("DOMContentLoaded", function() {
